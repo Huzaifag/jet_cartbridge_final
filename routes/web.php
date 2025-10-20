@@ -28,8 +28,16 @@ use App\Http\Controllers\Salesman\productController as SalesmanProductController
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Salesman\OrderController as SalesmanOrderController;
 use App\Http\Controllers\Accountant\DashboardController as AccountantDashboardController;
+use Illuminate\Support\Facades\Artisan;
 
-
+Route::get('/link-storage', function () {
+    try {
+        Artisan::call('storage:link');
+        return '<h3 style="color:green;">✅ Storage link created successfully!</h3>';
+    } catch (\Exception $e) {
+        return '<h3 style="color:red;">❌ Failed to create storage link:</h3><pre>' . $e->getMessage() . '</pre>';
+    }
+});
 
 
 Route::get('/', [FrontendController::class, 'index'])->name('home');
