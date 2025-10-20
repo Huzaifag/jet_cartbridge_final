@@ -74,12 +74,17 @@ class ProductController extends Controller
             'status' => 'required|in:active,inactive,out_of_stock',
         ]);
 
-        // Handle image uploads
         $imagePaths = [];
+
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('product-images', 'public');
-                $imagePaths[] = $path;
+                $newName = uniqid() . '.' . $image->getClientOriginalExtension();
+
+                // Move to public/product-images directory
+                $image->move(public_path('product-images'), $newName);
+
+                // Save relative path
+                $imagePaths[] = 'products/' . $newName;
             }
         }
 
