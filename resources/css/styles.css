@@ -1,0 +1,222 @@
+:root {
+    /* 1. Color Palette Refresh: More vibrant primary, subtle secondary, fresh accent */
+    --primary-color: #007bff; /* Vibrant Blue - Bootstrap Primary (Modern standard) */
+    --secondary-color: #0056b3; /* Darker Blue for depth/hover */
+    --accent-color: #28a745; /* Green - Success/Action (Standard, but used consistently) */
+    --light-gray: #f2f4f8; /* Softer background */
+    --text-color: #343a40;
+    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08); /* Modern, softer shadow */
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    /* Ensure Poppins is loaded and use a softer background */
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--light-gray); /* Use the new lighter gray */
+    color: var(--text-color);
+}
+
+/* --- Hero Section & Navigation --- */
+
+.hero-section,
+.bulk-order-section,
+.supplier-section,
+.footer {
+    /* Use new colors, keep the gradient/texture effect */
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    padding: 80px 0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    /* Add a subtle inset shadow for depth on these large elements */
+    box-shadow: inset 0 -5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-dropdown{
+    color: #0056b3 !important;
+}
+
+.hero-section::before,
+.supplier-section::before,
+.bulk-order-section::before {
+    /* Keep the subtle pattern effect */
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    /* Consider removing the external URL if loading time is an issue, or use a simpler SVG pattern */
+    background: url('https://img.freepik.com/free-vector/abstract-background-with-squares_23-2148995948.jpg');
+    opacity: 0.08; /* Slightly less opaque */
+    background-size: cover;
+}
+
+.search-bar {
+    /* Refined Glassmorphism */
+    background: rgba(255, 255, 255, 0.15); /* Slightly more visible background */
+    backdrop-filter: blur(12px); /* Slightly stronger blur */
+    border-radius: 12px; /* Softer radius than 50px circle */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle light border */
+    padding: 10px; /* Increased padding */
+}
+
+.search-bar input {
+    /* Increase padding for better touch targets */
+    padding: 12px 20px;
+}
+
+.search-bar button {
+    /* Use a standard, but visible, radius */
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-weight: 600;
+}
+
+
+
+
+.btn-primary {
+    /* Refined button gradient and hover */
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: 8px; /* Square off the corners slightly */
+    padding: 12px 30px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px); /* Slightly more lift */
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn-outline-primary {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 8px; /* Consistent radius */
+    padding: 10px 25px;
+}
+
+.btn-outline-primary:hover {
+    box-shadow: var(--shadow-light);
+    transform: translateY(-1px);
+}
+
+
+/* --- Card Styles (Category, Product) --- */
+
+.category-card,
+.product-card {
+    /* Softer, more minimalist card style */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px; /* Softer corners */
+    box-shadow: var(--shadow-light);
+}
+
+.category-card:hover,
+.product-card:hover {
+    /* Subtler lift and shadow */
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.category-img {
+    height: 200px;
+    object-fit: cover;
+    /* Add subtle transition for images on hover if desired */
+}
+
+.product-img {
+    height: 250px;
+    object-fit: cover;
+}
+
+/* --- Seller Section Styles (Unification) --- */
+
+.seller-selection-container {
+    background: white;
+    border-radius: 16px; /* Larger, softer radius */
+    padding: 40px; /* Increased padding */
+    box-shadow: var(--shadow-light);
+}
+
+.seller-filter-card {
+    background-color: var(--light-gray); /* Use the new light gray */
+    border-radius: 12px;
+    padding: 25px;
+}
+
+.seller-card {
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Lighter border */
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Very light initial shadow */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition curve */
+}
+
+.seller-card:hover {
+    transform: translateY(-3px); /* Subtler lift */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color); /* Hover border color from primary */
+}
+
+.seller-card.selected {
+    border: 2px solid var(--accent-color);
+    background-color: rgba(40, 167, 69, 0.08); /* Brighter accent tint */
+}
+
+.seller-avatar {
+    border: 3px solid var(--accent-color); /* Use accent color for border pop */
+}
+
+.verification-badge {
+    background: var(--accent-color);
+    font-weight: 600;
+}
+
+.compare-checkbox {
+    /* Use a standard form control scale */
+    transform: scale(1.1);
+}
+
+/* --- Stats and Modal Details --- */
+
+.stats-section {
+    background: linear-gradient(135deg, var(--light-gray) 0%, #e0e4eb 100%); /* Lighter background gradient */
+}
+
+.stats-card {
+    border-radius: 16px;
+    padding: 40px 30px;
+    box-shadow: var(--shadow-light);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-value {
+    color: var(--primary-color);
+    font-size: 1.8rem; /* Bolder stat value */
+}
+
+.bulk-pricing-table th {
+    background: rgba(0, 123, 255, 0.1); /* Use primary color tint */
+    color: var(--primary-color);
+}
+
+.bulk-pricing-table td {
+    border-bottom: 1px solid #dcdcdc;
+}
+
+/* --- Dropdowns --- */
+
+.dropdown-menu {
+    border-radius: 10px; /* Consistent, slightly smaller radius */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item:hover {
+    /* Use primary color tint for hover background */
+    background-color: rgba(0, 123, 255, 0.1);
+}

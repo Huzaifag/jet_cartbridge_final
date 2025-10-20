@@ -1,0 +1,273 @@
+/* Action Buttons */
+.action-btn {
+    border-radius: 0.35rem !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+/* Sidebar Styles */
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    min-height: 100vh;
+    background: #343a40;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+    background: #2c3136;
+}
+
+#sidebar ul.components {
+    padding: 20px 0;
+}
+
+#sidebar ul p {
+    color: #fff;
+    padding: 10px;
+}
+
+#sidebar ul li a {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    display: block;
+    color: #fff;
+    text-decoration: none;
+}
+
+#sidebar ul li a:hover,
+#sidebar ul li.active > a {
+    color: #fff;
+    background: #2c3136;
+}
+
+#sidebar ul li.active > a {
+    border-left: 4px solid #0dcaf0;
+}
+
+#sidebar ul ul a {
+    font-size: 0.9em !important;
+    padding-left: 30px !important;
+    background: #2c3136;
+}
+
+/* Content Styles */
+#content {
+    width: 100%;
+    min-height: 100vh;
+    transition: all 0.3s;
+    background: #f8f9fa;
+}
+
+/* Navbar Styles */
+#sidebarCollapse {
+    background: #0dcaf0;
+    border: none;
+}
+
+.navbar {
+    padding: 15px 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 40px;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+.btn-primary:hover {
+    background-color: #0bb5d9;
+    border-color: #0bb5d9;
+}
+
+/* Table Styles */
+.table thead th {
+    border-top: none;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+}
+
+/* Dropdown Styles */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+    padding: 8px 20px;
+}
+
+.dropdown-item i {
+    margin-right: 10px;
+}
+
+/* Form Styles */
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+    border-color: #0dcaf0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 202, 240, 0.25);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 5px 10px;
+    border-radius: 30px;
+}
+
+/* Status Colors */
+.status-active {
+    color: #198754;
+}
+
+.status-inactive {
+    color: #dc3545;
+}
+
+.seller-nav {
+    background-color: #1a3353;
+    padding: 10px 0;
+}
+
+.seller-nav .nav-link {
+    color: white;
+    padding: 8px 15px;
+}
+
+.seller-nav .nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+.stat-card {
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.inventory-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+}
+
+.status-low {
+    background-color: #ffeaea;
+    color: #dc3545;
+}
+
+.status-ok {
+    background-color: #e8f5e9;
+    color: #28a745;
+}
+
+.upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background: #f8f9fa;
+    margin: 20px 0;
+}
+
+.chat-container {
+    height: 400px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow-y: auto;
+}
+
+.message-input {
+    border-top: 1px solid #dee2e6;
+    padding: 15px;
+    background: white;
+}
+
+.promotion-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.analytics-chart {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+} 
