@@ -28,9 +28,9 @@
     <!-- Overlay for Mobile -->
     <div class="overlay"></div>
 
-    @include('salesman.component.sidebar')
+    @include('accountant.component.sidebar')
 
-    @include('salesman.component.navbar')
+    @include('accountant.component.navbar')
 
     <!-- Main Content -->
     <div class="main-content">

@@ -197,17 +197,17 @@
                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
                     role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="avatar bg-primary text-white rounded-circle me-2">
-                        {{ collect(explode(' ', Auth::user()->salesman->name))->map(fn($w) => strtoupper(Str::substr($w, 0, 1)))->implode('') }}
+                        {{ collect(explode(' ', Auth::user()->accountant->name))->map(fn($w) => strtoupper(Str::substr($w, 0, 1)))->implode('') }}
                     </div>
                     <div class="d-none d-md-block">
-                        <div class="fw-bold">{{ Auth::user()->salesman->name }}</div>
-                        <div class="small text-muted">Salesman Account</div>
+                        <div class="fw-bold">{{ Auth::user()->accountant->name }}</div>
+                        <div class="small text-muted">Accountant Account</div>
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
                     <li class="dropdown-header">
-                        <h6 class="mb-0">{{ Auth::user()->salesman->name }}</h6>
-                        <small class="text-muted">Salesman Account</small>
+                        <h6 class="mb-0">{{ Auth::user()->accountant->name }}</h6>
+                        <small class="text-muted">Accountant Account</small>
                     </li>
                     <li>
                         <hr class="dropdown-divider">

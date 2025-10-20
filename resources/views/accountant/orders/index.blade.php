@@ -1,4 +1,4 @@
-@extends('salesman.layouts.app')
+@extends('accountant.layouts.app')
     <style>
         /* Card for stats */
         .stat-card {
@@ -178,7 +178,7 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="action-button-group">
-                                        <a href="{{ route('salesman.placed-orders.show', $order->id) }}"
+                                        <a href="{{ route('accountant.confirmed-orders.show', $order->id) }}"
                                             class="btn btn-sm btn-outline-info" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>

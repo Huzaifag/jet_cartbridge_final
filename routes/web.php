@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accountant\AccountantOrderController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\InvoicesController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\UserContactController;
 use App\Http\Controllers\Salesman\productController as SalesmanProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Salesman\OrderController as SalesmanOrderController;
+use App\Http\Controllers\Accountant\DashboardController as AccountantDashboardController;
 
 
 
@@ -256,13 +258,15 @@ Route::prefix('salesman')
     ->name('accountant.')
     ->middleware(['auth', 'role:accountant'])
     ->group(function () {
-        Route::get('/dashboard', [AccountantController::class, 'index'])->name('dashboard.index');
+        Route::get('/dashboard', [AccountantDashboardController::class, 'index'])->name('dashboard.index');
 
         // Confirmed orders
 
-        Route::get('/confirmed-orders', [SalesmanOrderController::class, 'index'])->name('confirmed-orders.index');
+        Route::get('/confirmed-orders', [AccountantOrderController::class, 'index'])->name('confirmed-orders.index');
 
-        Route::get('/confirmed-orders/{id}', [SalesmanOrderController::class, 'show'])->name('confirmed-orders.show');
+        Route::get('/confirmed-orders/{id}', [AccountantOrderController::class, 'show'])->name('confirmed-orders.show');
 
-        Route::put('/confirmed-orders/{id}/confirm', [SalesmanOrderController::class, 'confirm'])->name('confirmed-orders.invoincing');
+        Route::put('/confirmed-orders/{id}/confirm', [AccountantOrderController::class, 'confirm'])->name('confirmed-orders.invoincing');
+
+        Route::post('/orders/{id}/invoice/save', [AccountantOrderController::class, 'saveInvoice'])->name('orders.invoice.save');
     });

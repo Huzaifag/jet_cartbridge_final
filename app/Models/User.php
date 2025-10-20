@@ -70,4 +70,9 @@ class User extends Authenticatable
     public function salesman(){
         return $this->hasOne(Salesman::class);
     }
+
+    public function accountant(){
+        return $this->hasOne(Accountant::class);
+    }
+
 }

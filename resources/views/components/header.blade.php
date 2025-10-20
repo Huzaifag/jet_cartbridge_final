@@ -21,7 +21,7 @@
                         @break
 
                         @case(auth()->user()->hasRole('accountant'))
-                            <a href="#"
+                            <a href="{{ route('accountant.dashboard.index') }}"
                                 class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
                                 <i class="bi bi-briefcase me-1"></i>
                                 <span>Accountant Dashboard</span>

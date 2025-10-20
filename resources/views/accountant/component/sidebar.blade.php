@@ -13,18 +13,12 @@
         </li>
 
         <li class="nav-item">
-            <a href="{{ route('accountant.products.index') }}"
-                class="nav-link {{ request()->routeIs('accountant.products.index') ? 'active' : '' }}">
-                <i class="fas fa-box"></i>
-                Products
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ route('accountant.placed-orders.index') }}"
-                class="nav-link {{ request()->routeIs('accountant.placed-orders.index') ? 'active' : '' }}">
+            <a href="{{ route('accountant.confirmed-orders.index') }}"
+                class="nav-link {{ request()->routeIs('accountant.confirmed-orders.index') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart"></i>
-                Placed Orders
+                Confirmed Orders
             </a>
         </li>
+       
     </ul>
 </nav>

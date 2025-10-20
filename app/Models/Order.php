@@ -19,7 +19,9 @@ class Order extends Model
         'shipping_address',
         'billing_address',
         'notes',
-        'is_bulk'
+        'is_bulk',
+        'invoice',
+        'invoice_date'
     ];
 
     protected $casts = [
@@ -33,6 +35,7 @@ class Order extends Model
         'products',
         'orderItems',
         'statuses'
+        
     ];
 
     public function seller()

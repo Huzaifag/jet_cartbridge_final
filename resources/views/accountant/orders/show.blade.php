@@ -1,4 +1,4 @@
-@extends('salesman.layouts.app')
+@extends('accountant.layouts.app')
 
 @section('title', 'Order Details #' . $order['id'])
 
@@ -9,19 +9,19 @@
 
             <div class="d-flex align-items-center">
                 {{-- ⭐ NEW: Confirm Order Button (Only show if status is 'Order Placed') --}}
-                @if ($order['status'] === 'Order Placed')
-                    <form action="{{ route('salesman.placed-orders.confirm', $order['id']) }}" method="POST" class="mr-2">
+                @if ($order['status'] === 'Confirmed')
+                    <form action="{{ route('accountant.confirmed-orders.invoincing', $order['id']) }}" method="POST" class="mr-2">
                         @csrf
                         @method('PUT')
                         <button type="submit" class="btn btn-success shadow-sm"
                             onclick="return confirm('Are you sure you want to CONFIRM this order? This action cannot be easily undone.')">
-                            <i class="fas fa-check fa-sm text-white-50"></i> Confirm Order
+                            <i class="fas fa-check fa-sm text-white-50"></i> Created invoice
                         </button>
                     </form>
                 @endif
                 {{-- End NEW Button --}}
 
-                <a href="{{ route('salesman.placed-orders.index') }}"
+                <a href="{{ route('accountant.confirmed-orders.index') }}"
                     class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
                     <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Orders
                 </a>
