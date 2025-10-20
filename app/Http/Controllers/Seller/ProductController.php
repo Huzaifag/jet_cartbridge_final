@@ -84,7 +84,7 @@ class ProductController extends Controller
                 $image->move(public_path('product-images'), $newName);
 
                 // Save relative path
-                $imagePaths[] = 'products/' . $newName;
+                $imagePaths[] = 'product-images/' . $newName;
             }
         }
 
