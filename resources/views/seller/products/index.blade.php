@@ -283,7 +283,7 @@
                                             @endphp
 
                                             @if ($firstImage)
-                                                <img src="{{ asset('storage/' . $firstImage) }}"
+                                                <img src="{{ asset($firstImage) }}"
                                                     alt="{{ $product->name }}" class="product-img me-3">
                                             @else
                                                 <div class="product-img bg-light d-flex align-items-center justify-content-center me-3"
