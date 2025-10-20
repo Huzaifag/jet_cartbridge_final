@@ -204,8 +204,7 @@
                             <div class="card h-100 shadow-sm">
                                 <a href="{{ route('product.show', $product->slug) }}" class="text-decoration-none">
                                     <div class="product-img-container">
-                                        <img src="{{ asset('storage/' . $firstImage) }}" alt="{{ $firstImage }}"
-                                            class="card-img-top modern-product-img">
+                                        <img src="{{ asset($firstImage) }}" alt="{{ $firstImage }}" class="card-img-top modern-product-img">
                                     </div>
                                 </a>
 
