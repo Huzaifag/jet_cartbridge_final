@@ -21,8 +21,14 @@ class Order extends Model
         'notes',
         'is_bulk',
         'invoice',
-        'invoice_date'
+        'invoice_date',
+        'dispatch_video',
+        'dispatch_details',
+        'courier_name',
+        'tracking_number',
+        'dispatched_at'
     ];
+    
 
     protected $casts = [
         'shipping_address' => 'array',

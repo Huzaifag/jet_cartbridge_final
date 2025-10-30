@@ -1,0 +1,7 @@
+- [x] Update `fetchConversations()` in ChatController to use `Auth::user()->seller` (already correct)
+- [x] Update `sendMessage()` in ChatController to use `Auth::user()->seller` (already correct)
+- [x] Add seller ownership check in `fetchMessages()` in ChatController
+- [x] Fix JavaScript in `index.blade.php` to access `response.conversations` and use `conv.customer.name`
+- [x] Fix JavaScript in `index.blade.php` to access `response.messages` in fetchMessages
+- [x] Fix jQuery script loading by using @push('scripts') instead of @section('scripts')
+- [x] Test chat functionality to ensure conversations load properly (Server started, manual testing recommended)

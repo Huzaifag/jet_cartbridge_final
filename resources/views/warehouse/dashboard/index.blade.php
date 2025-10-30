@@ -1,3 +1,3 @@
-@extends('accountant.layouts.app')
+@extends('warehouse.layouts.app')
 @section('content')
 @endsection

@@ -5,7 +5,7 @@
     </div>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a href="{{ route('accountant.dashboard.index') }}"
+            <a href="{{ route('warehouse.dashboard.index') }}"
                 class="nav-link {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-home"></i>
                 Dashboard
@@ -13,7 +13,7 @@
         </li>
 
         <li class="nav-item">
-            <a href="{{ route('accountant.confirmed-orders.index') }}"
+            <a href="{{ route('warehouse.warehouse-orders.index') }}"
                 class="nav-link {{ request()->routeIs('accountant.confirmed-orders.index') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart"></i>
                 Confirmed Orders

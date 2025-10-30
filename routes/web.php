@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Accountant\AccountantOrderController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Customer\ChatController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\InvoicesController;
+use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Seller\AccountantController;
 use App\Http\Controllers\Seller\AuthController as SellerAuthController;
@@ -25,10 +27,19 @@ use App\Http\Controllers\Seller\InquiryController;
 use App\Http\Controllers\Seller\LuckyDrawController;
 use App\Http\Controllers\UserContactController;
 use App\Http\Controllers\Salesman\productController as SalesmanProductController;
+use App\Http\Controllers\Warehouse\WarehouseDashboardController;
+use App\Http\Controllers\Warehouse\WarehouseOrdersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Salesman\OrderController as SalesmanOrderController;
 use App\Http\Controllers\Accountant\DashboardController as AccountantDashboardController;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\manufacturer\ManufacturerAuthController;
+use App\Http\Controllers\manufacturer\ManufacturerDashboardController;
+use App\Http\Controllers\manufacturer\ManufacturerProductController;
+
+
+
+use App\Http\Controllers\Seller\ChatController as SellerChatController;
 
 Route::get('/link-storage', function () {
     try {
@@ -38,6 +49,27 @@ Route::get('/link-storage', function () {
         return '<h3 style="color:red;">❌ Failed to create storage link:</h3><pre>' . $e->getMessage() . '</pre>';
     }
 });
+
+
+
+Route::middleware(['auth'])->prefix('customer')->group(function () {
+    Route::post('/chat/start', [ChatController::class, 'startConversation'])->name('chat.start');
+    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::get('/chat/messages/{conversationId}', [ChatController::class, 'fetchMessages'])->name('chat.fetchMessages');
+    Route::get('/chat/conversations', [ChatController::class, 'fetchConversations'])->name('chat.fetchConversations');
+});
+
+Route::post('/meeting/request', [MeetingController::class, 'customerRequest'])
+    ->name('customer.meeting.request')
+    ->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/meeting/join/{room_name}', [MeetingController::class, 'join'])
+        ->name('meeting.join');
+});
+
+
+
 
 
 Route::get('/', [FrontendController::class, 'index'])->name('home');
@@ -231,14 +263,144 @@ Route::prefix('seller')
         Route::get('notification-preferences/show', [App\Http\Controllers\Seller\NotificationPreferenceController::class, 'show'])->name('notification-preferences.show');
         Route::post('twofactor/store', [App\Http\Controllers\Seller\TwoFactorController::class, 'store'])->name('twofactor.store');
         Route::post('change-password', [App\Http\Controllers\Seller\SettingsController::class, 'changePassword'])->name('change-password');
+
+        Route::prefix('chat')->name('chat.')->group(function () {
+            // Seller chat main page (sidebar + chat window)
+            Route::get('/', [SellerChatController::class, 'index'])->name('index');
+
+            // Fetch all conversations (for sidebar via AJAX)
+            Route::get('/conversations', [SellerChatController::class, 'fetchConversations'])->name('conversations');
+
+            // Fetch all messages of a conversation
+            Route::get('/messages/{conversationId}', [SellerChatController::class, 'fetchMessages'])->name('messages');
+
+            // Send message (Seller → Customer)
+            Route::post('/send', [SellerChatController::class, 'sendMessage'])->name('send');
+        });
+
+        Route::post('/meeting/{id}/accept', [MeetingController::class, 'accept'])
+            ->name('meeting.accept');
+        Route::post('/meeting/{id}/reject', [MeetingController::class, 'reject'])
+            ->name('/meeting.reject');
+
+        Route::get('/meetings', [MeetingController::class, 'index'])
+            ->name('meetings.index');
     });
 
 
 /*
 |--------------------------------------------------------------------------
-| Protected Seller Routes
+| Guest Manufacturer Routes
 |--------------------------------------------------------------------------
 */
+
+Route::prefix('manufacturer')->name('manufacturer.')->group(function () {
+
+    // ✅ Auth Routes
+    Route::middleware(['guest'])->group(function () {
+        // Manufacturer Register (step-wise)
+        Route::get('/register', [ManufacturerAuthController::class, 'showRegistrationForm'])->name('register');
+        Route::post('/register/step1', [ManufacturerAuthController::class, 'processStep1'])->name('register.step1');
+        Route::post('/register/step2', [ManufacturerAuthController::class, 'processStep2'])->name('register.step2');
+        Route::post('/register/step3', [ManufacturerAuthController::class, 'processStep3'])->name('register.step3');
+
+        // Manufacturer Login
+        Route::get('/login', [ManufacturerAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [ManufacturerAuthController::class, 'login'])->name('login.submit');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Protected Manufacturer Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('manufacturer')
+    ->name('manufacturer.')
+    ->middleware(['auth', 'role:manufacturer'])
+    ->group(function () {
+
+        Route::get('/dashboard', [ManufacturerDashboardController
+        ::class, 'index'])->name('dashboard');
+
+        Route::post('/logout', [ManufacturerAuthController::class, 'logout'])->name('logout');
+
+        // Product Routes
+        Route::resource('products', ManufacturerProductController::class);
+        Route::get('products/create/bulk', [ManufacturerProductController::class, 'createBulk'])->name('products.createBulk');
+        Route::post('products/bulk-delete', [ManufacturerProductController::class, 'bulkDelete'])->name('products.bulk-delete');
+
+        // ✅ Employees Routes
+        Route::prefix('employees')->name('employees.')->group(function () {
+            Route::resource('accountant', ManufacturerAccountantController::class);
+        });
+
+        Route::get('/bulk-orders', [InquiryController::class, 'bulkIndex'])->name('bulk-orders.index');
+
+
+        Route::get('/bulk-orders/{bulkOrder}', [InquiryController::class, 'bulkShow'])->name('bulk-orders.show');
+
+
+
+
+
+        // ✅ Orders Resource Routes
+        Route::resource('orders', OrderController::class);
+
+
+        // ✅ Order Tracking Routes
+        Route::prefix('orders/track')->name('orders.track.')->group(function () {
+            Route::get('/', [OrderController::class, 'tracking_view'])->name('index');
+            Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+        });
+        // ✅ Leads (single page, not resource)
+        Route::get('/leads', [LeadController::class, 'index'])->name('leads');
+        Route::get('/leads/{lead}/assign', [LeadController::class, 'assign'])->name('leads.assign');
+
+        // ✅ Promotions (full CRUD)
+        Route::resource('promotions', PromotionController::class);
+        Route::get('/lucky-draw/{luckyDraw}/entries', [LuckyDrawController::class, 'entries'])
+            ->name('lucky-draw.entries');
+
+        // ✅ Coins & Rewards (full CRUD if needed)
+        Route::resource('coins', CoinController::class);
+
+        // ✅ Communication (single page, not resource)
+        Route::get('/communication', [CommunicationController::class, 'index'])->name('communication');
+
+        // ✅ Settings (single page, not resource)
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+        Route::post('payment-settings/store', [App\Http\Controllers\Seller\PaymentSettingsController::class, 'store'])->name('payment-settings.store');
+
+        Route::post('notification-preferences/store', [App\Http\Controllers\Seller\NotificationPreferenceController::class, 'store'])->name('notification-preferences.store');
+        Route::get('notification-preferences/show', [App\Http\Controllers\Seller\NotificationPreferenceController::class, 'show'])->name('notification-preferences.show');
+        Route::post('twofactor/store', [App\Http\Controllers\Seller\TwoFactorController::class, 'store'])->name('twofactor.store');
+        Route::post('change-password', [App\Http\Controllers\Seller\SettingsController::class, 'changePassword'])->name('change-password');
+
+        Route::prefix('chat')->name('chat.')->group(function () {
+            // Seller chat main page (sidebar + chat window)
+            Route::get('/', [SellerChatController::class, 'index'])->name('index');
+
+            // Fetch all conversations (for sidebar via AJAX)
+            Route::get('/conversations', [SellerChatController::class, 'fetchConversations'])->name('conversations');
+
+            // Fetch all messages of a conversation
+            Route::get('/messages/{conversationId}', [SellerChatController::class, 'fetchMessages'])->name('messages');
+
+            // Send message (Seller → Customer)
+            Route::post('/send', [SellerChatController::class, 'sendMessage'])->name('send');
+        });
+
+        Route::post('/meeting/{id}/accept', [MeetingController::class, 'accept'])
+            ->name('meeting.accept');
+        Route::post('/meeting/{id}/reject', [MeetingController::class, 'reject'])
+            ->name('/meeting.reject');
+
+        Route::get('/meetings', [MeetingController::class, 'index'])
+            ->name('meetings.index');
+    });
+
 
 
 Route::prefix('salesman')
@@ -262,7 +424,7 @@ Route::prefix('salesman')
     });
 
 
-    Route::prefix('accountant')
+Route::prefix('accountant')
     ->name('accountant.')
     ->middleware(['auth', 'role:accountant'])
     ->group(function () {
@@ -277,4 +439,16 @@ Route::prefix('salesman')
         Route::put('/confirmed-orders/{id}/confirm', [AccountantOrderController::class, 'confirm'])->name('confirmed-orders.invoincing');
 
         Route::post('/orders/{id}/invoice/save', [AccountantOrderController::class, 'saveInvoice'])->name('orders.invoice.save');
+    });
+
+
+    Route::prefix('warehouse')
+    ->name('warehouse.')
+    ->middleware(['auth', 'role:warehouse'])
+    ->group(function () {
+        Route::get('/dashboard', [WarehouseDashboardController::class, 'index'])->name('dashboard.index');
+        Route::get('/warehouse-orders', [WarehouseOrdersController::class, 'index'])->name('warehouse-orders.index');
+        Route::get('/warehouse-orders/{id}/', [WarehouseOrdersController::class, 'show'])->name('warehouse-orders.show');
+        Route::post('/warehouse/orders/dispatch/{id}/', [WarehouseOrdersController::class, 'dispatch'])->name('orders.dispatch');
+        Route::get('/warehouse/orders/edit/{id}/', [WarehouseOrdersController::class, 'edit'])->name('orders.edit');
     });

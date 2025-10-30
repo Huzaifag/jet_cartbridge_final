@@ -47,6 +47,11 @@ class User extends Authenticatable
         return $this->hasOne(Seller::class);
     }
 
+    public function manufacturer()
+    {
+        return $this->hasOne(Manufacturer::class);
+    }
+
     public function contacts()
     {
         return $this->hasMany(UserContact::class);
@@ -67,12 +72,44 @@ class User extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
-    public function salesman(){
+    public function salesman()
+    {
         return $this->hasOne(Salesman::class);
     }
 
-    public function accountant(){
+    public function accountant()
+    {
         return $this->hasOne(Accountant::class);
     }
+
+    public function warehouse()
+    {
+        return $this->hasOne(WareHouse::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'customer_id');
+    }
+
+    public function sentMeetings()
+    {
+        return $this->hasMany(Meeting::class, 'sender_id');
+    }
+
+    public function receivedMeetings()
+    {
+        return $this->hasMany(Meeting::class, 'receiver_id');
+    }
+
+    public function allMeetings()
+    {
+        return Meeting::where(function ($q) {
+            $q->where('sender_id', $this->id)
+                ->orWhere('receiver_id', $this->id);
+        });
+    }
+
+
 
 }

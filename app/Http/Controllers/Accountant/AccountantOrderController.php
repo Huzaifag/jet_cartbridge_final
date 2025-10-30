@@ -41,8 +41,6 @@ class AccountantOrderController extends Controller
   public function confirm($id)
   {
     $order = Order::with('orderItems.product')->findOrFail($id);
-
-
     return view('accountant.orders.invoicing', compact('order'));
   }
 
@@ -72,6 +70,10 @@ class AccountantOrderController extends Controller
     $order->invoice = $filename;
     $order->invoice_date = Carbon::now()->toDateTimeString();
     $order->save();
+
+    
+
+
 
     // 3️⃣ Order stage updates
     $stageOrder = [

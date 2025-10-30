@@ -217,6 +217,253 @@
                 /* Ensures sticky behavior in the column */
             }
         }
+
+        /* --- Enhanced Chat Layout Styles --- */
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 500px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            z-index: 1050;
+            display: none;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .chat-container.show {
+            display: flex;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .chat-header .chat-title {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-header .close-chat {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .chat-header .close-chat:hover {
+            opacity: 1;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background: var(--background-color);
+            max-height: 350px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .message-bubble {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-bubble.customer {
+            justify-content: flex-end;
+        }
+
+        .message-bubble.seller {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message-bubble.customer .message-content {
+            background: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-bubble.seller .message-content {
+            background: white;
+            color: var(--text-color);
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-sender {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            opacity: 0.8;
+        }
+
+        .message-bubble.customer .message-sender {
+            display: none;
+            /* Hide sender for own messages */
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #6c757d;
+            margin-left: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .message-bubble.customer .message-time {
+            order: -1;
+            margin-right: 0.5rem;
+            margin-left: 0;
+        }
+
+        .chat-input-container {
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-input-container input {
+            flex: 1;
+            border: 1px solid #e9ecef;
+            border-radius: 25px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input-container input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 77, 64, 0.1);
+            outline: none;
+        }
+
+        .chat-input-container button {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .chat-input-container button:hover {
+            background: #00332c;
+            transform: scale(1.05);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 0.75rem 1rem;
+            font-style: italic;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            gap: 0.25rem;
+            margin-left: 0.5rem;
+        }
+
+        .typing-dots span {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #6c757d;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Responsive adjustments for chat */
+        @media (max-width: 576px) {
+            .chat-container {
+                width: calc(100vw - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
     </style>
 
     <div class="product-header-pro">
@@ -475,9 +722,25 @@
                             <button class="btn action-btn-pro btn-primary-custom mb-2">
                                 <i class="fas fa-paper-plane me-2"></i>Send Detailed Inquiry
                             </button>
-                            <button class="btn action-btn-pro btn-outline-primary-custom">
-                                <i class="fas fa-comments me-2"></i>Live Chat with Agent
-                            </button>
+                            <form id="startChatForm">
+                                @csrf
+                                <input type="hidden" name="seller_id" value="{{ $product->seller->id }}">
+                                <button type="submit" class="btn action-btn-pro btn-outline-primary-custom">
+                                    <i class="fas fa-comments me-2"></i> Live Chat with Seller
+                                </button>
+                            </form>
+
+                            <!-- New: Request a Meeting Button -->
+                            <form id="requestMeetingForm" class="mt-2">
+                                @csrf
+                                <input type="hidden" name="seller_id" value="{{ $product->seller->user_id }}">
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <button type="submit" class="btn action-btn-pro btn-outline-secondary">
+                                    <i class="fas fa-calendar-plus me-2"></i> Request a Meeting
+                                </button>
+                            </form>
+
+
 
                             <div class="mt-4 border-top pt-3">
                                 <small class="text-muted d-block mb-2">Alternative Contact Options</small>
@@ -618,6 +881,255 @@
             </div>
         </div>
     </div>
+
+    {{-- Enhanced Floating Chat Window --}}
+    <div id="chatBox" class="chat-container">
+        <div class="chat-header">
+            <div class="chat-title">
+                <i class="fas fa-comments"></i>
+                Live Chat with {{ $product->seller->company_name ?? 'Seller' }}
+            </div>
+            <button class="close-chat" id="closeChatBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="chatMessages" class="chat-messages">
+            {{-- Messages will be appended here --}}
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-comments fa-2x mb-2"></i>
+                <p>Start a conversation!</p>
+            </div>
+        </div>
+        <div id="typingIndicator" class="typing-indicator">
+            <span>Seller is typing</span>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <form id="sendMessageForm" class="chat-input-container">
+            @csrf
+            <input type="hidden" name="conversation_id" id="conversation_id">
+            <input type="text" class="form-control" id="messageInput" placeholder="Type your message..." required>
+            <button type="submit" class="btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- 🧩 Request Meeting Modal -->
+    <div class="modal fade" id="requestMeetingModal" tabindex="-1" aria-labelledby="requestMeetingModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="submitMeetingRequestForm">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="requestMeetingModalLabel">Request a Meeting</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="seller_id" id="meetingSellerId" value="{{ $product->seller->user_id }}">
+                        <input type="hidden" name="product_id" id="meetingProductId" value="{{ $product->id }}">
+
+                        <div class="mb-3">
+                            <label for="meetingTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" name="title" id="meetingTitle"
+                                placeholder="Enter meeting title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="meetingMessage" class="form-label">Message</label>
+                            <textarea class="form-control" name="message" id="meetingMessage" rows="3"
+                                placeholder="Write message..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="meetingDateTime" class="form-label">Schedule Date & Time</label>
+                            <input type="datetime-local" class="form-control" name="scheduled_at" id="meetingDateTime"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            // 1️⃣ When customer clicks "Live Chat with Seller"
+            $('#startChatForm').on('submit', function (e) {
+                e.preventDefault();
+
+                let seller_id = $(this).find('input[name="seller_id"]').val();
+
+                $.ajax({
+                    url: "{{ route('chat.start') }}",
+                    method: "POST",
+                    data: {
+                        seller_id: seller_id,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            $('#conversation_id').val(res.conversation.id);
+                            $('#chatBox').addClass('show');
+                            loadMessages(res.conversation.id);
+                        }
+                    },
+                    error: function (err) {
+                        alert("Please login as customer to chat.");
+                        console.error(err);
+                    }
+                });
+            });
+
+            // Close chat button
+            $('#closeChatBtn').on('click', function () {
+                $('#chatBox').removeClass('show');
+            });
+
+            // 2️⃣ Send message
+            $('#sendMessageForm').on('submit', function (e) {
+                e.preventDefault();
+
+                let conversation_id = $('#conversation_id').val();
+                let message = $('#messageInput').val();
+
+                if (message.trim() === '') return;
+
+                // Show own message immediately
+                appendMessage({
+                    message: message,
+                    sender_type: 'customer',
+                    created_at: new Date().toISOString()
+                });
+
+                $('#messageInput').val('').prop('disabled', true);
+
+                $.ajax({
+                    url: "{{ route('chat.send') }}",
+                    method: "POST",
+                    data: {
+                        conversation_id: conversation_id,
+                        message: message,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (res) {
+                        $('#messageInput').prop('disabled', false);
+                        // Update with server message if needed
+                    },
+                    error: function (err) {
+                        $('#messageInput').prop('disabled', false);
+                        console.error(err);
+                    }
+                });
+            });
+
+            // 3️⃣ Fetch and display messages
+            function loadMessages(conversation_id) {
+                $.get("{{ url('customer/chat/messages') }}/" + conversation_id, function (res) {
+                    if (res.success) {
+                        $('#chatMessages').empty();
+                        res.messages.forEach(msg => appendMessage(msg));
+                    }
+                });
+            }
+
+            // 4️⃣ Enhanced Append message to chat box
+            function appendMessage(msg) {
+                const isCustomer = msg.sender_type === 'customer';
+                const senderName = isCustomer ? 'You' : (msg.sender_name || 'Seller');
+                const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                let msgHtml = `
+                                <div class="message-bubble ${isCustomer ? 'customer' : 'seller'}">
+                                    ${!isCustomer ? `<div class="message-sender">${senderName}</div>` : ''}
+                                    <div class="message-content">
+                                        ${msg.message}
+                                    </div>
+                                    <span class="message-time">${time}</span>
+                                </div>
+                            `;
+                $('#chatMessages').append(msgHtml);
+                $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+
+                // Hide welcome message if first
+                $('.text-center.text-muted').hide();
+            }
+
+            // Auto-scroll on new messages (can be extended with WebSockets)
+            const chatMessages = $('#chatMessages');
+            chatMessages.scroll(function () {
+                // Logic for loading older messages if needed
+            });
+
+            // Enter key to send
+            $('#messageInput').on('keypress', function (e) {
+                if (e.which === 13) {
+                    $('#sendMessageForm').submit();
+                }
+            });
+
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // 🟢 Open modal when "Request Meeting" button clicked
+            const requestBtn = document.querySelector('#requestMeetingForm');
+            const modal = new bootstrap.Modal(document.getElementById('requestMeetingModal'));
+
+            requestBtn.addEventListener('submit', function (e) {
+                e.preventDefault();
+                modal.show();
+            });
+
+            // 🟢 Handle meeting form submission (AJAX)
+            const meetingForm = document.getElementById('submitMeetingRequestForm');
+
+            meetingForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+
+                fetch("{{ route('customer.meeting.request') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('✅ Meeting request sent successfully!');
+                            modal.hide();
+                            meetingForm.reset();
+                        } else {
+                            alert('⚠️ ' + (data.message || 'Something went wrong.'));
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('❌ Server error while sending meeting request.');
+                    });
+            });
+        });
+    </script>
+
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

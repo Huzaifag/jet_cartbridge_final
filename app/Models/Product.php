@@ -74,6 +74,11 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function manufacturer()
+    {
+        return $this->belongsTo(Manufacturer::class);
+    }
+
     // public function promotions()
     // {
     //     return $this->belongsToMany(Promotion::class, 'promotion_product');

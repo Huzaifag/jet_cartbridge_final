@@ -15,7 +15,7 @@ use App\Models\Promotion;
 class Seller extends Authenticatable
 {
     use HasApiTokens, Notifiable, HasRoles;
-    
+
     protected $guard_name = 'seller';
     /**
      * The attributes that are mass assignable.
@@ -156,4 +156,10 @@ class Seller extends Authenticatable
     {
         return $this->hasMany(Order::class, 'seller_id');
     }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'seller_id');
+    }
+
 }

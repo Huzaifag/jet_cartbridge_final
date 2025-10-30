@@ -5,16 +5,16 @@
     </div>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a href="{{ route('seller.dashboard') }}"
-                class="nav-link {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('manufacturer.dashboard') }}"
+                class="nav-link {{ request()->routeIs('manufacturer.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-home"></i>
                 Dashboard
             </a>
         </li>
 
         <li class="nav-item">
-            <a href="{{ route('seller.products.index') }}"
-                class="nav-link {{ request()->routeIs('seller.products.index') ? 'active' : '' }}">
+            <a href="{{ route('manufacturer.products.index') }}"
+                class="nav-link {{ request()->routeIs('manufacturer.products.index') ? 'active' : '' }}">
                 <i class="fas fa-box"></i>
                 Products
             </a>

@@ -37,7 +37,7 @@
                         @break
 
                         @case(auth()->user()->hasRole('warehouse'))
-                            <a href="#"
+                            <a href="{{ route('warehouse.dashboard.index') }}"
                                 class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
                                 <i class="bi bi-briefcase me-1"></i>
                                 <span>Warehouse Dashboard</span>
@@ -72,6 +72,17 @@
                         class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center border-start border-secondary">
                         <i class="bi bi-box-arrow-in-right me-1"></i>
                         <span>Sign Up</span>
+                    </a>
+                    <!-- New links -->
+                    <a href="{{ route('seller.register') }}"
+                        class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center border-start border-secondary">
+                        <i class="bi bi-person-plus-fill me-1"></i>
+                        <span>Join as Seller</span>
+                    </a>
+                    <a href="{{ route('manufacturer.register') }}"
+                        class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center border-start border-secondary">
+                        <i class="bi bi-person-plus-fill me-1"></i>
+                        <span>Join as Manufacturer</span>
                     </a>
                 @endguest
 

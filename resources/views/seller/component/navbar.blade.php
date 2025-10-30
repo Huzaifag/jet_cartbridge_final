@@ -153,10 +153,85 @@
                 </ul>
             </div>
 
+            @php
+                use App\Models\Meeting;
+                $user = auth()->user();
+
+                // All meetings (sent or received)
+                $allMeetings = $user->allMeetings()->latest()->get();
+
+                // Only pending ones (user as receiver)
+                $pendingMeetings = $user->allMeetings()
+                    ->where('status', Meeting::STATUS_PENDING)
+                    ->where('receiver_id', $user->id)
+                    ->orderBy('scheduled_at', 'asc')
+                    ->get();
+
+                $pendingMeetingsCount = $pendingMeetings->count();
+            @endphp
+
+            <!-- 🧩 Meetings Dropdown -->
+            <div class="dropdown me-3">
+                <a class="nav-link position-relative" href="#" role="button" id="meetingsDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-video fa-lg text-muted"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+                        {{ $pendingMeetingsCount ?? 0 }}
+                        <span class="visually-hidden">pending meetings</span>
+                    </span>
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow meeting-dropdown" aria-labelledby="meetingsDropdown"
+                    style="width: 350px;">
+                    <li class="dropdown-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Meeting Requests</h6>
+                        <span class="badge bg-success rounded-pill">{{ $pendingMeetingsCount ?? 0 }} Pending</span>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    @forelse ($pendingMeetings as $meeting)
+                        <li class="dropdown-item">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($meeting->sender->name) }}&background=random"
+                                        class="rounded-circle" width="40" height="40" alt="{{ $meeting->sender->name }}">
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="fw-bold">{{ $meeting->title ?? 'Meeting Request' }}</div>
+                                    <div class="small text-muted">From: {{ $meeting->sender->name }}</div>
+                                    <div class="small text-muted">📅 {{ $meeting->scheduled_at->format('d M, h:i A') }}
+                                    </div>
+
+                                    <div class="mt-2 d-flex gap-2">
+                                        <button class="btn btn-sm btn-success accept-meeting"
+                                            data-id="{{ $meeting->id }}">Accept</button>
+                                        <button class="btn btn-sm btn-danger reject-meeting"
+                                            data-id="{{ $meeting->id }}">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                    @empty
+                        <li class="dropdown-item text-center text-muted">No pending meetings</li>
+                    @endforelse
+
+                    <li class="dropdown-footer text-center">
+                        <a href="{{ route('seller.meetings.index') }}" class="text-primary">View All Meetings</a>
+                    </li>
+                </ul>
+            </div>
+
+
             <!-- Quick Actions Dropdown -->
             <div class="dropdown me-3 d-none d-md-block">
-                <a class="nav-link" href="#" role="button" id="quickActionsDropdown"
-                    data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link" href="#" role="button" id="quickActionsDropdown" data-bs-toggle="dropdown"
+                    aria-expanded="false">
                     <i class="fas fa-bolt fa-lg text-muted"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="quickActionsDropdown">
@@ -194,8 +269,8 @@
 
             <!-- User Dropdown -->
             <div class="user-dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
-                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="avatar bg-primary text-white rounded-circle me-2">
 
                         {{ collect(explode(' ', Auth::user()->seller->company_name))->map(fn($w) => strtoupper(Str::substr($w, 0, 1)))->implode('') }}
@@ -358,9 +433,9 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Mark notifications as read when dropdown is opened
-        document.getElementById('notificationDropdown').addEventListener('shown.bs.dropdown', function() {
+        document.getElementById('notificationDropdown').addEventListener('shown.bs.dropdown', function () {
             // In a real application, you would make an API call to mark notifications as read
             const badge = this.querySelector('.badge');
             if (badge) {
@@ -369,7 +444,7 @@
         });
 
         // Mark messages as read when dropdown is opened
-        document.getElementById('messagesDropdown').addEventListener('shown.bs.dropdown', function() {
+        document.getElementById('messagesDropdown').addEventListener('shown.bs.dropdown', function () {
             // In a real application, you would make an API call to mark messages as read
             const badge = this.querySelector('.badge');
             if (badge) {
@@ -379,8 +454,60 @@
 
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // 🟢 Accept Meeting
+    document.querySelectorAll('.accept-meeting').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+
+            fetch(`/seller/meeting/${id}/accept`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url; // Go to meeting room
+                } else {
+                    alert(data.message || 'Failed to accept meeting');
+                }
+            });
+        });
+    });
+
+    // 🔴 Reject Meeting
+    document.querySelectorAll('.reject-meeting').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+
+            fetch(`/seller/meeting/${id}/reject`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Meeting rejected');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to reject meeting');
+                }
+            });
+        });
+    });
+});
 </script>
