@@ -28,9 +28,9 @@
                 {{-- Dispatch Button --}}
                 @if ($order->status === 'Invoiced')
                     @role('warehouse')
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dispatchModal">
+                    <a href="{{ route('warehouse.orders.edit', $order->id) }}" type="button" class="btn btn-primary">
                         <i class="fas fa-truck"></i> Mark as Dispatched
-                    </button>
+</a>
                     @endrole
                 @endif
             </div>

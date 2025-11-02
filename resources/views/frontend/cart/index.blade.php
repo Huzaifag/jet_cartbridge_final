@@ -254,7 +254,7 @@
                                            data-quantity="{{ $item->quantity }}"
                                            {{ $item->is_selected ? 'checked' : '' }}>
                                 </div>
-                                <img src="{{ asset('storage/' . ($item->product->images[0] ?? 'placeholder.png')) }}"
+                                <img src="{{ asset(($item->product->images[0] ?? 'placeholder.png')) }}"
                                     alt="{{ $item->product->name }}" class="item-image">
                                 <div class="item-details">
                                     <h5 class="item-title">{{ $item->product->name }}</h5>

@@ -178,7 +178,7 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="action-button-group">
-                                        <a href="{{ route('warehouse.warehouse-orders.show', $order->id) }}"
+                                        <a href="{{ route('warehouse.orders.show', $order->id) }}"
                                             class="btn btn-sm btn-outline-info" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>

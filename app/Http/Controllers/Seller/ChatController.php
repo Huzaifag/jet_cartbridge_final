@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
+use App\Events\MessageSent;
 
 class ChatController extends Controller
 {
@@ -99,6 +100,9 @@ class ChatController extends Controller
             'last_message' => $request->message,
             'last_message_sender' => 'seller',
         ]);
+
+        // Broadcast the message
+        broadcast(new MessageSent($message));
 
         return response()->json([
             'success' => true,

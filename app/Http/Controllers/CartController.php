@@ -10,43 +10,73 @@ use App\Models\OrderItem;
 use App\Models\OrderStatus;
 use App\Models\Product;
 use App\Models\PromotionRule;
+use App\Models\UserContact;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
 
 
 class CartController extends Controller
 {
     public function index()
     {
-        if (!auth()->user()->hasRole('customer')) {
-            return redirect('/');
+        // Authorization check - ensure only customers can access cart
+        if (!auth()->check() || !auth()->user()->hasRole('customer')) {
+            abort(403, 'Unauthorized access to cart');
         }
 
         $cart = auth()->user()->cart;
         $subtotal = $cart ? $cart->total() : 0;
-        $shipping = 10;
-
-        $tax = 5;
+        $shipping = $subtotal > 50 ? 0 : 10; // Free shipping over $50
+        $tax = round($subtotal * 0.08, 2); // 8% tax
         $total = $subtotal + $shipping + $tax;
+
         return view('frontend.cart.index', compact('cart', 'total', 'subtotal', 'shipping', 'tax'));
     }
 
     public function removeFromCart(CartItem $item)
     {
-        if (!auth()->user()->hasRole('customer')) {
-            return redirect('/');
+        // Authorization check - ensure user owns this cart item
+        if ($item->cart->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to cart item');
         }
 
         $item->delete();
         return redirect()->back()->with('success', 'Item removed from cart');
     }
 
-    public function addToCart(Product $product)
+    public function addToCart(Request $request, Product $product)
     {
-        if (!auth()->user()->hasRole('customer')) {
-            return redirect('/');
+        // Rate limiting to prevent spam
+        $key = 'add-to-cart:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 10)) { // 10 attempts per minute
+            return redirect()->back()->with('error', 'Too many requests. Please try again later.');
+        }
+        RateLimiter::hit($key, 60); // 60 second window
+
+        // Authorization check
+        if (!auth()->check() || !auth()->user()->hasRole('customer')) {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Validate product availability
+        if ($product->status !== 'active') {
+            return redirect()->back()->with('error', 'Product is not available for purchase.');
+        }
+
+        // Validate request
+        $request->validate([
+            'quantity' => 'nullable|integer|min:1|max:99'
+        ]);
+
+        $quantityToAdd = $request->input('quantity', 1);
+
+        // Check stock availability (assuming product has stock field)
+        if (isset($product->stock) && $product->stock < $quantityToAdd) {
+            return redirect()->back()->with('error', 'Insufficient stock available.');
         }
 
         // Get or create user's active cart
@@ -57,9 +87,6 @@ class CartController extends Controller
         // Check if the product already exists in the cart
         $cartItem = $cart->items()->where('product_id', $product->id)->first();
 
-        // Default quantity to add
-        $quantityToAdd = 1;
-
         // Check for active promotion on this product
         $promotionRule = PromotionRule::where('applicable_product_id', $product->id)
             ->whereHas('promotion', function ($q) {
@@ -69,6 +96,7 @@ class CartController extends Controller
             })
             ->first();
 
+        $freeQty = 0;
         if ($promotionRule) {
             // Example: buy_quantity = 1, get_quantity = 1
             $buyQty = $promotionRule->buy_quantity;
@@ -76,58 +104,73 @@ class CartController extends Controller
 
             // For every "buy" product, calculate free products
             $freeQty = floor($quantityToAdd / $buyQty) * $getQty;
-        } else {
-            $freeQty = 0;
         }
 
-        if ($cartItem) {
-            // Product already in cart — increase quantity
-            $cartItem->increment('quantity', $quantityToAdd);
-        } else {
-            // Create new cart item
-            $cartItem = $cart->items()->create([
-                'product_id' => $product->id,
-                'quantity' => $quantityToAdd,
-                'price' => $product->b2c_price,
-            ]);
-        }
-
-        // Handle free product addition
-        if ($freeQty > 0) {
-            // Check if free product already exists in the cart
-            $freeItem = $cart->items()->where('product_id', $product->id)
-                ->where('is_free', true)
-                ->first();
-
-            if ($freeItem) {
-                $freeItem->increment('quantity', $freeQty);
+        DB::transaction(function () use ($cart, $cartItem, $product, $quantityToAdd, $freeQty) {
+            if ($cartItem) {
+                // Product already in cart — increase quantity
+                $cartItem->increment('quantity', $quantityToAdd);
             } else {
+                // Create new cart item
                 $cart->items()->create([
                     'product_id' => $product->id,
-                    'quantity' => $freeQty,
-                    'price' => 0,
-                    'is_free' => true, // Add a boolean column in your cart_items table
+                    'quantity' => $quantityToAdd,
+                    'price' => $product->b2c_price,
+                    'is_selected' => true, // Auto-select new items
                 ]);
             }
-        }
+
+            // Handle free product addition
+            if ($freeQty > 0) {
+                // Check if free product already exists in the cart
+                $freeItem = $cart->items()->where('product_id', $product->id)
+                    ->where('is_free', true)
+                    ->first();
+
+                if ($freeItem) {
+                    $freeItem->increment('quantity', $freeQty);
+                } else {
+                    $cart->items()->create([
+                        'product_id' => $product->id,
+                        'quantity' => $freeQty,
+                        'price' => 0,
+                        'is_free' => true,
+                        'is_selected' => true,
+                    ]);
+                }
+            }
+        });
 
         return redirect()->back()->with('success', 'Product added to cart successfully!');
     }
 
     public function selectAddress($cartId)
     {
-        // Fetch the user's cart
-        $cart = Cart::with(['items.product'])->findOrFail($cartId);
+        // Authorization check
+        if (!auth()->check() || !auth()->user()->hasRole('customer')) {
+            abort(403, 'Unauthorized access');
+        }
 
-        // Fetch user’s saved addresses
+        // Fetch the user's cart with authorization
+        $cart = Cart::where('id', $cartId)
+            ->where('user_id', auth()->id())
+            ->with(['items.product'])
+            ->firstOrFail();
+
+        // Check if cart has selected items
+        $selectedItems = $cart->items->where('is_selected', true);
+        if ($selectedItems->isEmpty()) {
+            return redirect()->route('cart')->with('warning', 'Please select items to checkout.');
+        }
+
+        // Fetch user's saved addresses
         $addresses = auth()->user()->contacts ?? collect();
 
         // Calculate summary details for only selected items
-        $selectedItems = $cart->items->where('is_selected', true);
         $itemCount = $selectedItems->count();
         $subtotal = $selectedItems->sum(fn($item) => $item->price * $item->quantity);
-        $shipping = $subtotal > 50 ? 0 : 5; // Example: free shipping for orders over $50
-        $tax = round($subtotal * 0.1, 2);
+        $shipping = $subtotal > 50 ? 0 : 5; // Free shipping for orders over $50
+        $tax = round($subtotal * 0.08, 2); // 8% tax
         $total = $subtotal + $shipping + $tax;
 
         // Return view with all necessary data
@@ -145,12 +188,30 @@ class CartController extends Controller
 
     public function payment(Request $request)
     {
+        // dd($request->address_id);
+        // Authorization check
+        if (!auth()->check() || !auth()->user()->hasRole('customer')) {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Validate request with proper authorization
         $request->validate([
-            'address_id' => 'required|exists:user_contacts,id',
+            'address_id' => [
+                'required',
+            ],
         ]);
 
-        // Store selected address in session for order processing
+        // dd($request->address_id);
+
+        // Verify address belongs to user
+        $selectedAddress = auth()->user()->contacts()->find($request->address_id);
+        if (!$selectedAddress) {
+            return redirect()->back()->with('error', 'Invalid address selection.');
+        }
+
+        // Store selected address in session with expiration
         session(['selected_address_id' => $request->address_id]);
+        session(['address_selected_at' => now()]);
 
         // Get user's cart and selected items
         $cart = auth()->user()->cart;
@@ -169,9 +230,6 @@ class CartController extends Controller
         $tax = round($subtotal * 0.08, 2); // 8% tax
         $total = $subtotal + $shipping + $tax;
 
-        // Get selected address details
-        $selectedAddress = auth()->user()->contacts()->find($request->address_id);
-
         // Return payment view with data
         return view('frontend.pages.payment', compact(
             'cart',
@@ -189,10 +247,28 @@ class CartController extends Controller
 
     public function placeOrder(Request $request, Cart $cart)
     {
+        // Authorization check
+        if (!auth()->check() || !auth()->user()->hasRole('customer')) {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Verify cart ownership
+        if ($cart->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to cart');
+        }
+
         // Validate request
         $request->validate([
             'payment_method' => 'required|in:cod,card,upi',
         ]);
+
+        // Check session expiration (15 minutes)
+        $addressSelectedAt = session('address_selected_at');
+        if (!$addressSelectedAt || now()->diffInMinutes($addressSelectedAt) > 15) {
+            return redirect()
+                ->route('order.select-address', $cart->id)
+                ->with('error', 'Session expired. Please select address again.');
+        }
 
         // Get selected address from session
         $addressId = session('selected_address_id');
@@ -202,10 +278,19 @@ class CartController extends Controller
                 ->with('error', 'Please select a delivery address first.');
         }
 
-        // Fetch selected items
+        // Verify address still belongs to user
+        $selectedAddress = auth()->user()->contacts()->find($addressId);
+        if (!$selectedAddress) {
+            return redirect()
+                ->route('order.select-address', $cart->id)
+                ->with('error', 'Invalid address selection.');
+        }
+
+        // Fetch selected items with lock for update
         $selectedItems = $cart->items()
             ->where('is_selected', true)
             ->with('product')
+            ->lockForUpdate()
             ->get();
 
         if ($selectedItems->isEmpty()) {
@@ -214,15 +299,19 @@ class CartController extends Controller
                 ->with('warning', 'No items selected for order.');
         }
 
+        // Check stock availability before placing order
+        foreach ($selectedItems as $item) {
+            if (isset($item->product->stock) && $item->product->stock < $item->quantity) {
+                return redirect()->back()->with('error', "Insufficient stock for {$item->product->name}.");
+            }
+        }
+
         $createdOrders = [];
 
-        DB::transaction(function () use ($cart, $selectedItems, $request, $addressId, &$createdOrders) {
+        DB::transaction(function () use ($cart, $selectedItems, $request, $selectedAddress, &$createdOrders) {
 
-            // Fetch and format selected address
-            $selectedAddress = auth()->user()->contacts()->find($addressId);
-            $addressString = $selectedAddress
-                ? "{$selectedAddress->address}, {$selectedAddress->city}, {$selectedAddress->state} {$selectedAddress->postal_code}, {$selectedAddress->country}"
-                : 'N/A';
+            // Format address string
+            $addressString = "{$selectedAddress->address}, {$selectedAddress->city}, {$selectedAddress->state} {$selectedAddress->postal_code}, {$selectedAddress->country}";
 
             // Group items by seller
             $itemsBySeller = $selectedItems->groupBy(fn($item) => $item->product->seller_id);
@@ -232,8 +321,10 @@ class CartController extends Controller
                 // Calculate total
                 $total = $items->sum(fn($item) => $item->price * $item->quantity);
 
-                // Create order
+                // Create order with unique order number
+                $orderNumber = 'ORD-' . strtoupper(uniqid());
                 $order = Order::create([
+                    'order_number' => $orderNumber,
                     'status' => 'Order Placed',
                     'seller_id' => $sellerId,
                     'customer_id' => auth()->id(),
@@ -245,7 +336,7 @@ class CartController extends Controller
                     'notes' => '',
                 ]);
 
-                // ✅ Insert order stages (fixing SQL mismatch)
+                // Insert order stages
                 $stages = [
                     ['stage' => 'order_placed', 'status' => 'completed', 'started_at' => now(), 'completed_at' => now()],
                     ['stage' => 'with_accountant', 'status' => 'pending'],
@@ -264,7 +355,7 @@ class CartController extends Controller
                     ]);
                 }
 
-                // Create order items
+                // Create order items and update stock
                 foreach ($items as $item) {
                     OrderItem::create([
                         'order_id' => $order->id,
@@ -272,6 +363,11 @@ class CartController extends Controller
                         'quantity' => $item->quantity,
                         'price' => $item->price,
                     ]);
+
+                    // Decrease product stock if available
+                    if (isset($item->product->stock)) {
+                        $item->product->decrement('stock', $item->quantity);
+                    }
                 }
 
                 $createdOrders[] = $order;
@@ -280,10 +376,10 @@ class CartController extends Controller
             // Remove selected cart items
             $cart->items()->where('is_selected', true)->delete();
 
-            // Clear selected address
-            session()->forget('selected_address_id');
+            // Clear session
+            session()->forget(['selected_address_id', 'address_selected_at']);
 
-            // Optionally delete empty cart
+            // Delete empty cart
             if ($cart->items()->count() === 0) {
                 $cart->delete();
             }
@@ -291,7 +387,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart')
-            ->with('success', 'Order placed successfully!');
+            ->with('success', 'Order placed successfully! Order numbers: ' . collect($createdOrders)->pluck('order_number')->join(', '));
     }
 
 
@@ -380,6 +476,16 @@ class CartController extends Controller
 
     public function toggleItemSelection(Request $request, CartItem $cartItem)
     {
+        // Rate limiting
+        $key = 'cart-toggle:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 30)) { // 30 attempts per minute
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many requests. Please try again later.'
+            ], 429);
+        }
+        RateLimiter::hit($key, 60);
+
         // Verify the cart item belongs to the authenticated user
         if ($cartItem->cart->user_id !== Auth::id()) {
             return response()->json([
@@ -388,7 +494,12 @@ class CartController extends Controller
             ], 403);
         }
 
-        $cartItem->is_selected = $request->input('is_selected', !$cartItem->is_selected);
+        // Validate request
+        $request->validate([
+            'is_selected' => 'required|boolean'
+        ]);
+
+        $cartItem->is_selected = $request->input('is_selected');
         $cartItem->save();
 
         return response()->json([
@@ -403,6 +514,16 @@ class CartController extends Controller
      */
     public function selectAll(Cart $cart)
     {
+        // Rate limiting
+        $key = 'cart-select-all:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 20)) { // 20 attempts per minute
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many requests. Please try again later.'
+            ], 429);
+        }
+        RateLimiter::hit($key, 60);
+
         // Verify the cart belongs to the authenticated user
         if ($cart->user_id !== Auth::id()) {
             return response()->json([
@@ -426,6 +547,16 @@ class CartController extends Controller
      */
     public function deselectAll(Cart $cart)
     {
+        // Rate limiting
+        $key = 'cart-deselect-all:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 20)) { // 20 attempts per minute
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many requests. Please try again later.'
+            ], 429);
+        }
+        RateLimiter::hit($key, 60);
+
         // Verify the cart belongs to the authenticated user
         if ($cart->user_id !== Auth::id()) {
             return response()->json([
@@ -449,6 +580,16 @@ class CartController extends Controller
      */
     public function toggleSelectAll(Request $request, Cart $cart)
     {
+        // Rate limiting
+        $key = 'cart-toggle-select-all:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 20)) { // 20 attempts per minute
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many requests. Please try again later.'
+            ], 429);
+        }
+        RateLimiter::hit($key, 60);
+
         // Verify the cart belongs to the authenticated user
         if ($cart->user_id !== Auth::id()) {
             return response()->json([
@@ -457,7 +598,12 @@ class CartController extends Controller
             ], 403);
         }
 
-        $selectAll = $request->input('select_all', true);
+        // Validate request
+        $request->validate([
+            'select_all' => 'required|boolean'
+        ]);
+
+        $selectAll = $request->input('select_all');
 
         // Update all cart items
         $cart->items()->update(['is_selected' => $selectAll]);
@@ -477,6 +623,16 @@ class CartController extends Controller
      */
     public function bulkUpdateSelection(Request $request, Cart $cart)
     {
+        // Rate limiting
+        $key = 'cart-bulk-update:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 15)) { // 15 attempts per minute
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many requests. Please try again later.'
+            ], 429);
+        }
+        RateLimiter::hit($key, 60);
+
         // Verify the cart belongs to the authenticated user
         if ($cart->user_id !== Auth::id()) {
             return response()->json([
@@ -486,25 +642,27 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'items' => 'required|array',
-            'items.*.id' => 'required|exists:cart_items,id',
+            'items' => 'required|array|min:1|max:50', // Limit to 50 items per request
+            'items.*.id' => 'required|integer|exists:cart_items,id',
             'items.*.is_selected' => 'required|boolean'
         ]);
 
         $items = $request->input('items');
         $updated = 0;
 
-        foreach ($items as $itemData) {
-            $cartItem = CartItem::where('id', $itemData['id'])
-                ->where('cart_id', $cart->id)
-                ->first();
+        DB::transaction(function () use ($items, $cart, &$updated) {
+            foreach ($items as $itemData) {
+                $cartItem = CartItem::where('id', $itemData['id'])
+                    ->where('cart_id', $cart->id)
+                    ->first();
 
-            if ($cartItem) {
-                $cartItem->is_selected = $itemData['is_selected'];
-                $cartItem->save();
-                $updated++;
+                if ($cartItem) {
+                    $cartItem->is_selected = $itemData['is_selected'];
+                    $cartItem->save();
+                    $updated++;
+                }
             }
-        }
+        });
 
         $selectedCount = $cart->items()->where('is_selected', true)->count();
 
@@ -556,6 +714,16 @@ class CartController extends Controller
      */
     public function updateQuantity(Request $request, CartItem $cartItem)
     {
+        // Rate limiting
+        $key = 'cart-update-quantity:' . auth()->id();
+        if (RateLimiter::tooManyAttempts($key, 30)) { // 30 attempts per minute
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many requests. Please try again later.'
+            ], 429);
+        }
+        RateLimiter::hit($key, 60);
+
         // Verify the cart item belongs to the authenticated user
         if ($cartItem->cart->user_id !== Auth::id()) {
             return response()->json([
@@ -568,7 +736,17 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1|max:99'
         ]);
 
-        $cartItem->quantity = $request->input('quantity');
+        $newQuantity = $request->input('quantity');
+
+        // Check stock availability if product has stock
+        if (isset($cartItem->product->stock) && $cartItem->product->stock < $newQuantity) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient stock available'
+            ], 400);
+        }
+
+        $cartItem->quantity = $newQuantity;
         $cartItem->save();
 
         return response()->json([

@@ -1,7 +1,19 @@
-- [x] Update `fetchConversations()` in ChatController to use `Auth::user()->seller` (already correct)
-- [x] Update `sendMessage()` in ChatController to use `Auth::user()->seller` (already correct)
-- [x] Add seller ownership check in `fetchMessages()` in ChatController
-- [x] Fix JavaScript in `index.blade.php` to access `response.conversations` and use `conv.customer.name`
-- [x] Fix JavaScript in `index.blade.php` to access `response.messages` in fetchMessages
-- [x] Fix jQuery script loading by using @push('scripts') instead of @section('scripts')
-- [x] Test chat functionality to ensure conversations load properly (Server started, manual testing recommended)
+# Real-Time Chat Implementation with Laravel Broadcasting and Pusher
+
+## Current Status
+- [x] Analyze current polling-based chat implementation
+- [x] Create comprehensive plan
+- [x] Get user approval
+
+## Pending Tasks
+- [ ] Install and configure Laravel Broadcasting with Pusher
+- [ ] Create MessageSent event for broadcasting
+- [ ] Update Customer\ChatController to fire broadcast event
+- [ ] Update Seller\ChatController to fire broadcast event
+- [ ] Install Laravel Echo and Pusher JS dependencies
+- [ ] Configure Echo in resources/js/app.js
+- [ ] Update product-details.blade.php to use Echo instead of polling
+- [ ] Update seller/chat/index.blade.php to use Echo instead of polling
+- [ ] Add error handling and fallbacks
+- [ ] Test real-time messaging
+- [ ] Run config cache and build assets

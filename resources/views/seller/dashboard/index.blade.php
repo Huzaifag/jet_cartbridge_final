@@ -12,12 +12,12 @@
 </div>
 
 <div class="filter-options">
-  <button class="filter-btn active" data-range="today">Today</button>
-  <button class="filter-btn" data-range="week">This Week</button>
-  <button class="filter-btn" data-range="month">This Month</button>
-  <button class="filter-btn" data-range="quarter">This Quarter</button>
-  <button class="filter-btn" data-range="year">This Year</button>
-  <button class="filter-btn" data-range="all">All Time</button>
+  <button class="filter-btn {{ $range == 'today' ? 'active' : '' }}" data-range="today">Today</button>
+  <button class="filter-btn {{ $range == 'week' ? 'active' : '' }}" data-range="week">This Week</button>
+  <button class="filter-btn {{ $range == 'month' ? 'active' : '' }}" data-range="month">This Month</button>
+  <button class="filter-btn {{ $range == 'quarter' ? 'active' : '' }}" data-range="quarter">This Quarter</button>
+  <button class="filter-btn {{ $range == 'year' ? 'active' : '' }}" data-range="year">This Year</button>
+  <button class="filter-btn {{ $range == 'all' ? 'active' : '' }}" data-range="all">All Time</button>
 </div>
 
 <div class="row mb-4">
@@ -29,9 +29,9 @@
               </div>
               <div class="stat-content">
                   <div class="stat-title">Total Sales</div>
-                  <div class="stat-value">$12,845</div>
-                  <div class="stat-change change-up">
-                      <i class="fas fa-arrow-up"></i> 24.5% from last week
+                  <div class="stat-value">${{ number_format($totalSales, 2) }}</div>
+                  <div class="stat-change {{ $salesChange >= 0 ? 'change-up' : 'change-down' }}">
+                      <i class="fas fa-arrow-{{ $salesChange >= 0 ? 'up' : 'down' }}"></i> {{ abs($salesChange) }}% from last {{ $range == 'today' ? 'day' : ($range == 'week' ? 'week' : ($range == 'month' ? 'month' : ($range == 'quarter' ? 'quarter' : 'year'))) }}
                   </div>
               </div>
           </div>
@@ -45,9 +45,9 @@
               </div>
               <div class="stat-content">
                   <div class="stat-title">Total Orders</div>
-                  <div class="stat-value">1,258</div>
-                  <div class="stat-change change-up">
-                      <i class="fas fa-arrow-up"></i> 12.3% from last week
+                  <div class="stat-value">{{ number_format($totalOrders) }}</div>
+                  <div class="stat-change {{ $ordersChange >= 0 ? 'change-up' : 'change-down' }}">
+                      <i class="fas fa-arrow-{{ $ordersChange >= 0 ? 'up' : 'down' }}"></i> {{ abs($ordersChange) }}% from last {{ $range == 'today' ? 'day' : ($range == 'week' ? 'week' : ($range == 'month' ? 'month' : ($range == 'quarter' ? 'quarter' : 'year'))) }}
                   </div>
               </div>
           </div>
@@ -61,9 +61,9 @@
               </div>
               <div class="stat-content">
                   <div class="stat-title">Active Products</div>
-                  <div class="stat-value">186</div>
-                  <div class="stat-change change-up">
-                      <i class="fas fa-arrow-up"></i> 5.2% from last week
+                  <div class="stat-value">{{ number_format($activeProducts) }}</div>
+                  <div class="stat-change {{ $productsChange >= 0 ? 'change-up' : 'change-down' }}">
+                      <i class="fas fa-arrow-{{ $productsChange >= 0 ? 'up' : 'down' }}"></i> {{ abs($productsChange) }}% from last {{ $range == 'today' ? 'day' : ($range == 'week' ? 'week' : ($range == 'month' ? 'month' : ($range == 'quarter' ? 'quarter' : 'year'))) }}
                   </div>
               </div>
           </div>
@@ -77,9 +77,9 @@
               </div>
               <div class="stat-content">
                   <div class="stat-title">New Customers</div>
-                  <div class="stat-value">64</div>
-                  <div class="stat-change change-down">
-                      <i class="fas fa-arrow-down"></i> 3.7% from last week
+                  <div class="stat-value">{{ number_format($newCustomers) }}</div>
+                  <div class="stat-change {{ $customersChange >= 0 ? 'change-up' : 'change-down' }}">
+                      <i class="fas fa-arrow-{{ $customersChange >= 0 ? 'up' : 'down' }}"></i> {{ abs($customersChange) }}% from last {{ $range == 'today' ? 'day' : ($range == 'week' ? 'week' : ($range == 'month' ? 'month' : ($range == 'quarter' ? 'quarter' : 'year'))) }}
                   </div>
               </div>
           </div>
@@ -121,71 +121,35 @@
               <h5 class="card-title mb-0">Top Selling Products</h5>
           </div>
           <div class="card-body">
-              <div class="top-product-item">
-                  <div class="product-img">
-                      <i class="fas fa-hamburger"></i>
-                  </div>
-                  <div class="product-info">
-                      <div class="product-name">Premium Burger</div>
-                      <div class="product-stats">128 sold • $2,458 revenue</div>
-                      <div class="progress-bar-container">
-                          <div class="progress-bar" style="width: 78%; background-color: #4361ee;"></div>
+              @if($topProducts->count() > 0)
+                  @php
+                      $maxRevenue = $topProducts->max('total_revenue');
+                  @endphp
+                  @foreach($topProducts as $product)
+                  <div class="top-product-item">
+                      <div class="product-img">
+                          @if($product->images && is_array($product->images) && count($product->images) > 0)
+                              <img src="{{ asset('storage/' . $product->images[0]) }}" alt="{{ $product->name }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
+                          @else
+                              <i class="fas fa-box"></i>
+                          @endif
                       </div>
-                  </div>
-                  <div class="product-sales">78%</div>
-              </div>
-              <div class="top-product-item">
-                  <div class="product-img">
-                      <i class="fas fa-pizza-slice"></i>
-                  </div>
-                  <div class="product-info">
-                      <div class="product-name">Special Pizza</div>
-                      <div class="product-stats">96 sold • $1,845 revenue</div>
-                      <div class="progress-bar-container">
-                          <div class="progress-bar" style="width: 65%; background-color: #28a745;"></div>
+                      <div class="product-info">
+                          <div class="product-name">{{ $product->name }}</div>
+                          <div class="product-stats">{{ $product->total_sold }} sold • ${{ number_format($product->total_revenue, 2) }} revenue</div>
+                          <div class="progress-bar-container">
+                              <div class="progress-bar" style="width: {{ $maxRevenue > 0 ? ($product->total_revenue / $maxRevenue) * 100 : 0 }}%; background-color: #4361ee;"></div>
+                          </div>
                       </div>
+                      <div class="product-sales">{{ $maxRevenue > 0 ? round(($product->total_revenue / $maxRevenue) * 100) : 0 }}%</div>
                   </div>
-                  <div class="product-sales">65%</div>
-              </div>
-              <div class="top-product-item">
-                  <div class="product-img">
-                      <i class="fas fa-ice-cream"></i>
+                  @endforeach
+              @else
+                  <div class="text-center py-4">
+                      <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                      <p class="text-muted">No sales data available for the selected period.</p>
                   </div>
-                  <div class="product-info">
-                      <div class="product-name">Deluxe Ice Cream</div>
-                      <div class="product-stats">74 sold • $985 revenue</div>
-                      <div class="progress-bar-container">
-                          <div class="progress-bar" style="width: 52%; background-color: #ffc107;"></div>
-                      </div>
-                  </div>
-                  <div class="product-sales">52%</div>
-              </div>
-              <div class="top-product-item">
-                  <div class="product-img">
-                      <i class="fas fa-coffee"></i>
-                  </div>
-                  <div class="product-info">
-                      <div class="product-name">Premium Coffee</div>
-                      <div class="product-stats">58 sold • $756 revenue</div>
-                      <div class="progress-bar-container">
-                          <div class="progress-bar" style="width: 45%; background-color: #dc3545;"></div>
-                      </div>
-                  </div>
-                  <div class="product-sales">45%</div>
-              </div>
-              <div class="top-product-item">
-                  <div class="product-img">
-                      <i class="fas fa-cookie"></i>
-                  </div>
-                  <div class="product-info">
-                      <div class="product-name">Gourmet Cookies</div>
-                      <div class="product-stats">42 sold • $525 revenue</div>
-                      <div class="progress-bar-container">
-                          <div class="progress-bar" style="width: 38%; background-color: #6f42c1;"></div>
-                      </div>
-                  </div>
-                  <div class="product-sales">38%</div>
-              </div>
+              @endif
           </div>
       </div>
   </div>
@@ -195,51 +159,24 @@
               <h5 class="card-title mb-0">Recent Activities</h5>
           </div>
           <div class="card-body">
-              <div class="recent-activity-item">
-                  <div class="activity-icon" style="background-color: rgba(40, 167, 69, 0.1); color: #28a745;">
-                      <i class="fas fa-shopping-cart"></i>
+              @if($recentActivities->count() > 0)
+                  @foreach($recentActivities as $activity)
+                  <div class="recent-activity-item">
+                      <div class="activity-icon" style="background-color: {{ $activity['icon_bg'] }}; color: {{ $activity['icon_color'] }};">
+                          <i class="{{ $activity['icon'] }}"></i>
+                      </div>
+                      <div class="activity-content">
+                          <div class="activity-title">{{ $activity['title'] }}</div>
+                          <div class="activity-time">{{ $activity['time'] }}</div>
+                      </div>
                   </div>
-                  <div class="activity-content">
-                      <div class="activity-title">New order #ORD-2589 received</div>
-                      <div class="activity-time">2 minutes ago</div>
+                  @endforeach
+              @else
+                  <div class="text-center py-4">
+                      <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                      <p class="text-muted">No recent activities to display.</p>
                   </div>
-              </div>
-              <div class="recent-activity-item">
-                  <div class="activity-icon" style="background-color: rgba(67, 97, 238, 0.1); color: #4361ee;">
-                      <i class="fas fa-box"></i>
-                  </div>
-                  <div class="activity-content">
-                      <div class="activity-title">Product "Special Pizza" stock is low</div>
-                      <div class="activity-time">45 minutes ago</div>
-                  </div>
-              </div>
-              <div class="recent-activity-item">
-                  <div class="activity-icon" style="background-color: rgba(255, 193, 7, 0.1); color: #ffc107;">
-                      <i class="fas fa-star"></i>
-                  </div>
-                  <div class="activity-content">
-                      <div class="activity-title">New 5-star review from customer John D.</div>
-                      <div class="activity-time">1 hour ago</div>
-                  </div>
-              </div>
-              <div class="recent-activity-item">
-                  <div class="activity-icon" style="background-color: rgba(108, 117, 125, 0.1); color: #6c757d;">
-                      <i class="fas fa-truck"></i>
-                  </div>
-                  <div class="activity-content">
-                      <div class="activity-title">Order #ORD-2583 has been delivered</div>
-                      <div class="activity-time">2 hours ago</div>
-                  </div>
-              </div>
-              <div class="recent-activity-item">
-                  <div class="activity-icon" style="background-color: rgba(23, 162, 184, 0.1); color: #17a2b8;">
-                      <i class="fas fa-user-plus"></i>
-                  </div>
-                  <div class="activity-content">
-                      <div class="activity-title">New customer registration</div>
-                      <div class="activity-time">5 hours ago</div>
-                  </div>
-              </div>
+              @endif
           </div>
       </div>
   </div>

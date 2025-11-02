@@ -12,6 +12,7 @@ class AppServiceProvider extends ServiceProvider
 
     protected $policies = [
         \App\Models\UserInquiry::class => \App\Policies\UserInquiryPolicy::class,
+        \App\Models\Order::class => \App\Policies\OrderPolicy::class,
     ];
 
     public function register(): void

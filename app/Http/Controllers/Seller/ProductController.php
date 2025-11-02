@@ -43,11 +43,13 @@ class ProductController extends Controller
         }
 
         $products = $query->latest()->paginate(10);
+        
         return view('seller.products.index', compact('products'));
     }
 
     public function create()
     {
+        
         return view('seller.products.create');
     }
 
@@ -61,7 +63,7 @@ class ProductController extends Controller
             'b2b_price' => 'required|numeric|min:0',
             'b2b_moq' => 'required|integer|min:1',
             'stock_quantity' => 'required|integer|min:0',
-            'category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'specifications' => 'nullable|array',
@@ -88,7 +90,7 @@ class ProductController extends Controller
             'b2b_price' => $validated['b2b_price'],
             'b2b_moq' => $validated['b2b_moq'],
             'stock_quantity' => $validated['stock_quantity'],
-            'category' => $validated['category'],
+            'category_id' => $validated['category_id'],
             'brand' => $validated['brand'],
             'model' => $validated['model'],
             'specifications' => $validated['specifications'] ?? [],
@@ -128,7 +130,7 @@ class ProductController extends Controller
             'b2b_price' => 'required|numeric|min:0',
             'b2b_moq' => 'required|integer|min:1',
             'stock_quantity' => 'required|integer|min:0',
-            'category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'specifications' => 'nullable|array',
@@ -138,16 +140,15 @@ class ProductController extends Controller
 
         $imagePaths = $product->images ?? [];
 
-        if ($request->hasFile('images')) {
-            // Delete old images
-            foreach ($imagePaths as $oldImage) {
-                if (File::exists(public_path($oldImage))) {
-                    File::delete(public_path($oldImage));
-                }
-            }
-
-            // Upload new images
+        // Handle existing images (keep them if not removed)
+        if ($request->has('existing_images')) {
+            $imagePaths = $request->existing_images;
+        } else {
             $imagePaths = [];
+        }
+
+        if ($request->hasFile('images')) {
+            // Upload new images and add to existing
             foreach ($request->file('images') as $image) {
                 $newName = uniqid() . '.' . $image->getClientOriginalExtension();
                 $image->move(public_path('product-images'), $newName);
@@ -164,7 +165,7 @@ class ProductController extends Controller
             'b2b_price' => $validated['b2b_price'],
             'b2b_moq' => $validated['b2b_moq'],
             'stock_quantity' => $validated['stock_quantity'],
-            'category' => $validated['category'],
+            'category_id' => $validated['category_id'],
             'brand' => $validated['brand'],
             'model' => $validated['model'],
             'specifications' => $validated['specifications'] ?? [],

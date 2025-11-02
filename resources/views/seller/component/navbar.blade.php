@@ -87,75 +87,19 @@
                 </ul>
             </div>
 
-            <!-- Messages Dropdown -->
-            <div class="dropdown me-3">
-                <a class="nav-link position-relative" href="#" role="button" id="messagesDropdown"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-comments fa-lg text-muted"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                        3
-                        <span class="visually-hidden">unread messages</span>
-                    </span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow message-dropdown" aria-labelledby="messagesDropdown">
-                    <li class="dropdown-header">
-                        <h6 class="mb-0">Messages</h6>
-                        <span class="badge bg-primary rounded-pill">3 Unread</span>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <div class="flex-shrink-0">
-                                <img src="https://ui-avatars.com/api/?name=Customer+One&background=random"
-                                    class="rounded-circle" width="40" height="40" alt="Customer One">
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <div class="fw-bold">Customer One</div>
-                                <div class="small text-truncate">Hi, when will my order be delivered?</div>
-                                <div class="text-muted small">30 minutes ago</div>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <div class="flex-shrink-0">
-                                <img src="https://ui-avatars.com/api/?name=Customer+Two&background=random"
-                                    class="rounded-circle" width="40" height="40" alt="Customer Two">
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <div class="fw-bold">Customer Two</div>
-                                <div class="small text-truncate">I have a special request for my order</div>
-                                <div class="text-muted small">2 hours ago</div>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <div class="flex-shrink-0">
-                                <img src="https://ui-avatars.com/api/?name=Customer+Three&background=random"
-                                    class="rounded-circle" width="40" height="40" alt="Customer Three">
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <div class="fw-bold">Customer Three</div>
-                                <div class="small text-truncate">Thank you for the great service!</div>
-                                <div class="text-muted small">5 hours ago</div>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li class="dropdown-footer text-center">
-                        <a href="#" class="text-primary">View All Messages</a>
-                    </li>
-                </ul>
-            </div>
-
             @php
                 use App\Models\Meeting;
+                use App\Models\Message;
                 $user = auth()->user();
+
+                // Unread messages for seller
+                $unreadMessagesCount = Message::whereHas('conversation', function($q) use ($user) {
+                    $q->where('seller_id', $user->seller->id);
+                })->where('is_read', false)->count();
+
+                $unreadMessages = Message::whereHas('conversation', function($q) use ($user) {
+                    $q->where('seller_id', $user->seller->id);
+                })->where('is_read', false)->with('conversation.customer')->latest()->take(5)->get();
 
                 // All meetings (sent or received)
                 $allMeetings = $user->allMeetings()->latest()->get();
@@ -169,6 +113,54 @@
 
                 $pendingMeetingsCount = $pendingMeetings->count();
             @endphp
+
+            <!-- Messages Dropdown -->
+            <div class="dropdown me-3">
+                <a class="nav-link position-relative" href="#" role="button" id="messagesDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-comments fa-lg text-muted"></i>
+                    @if($unreadMessagesCount > 0)
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+                        {{ $unreadMessagesCount }}
+                        <span class="visually-hidden">unread messages</span>
+                    </span>
+                    @endif
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow message-dropdown" aria-labelledby="messagesDropdown">
+                    <li class="dropdown-header">
+                        <h6 class="mb-0">Messages</h6>
+                        @if($unreadMessagesCount > 0)
+                        <span class="badge bg-primary rounded-pill">{{ $unreadMessagesCount }} Unread</span>
+                        @endif
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    @forelse($unreadMessages as $message)
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center" href="#">
+                            <div class="flex-shrink-0">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($message->conversation->customer->name) }}&background=random"
+                                    class="rounded-circle" width="40" height="40" alt="{{ $message->conversation->customer->name }}">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="fw-bold">{{ $message->conversation->customer->name }}</div>
+                                <div class="small text-truncate">{{ Str::limit($message->message, 50) }}</div>
+                                <div class="text-muted small">{{ $message->created_at->diffForHumans() }}</div>
+                            </div>
+                        </a>
+                    </li>
+                    @empty
+                    <li class="dropdown-item text-center text-muted">No unread messages</li>
+                    @endforelse
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li class="dropdown-footer text-center">
+                        <a href="#" class="text-primary">View All Messages</a>
+                    </li>
+                </ul>
+            </div>
 
             <!-- 🧩 Meetings Dropdown -->
             <div class="dropdown me-3">
@@ -315,11 +307,7 @@
                         <hr class="dropdown-divider">
                     </li>
                     <li>
-                        <form action="{{ route('logout') }}" method="GET">
-                            @csrf
-                            <button type="submit" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </button>
+                    <a class="dropdown-item text-danger" href="{{ route('logout') }}">Logout</a>
                         </form>
                     </li>
                 </ul>

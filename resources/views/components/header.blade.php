@@ -45,7 +45,7 @@
                         @break
 
                         @case(auth()->user()->hasRole('deliveryman'))
-                            <a href="#"
+                            <a href="{{ route('deliveryman.dashboard') }}"
                                 class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
                                 <i class="bi bi-briefcase me-1"></i>
                                 <span>Deliveryman Dashboard</span>
@@ -171,7 +171,7 @@
                             <i class="bi bi-person-circle fs-5"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{ route('profile') }}">My Account</a></li>
+                            <li><a class="dropdown-item" href="{{ route('user.profile') }}">My Account</a></li>
                             <li><a class="dropdown-item" href="{{ route('user.contacts.index') }}">My Contacts</a>
                             </li>
                             <li><a class="dropdown-item" href="#">Order History</a></li>

@@ -29,6 +29,8 @@ class Product extends Model
         'is_featured',
         'rating',
         'verification_status',
+        'category_id',
+
     ];
 
     protected $casts = [
@@ -39,6 +41,8 @@ class Product extends Model
         'b2b_price' => 'decimal:2',
         'rating' => 'decimal:1',
     ];
+
+    protected $with = ['category'];
 
     public function seller()
     {
@@ -77,6 +81,16 @@ class Product extends Model
     public function manufacturer()
     {
         return $this->belongsTo(Manufacturer::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function getCategory()
+    {
+        return Category::find( $this->category_id ) ?? 'No Category';
     }
 
     // public function promotions()

@@ -239,11 +239,7 @@
                         <hr class="dropdown-divider">
                     </li>
                     <li>
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </button>
+                    <a class="dropdown-item text-danger" href="{{ route('logout') }}">Logout</a>
                         </form>
                     </li>
                 </ul>

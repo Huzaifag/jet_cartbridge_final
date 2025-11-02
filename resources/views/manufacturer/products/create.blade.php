@@ -273,8 +273,7 @@
                         <div class="row" id="image-preview-container">
                             <div class="col-md-3 mb-3">
                                 <div class="image-upload-box">
-                                    <input type="file" name="images[]" class="image-upload" accept="image/*"
-                                        required>
+                                    <input type="file" name="images[]" class="image-upload" accept="image/*">
                                     <div class="upload-placeholder">
                                         <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
                                         <div>Click to upload</div>
@@ -568,10 +567,7 @@
                             }
                         });
 
-                        if (!hasImage) {
-                            alert('Please upload at least one product image');
-                            isValid = false;
-                        }
+                        // Image validation removed - images are now optional
                     }
 
                     return isValid;

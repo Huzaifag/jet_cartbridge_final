@@ -76,6 +76,13 @@ Route::get('/', [FrontendController::class, 'index'])->name('home');
 
 Route::get('/product/{slug}', [FrontendController::class, 'showProduct'])->name('product.show');
 
+Route::get('/profile', [FrontendController::class, 'profile'])->name('user.profile')->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/follow/seller/{seller}', [App\Http\Controllers\FollowController::class, 'followSeller'])->name('follow.seller');
+    Route::post('/follow/manufacturer/{manufacturer}', [App\Http\Controllers\FollowController::class, 'followManufacturer'])->name('follow.manufacturer');
+});
+
 
 // kbkb
 
@@ -92,7 +99,7 @@ Route::get('/product/{slug}', [FrontendController::class, 'showProduct'])->name(
 Route::middleware('auth')->group(function () {
     // Logout route (only for logged-in users)
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
+    // Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
     Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/change-password', [AuthController::class, 'changePassword'])->name('profile.change-password');
 });
@@ -100,31 +107,40 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['web', 'auth'])->group(function () {
     // Auth routes
     Route::middleware('auth')->group(function () {
-        Route::get('/cart', [CartController::class, 'index'])->name('cart');
-        Route::delete('/cart/item/{item}', [CartController::class, 'removeFromCart'])->name('cart.remove');
-        Route::post('/add-to-cart/{product}', [CartController::class, 'addToCart'])->name('addToCart');
-        Route::post('/order/{cart}', [CartController::class, 'order'])->name('order');
-        // Selection management
-        Route::post('/cart/{cartItem}/toggle-selection', [CartController::class, 'toggleItemSelection'])->name('cart.toggle.selection');
-        Route::post('/cart/{cart}/select-all', [CartController::class, 'selectAll'])->name('cart.select.all');
-        Route::post('/cart/{cart}/deselect-all', [CartController::class, 'deselectAll'])->name('cart.deselect.all');
-        Route::post('/cart/{cart}/toggle-select-all', [CartController::class, 'toggleSelectAll'])->name('cart.toggle.select.all');
-        Route::post('/cart/{cart}/bulk-update-selection', [CartController::class, 'bulkUpdateSelection'])->name('cart.bulk.update.selection');
+        // Cart routes with proper role restriction
+        Route::middleware(['role:customer'])->group(function () {
+            Route::get('/cart', [CartController::class, 'index'])->name('cart');
+            Route::delete('/cart/item/{item}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+            Route::post('/add-to-cart/{product}', [CartController::class, 'addToCart'])->name('addToCart');
+            Route::post('/order/{cart}', [CartController::class, 'order'])->name('order');
+            // Selection management
+            Route::post('/cart/{cartItem}/toggle-selection', [CartController::class, 'toggleItemSelection'])->name('cart.toggle.selection');
+            Route::post('/cart/{cart}/select-all', [CartController::class, 'selectAll'])->name('cart.select.all');
+            Route::post('/cart/{cart}/deselect-all', [CartController::class, 'deselectAll'])->name('cart.deselect.all');
+            Route::post('/cart/{cart}/toggle-select-all', [CartController::class, 'toggleSelectAll'])->name('cart.toggle.select.all');
+            Route::post('/cart/{cart}/bulk-update-selection', [CartController::class, 'bulkUpdateSelection'])->name('cart.bulk.update.selection');
+            Route::put('/cart/{cartItem}/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.update.quantity');
+            Route::get('/cart/{cart}/selected-summary', [CartController::class, 'getSelectedSummary'])->name('cart.selected.summary');
 
-        Route::post('order/{id}/select-address', [CartController::class, 'selectAddress'])->name('order.select-address');
+            // Checkout flow
+            Route::post('order/{id}/select-address', [CartController::class, 'selectAddress'])->name('order.select-address');
+            Route::get('/order/order-payment', [CartController::class, 'payment'])->name('order.order-payment');
+            Route::post('/order/{cart}/place', [CartController::class, 'placeOrder'])->name('order.place');
+
+            // User contacts management
+            Route::resource('user/contacts', UserContactController::class)
+                ->names('user.contacts');
+        });
+
+        // General authenticated routes
         Route::get('/track-order', [FrontendController::class, 'showTrackOrderForm'])->name('track-order.form');
-        Route::get('/order/order-payment', [CartController::class, 'payment'])->name('order.order-payment');
-        Route::post('/order/{cart}/place', [CartController::class, 'placeOrder'])->name('order.place');
         Route::get('/customer-invoices', [InvoicesController::class, 'index'])->name('invoices.index');
         Route::get('/customer-invoices/{id}/dowload', [InvoicesController::class, 'download'])->name('invoice.download');
         Route::post('/customer-invoices/{id}/pay', [InvoicesController::class, 'pay'])->name('invoice.pay');
 
         Route::get('product/{slug}/send-inquiry', [FrontendController::class, 'showInquiryForm'])->name('inquiry.form');
-
         Route::post('product/send-inquiry', [FrontendController::class, 'submitInquiry'])->name('inquiry.submit');
 
-        Route::resource('user/contacts', UserContactController::class)
-            ->names('user.contacts');
         Route::post('/product/{slug}/review', [ReviewController::class, 'store'])->name('review.store');
         Route::post('/product/{review}/ref-order', [ReviewController::class, 'orderWithFer'])->name('review.orderWithFer');
         Route::get('/checkout', [ReviewController::class, 'show'])
@@ -200,6 +216,9 @@ Route::prefix('seller')
         Route::resource('products', ProductController::class);
         Route::get('products/create/bulk', [ProductController::class, 'createBulk'])->name('products.createBulk');
         Route::post('products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulk-delete');
+
+        // Category Routes
+        Route::resource('categories', \App\Http\Controllers\Seller\CategoryController::class);
 
         // ✅ Employees Routes
         Route::prefix('employees')->name('employees.')->group(function () {
@@ -447,8 +466,19 @@ Route::prefix('accountant')
     ->middleware(['auth', 'role:warehouse'])
     ->group(function () {
         Route::get('/dashboard', [WarehouseDashboardController::class, 'index'])->name('dashboard.index');
-        Route::get('/warehouse-orders', [WarehouseOrdersController::class, 'index'])->name('warehouse-orders.index');
-        Route::get('/warehouse-orders/{id}/', [WarehouseOrdersController::class, 'show'])->name('warehouse-orders.show');
+        Route::get('/warehouse-orders', [WarehouseOrdersController::class, 'index'])->name('orders.index');
+        Route::get('/warehouse-orders/{id}/', [WarehouseOrdersController::class, 'show'])->name('orders.show');
         Route::post('/warehouse/orders/dispatch/{id}/', [WarehouseOrdersController::class, 'dispatch'])->name('orders.dispatch');
         Route::get('/warehouse/orders/edit/{id}/', [WarehouseOrdersController::class, 'edit'])->name('orders.edit');
+    });
+
+Route::prefix('deliveryman')
+    ->name('deliveryman.')
+    ->middleware(['auth', 'role:deliveryman'])
+    ->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Deliveryman\DeliveryManController::class, 'index'])->name('dashboard');
+        Route::get('/orders', [App\Http\Controllers\Deliveryman\DeliveryManController::class, 'orders'])->name('orders.index');
+        Route::get('/orders/{order}', [App\Http\Controllers\Deliveryman\DeliveryManController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/deliver', [App\Http\Controllers\Deliveryman\DeliveryManController::class, 'deliver'])->name('orders.deliver');
+        Route::get('/orders/{order}/deliver/edit', [App\Http\Controllers\Deliveryman\DeliveryManController::class, 'edit'])->name('orders.edit');
     });

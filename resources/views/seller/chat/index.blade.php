@@ -4,73 +4,103 @@
 <style>
     /* Custom Styles for Professional Chat Interface */
     .chat-container {
-        min-height: 90vh; /* Make the chat area fill more of the screen */
-        border-radius: 1rem; /* Rounded corners for a modern look */
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-        overflow: hidden; /* Ensures content stays within the rounded corners */
-        background-color: #ffffff; /* Clean white background */
+        min-height: 90vh;
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        background-color: #ffffff;
     }
 
-    /* Sidebar Styling */
     #conversationSidebar {
-        border-right: 1px solid #e9ecef; /* Lighter divider line */
+        border-right: 1px solid #e9ecef;
         padding-right: 0;
-        height: 100%; /* Fill the container height */
+        height: 100%;
     }
 
     .conversation-item {
         border: none;
-        border-bottom: 1px solid #f8f9fa; /* Very light separation */
+        border-bottom: 1px solid #f8f9fa;
         padding: 1rem 1.5rem;
         cursor: pointer;
         transition: background-color 0.2s, border-left 0.2s;
-        /* Custom line for active/hover */
         border-left: 4px solid transparent;
     }
 
     .conversation-item:hover,
     .conversation-item.active {
         background-color: #f8f9fa;
-        border-left-color: #0d6efd; /* Primary color indicator */
+        border-left-color: #0d6efd;
     }
 
     .conversation-item.active {
         font-weight: 600;
     }
 
-    /* Chat Messages Window Styling */
     #chatMessages {
-        background-color: #f8f9fa; /* Soft background for message area */
-        border: none; /* Remove default border */
+        background-color: #f8f9fa;
+        border: none;
         border-radius: 0.5rem;
-        flex-grow: 1; /* Ensure it takes up available vertical space */
+        flex-grow: 1;
         padding: 1rem;
     }
 
-    /* Individual Message Bubbles */
     .message-bubble {
         padding: 0.75rem 1rem;
-        border-radius: 1.25rem; /* Pill-shaped bubbles */
-        max-width: 65%; /* Max width for readability */
+        border-radius: 1.25rem;
+        max-width: 65%;
     }
 
     .seller-message .message-bubble {
-        background-color: #0d6efd; /* Primary blue for seller */
+        background-color: #0d6efd;
         color: white;
     }
 
     .customer-message .message-bubble {
-        background-color: #e9ecef; /* Light gray for customer */
+        background-color: #e9ecef;
         color: #212529;
     }
 
-    /* Message Input Styling */
     #messageInput {
         border-radius: 0.5rem 0 0 0.5rem;
     }
 
     #sendMessageBtn {
         border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+        display: inline-block;
+        padding: 0.75rem 1rem;
+        background-color: #e9ecef;
+        border-radius: 1.25rem;
+    }
+
+    .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        background-color: #6c757d;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 0 2px;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-10px);
+        }
     }
 </style>
 
@@ -113,11 +143,44 @@
 </div>
 @endsection
 
+@push('scripts')
 <script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
 <script>
 $(document).ready(function() {
     let currentConversationId = null;
     let currentCustomerName = null;
+    let pusher = null;
+    let currentChannel = null;
+
+    // 🔹 Initialize Pusher
+    function initializePusher() {
+        // Enable pusher logging for development (disable in production)
+        Pusher.logToConsole = true;
+        
+        pusher = new Pusher('1631bf206e381798697b', {
+            cluster: 'ap2',
+            encrypted: true,
+            authEndpoint: '/broadcasting/auth', // Laravel broadcasting auth endpoint
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                }
+            }
+        });
+
+        // Connection state monitoring
+        pusher.connection.bind('connected', function() {
+            console.log('Pusher connected successfully');
+        });
+
+        pusher.connection.bind('error', function(err) {
+            console.error('Pusher connection error:', err);
+        });
+    }
+
+    // Initialize Pusher on page load
+    initializePusher();
 
     // 🔹 Fetch all conversations when page loads
     fetchConversations();
@@ -132,7 +195,6 @@ $(document).ready(function() {
                     $('#conversationList').append('<li class="list-group-item text-center text-muted p-4">No conversations yet.</li>');
                 } else {
                     response.conversations.forEach(function(conv) {
-                        // Truncate message for a cleaner list view
                         const lastMessage = conv.last_message ? conv.last_message.substring(0, 30) + (conv.last_message.length > 30 ? '...' : '') : 'Start conversation...';
                         
                         $('#conversationList').append(`
@@ -158,19 +220,18 @@ $(document).ready(function() {
         $('.conversation-item').removeClass('active');
         $(this).addClass('active');
         
-        // Update header and enable input
         $('#chatHeaderName').text(currentCustomerName);
-        $('#messageInput').prop('disabled', false).focus(); // Focus on input
+        $('#messageInput').prop('disabled', false).focus();
         $('#sendMessageBtn').prop('disabled', false);
-        
+
         fetchMessages(currentConversationId);
+        subscribeToChat(currentConversationId);
     });
 
     // 🔹 Fetch messages for the selected conversation
     function fetchMessages(conversationId) {
-        // Show loading indicator
         $('#chatMessages').html('<div class="text-center text-primary mt-5"><i class="fas fa-circle-notch fa-spin fa-2x"></i><p class="mt-2">Loading messages...</p></div>');
-        
+
         $.ajax({
             url: `/seller/chat/messages/${conversationId}`,
             method: 'GET',
@@ -180,21 +241,9 @@ $(document).ready(function() {
                     $('#chatMessages').html('<div class="text-center text-muted mt-5"><p>No messages yet. Say hello!</p></div>');
                 } else {
                     response.messages.forEach(function(msg) {
-                        const isSeller = msg.sender_type === 'seller';
-                        const alignmentClass = isSeller ? 'text-end seller-message' : 'text-start customer-message';
-                        const time = new Date(msg.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                        
-                        $('#chatMessages').append(`
-                            <div class="mb-3 ${alignmentClass}">
-                                <div class="d-inline-block message-bubble shadow-sm">
-                                    ${msg.message}
-                                </div>
-                                <div class="d-block mt-1"><small class="text-muted">${time}</small></div>
-                            </div>
-                        `);
+                        appendMessage(msg);
                     });
-                    // Scroll to the bottom of the chat window
-                    $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+                    scrollToBottom();
                 }
             },
             error: function() {
@@ -207,8 +256,7 @@ $(document).ready(function() {
     function sendMessage() {
         const message = $('#messageInput').val().trim();
         if (!message || !currentConversationId) return;
-        
-        // Disable input/button and show loading state
+
         $('#messageInput').prop('disabled', true);
         $('#sendMessageBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
 
@@ -222,16 +270,18 @@ $(document).ready(function() {
             },
             success: function(response) {
                 $('#messageInput').val('');
-                // Re-enable input/button
                 $('#messageInput').prop('disabled', false).focus();
                 $('#sendMessageBtn').prop('disabled', false).html('<i class="fas fa-paper-plane me-1"></i> Send');
                 
-                fetchMessages(currentConversationId); // refresh chat to show new message
-                fetchConversations(); // refresh sidebar to show new last message
+                // Append message immediately for better UX
+                if (response.message) {
+                    appendMessage(response.message);
+                }
+                
+                fetchConversations(); // Refresh sidebar
             },
-            error: function() {
-                alert('Failed to send message');
-                // Re-enable input/button
+            error: function(xhr) {
+                alert('Failed to send message: ' + (xhr.responseJSON?.message || 'Unknown error'));
                 $('#messageInput').prop('disabled', false).focus();
                 $('#sendMessageBtn').prop('disabled', false).html('<i class="fas fa-paper-plane me-1"></i> Send');
             }
@@ -242,10 +292,133 @@ $(document).ready(function() {
 
     // 🔹 Allow Enter key to send message
     $('#messageInput').on('keypress', function(e) {
-        if (e.which === 13) {
-            e.preventDefault(); // Prevent new line in input
+        if (e.which === 13 && !e.shiftKey) {
+            e.preventDefault();
             sendMessage();
+        }
+    });
+
+    // 🔹 Subscribe to real-time chat updates using Pusher
+    function subscribeToChat(conversationId) {
+        // Unsubscribe from previous channel if exists
+        if (currentChannel) {
+            pusher.unsubscribe(currentChannel.name);
+        }
+
+        // Subscribe to the conversation channel
+        const channelName = `private-conversation.${conversationId}`;
+        currentChannel = pusher.subscribe(channelName);
+
+        // Listen for new messages
+        currentChannel.bind('message.sent', function(data) {
+            console.log('New message received:', data);
+            
+            // Only append if message is from customer (not seller)
+            if (data.message && data.message.sender_type !== 'seller') {
+                appendMessage(data.message);
+                
+                // Update conversation list
+                fetchConversations();
+            }
+        });
+
+        // Listen for typing indicator (optional)
+        currentChannel.bind('user.typing', function(data) {
+            console.log('User typing:', data);
+            showTypingIndicator();
+        });
+
+        // Handle subscription errors
+        currentChannel.bind('pusher:subscription_error', function(status) {
+            console.error('Pusher subscription error:', status);
+            alert('Unable to connect to real-time chat. Please refresh the page.');
+        });
+
+        currentChannel.bind('pusher:subscription_succeeded', function() {
+            console.log('Successfully subscribed to channel:', channelName);
+        });
+    }
+
+    // 🔹 Show typing indicator
+    function showTypingIndicator() {
+        if ($('#typingIndicator').length === 0) {
+            $('#chatMessages').append(`
+                <div id="typingIndicator" class="mb-3 text-start customer-message">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `);
+            scrollToBottom();
+            
+            // Remove after 3 seconds
+            setTimeout(function() {
+                $('#typingIndicator').fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 3000);
+        }
+    }
+
+    // 🔹 Append message to chat
+    function appendMessage(msg) {
+        const isSeller = msg.sender_type === 'seller';
+        const alignmentClass = isSeller ? 'text-end seller-message' : 'text-start customer-message';
+        const time = new Date(msg.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        // Check if message already exists (prevent duplicates)
+        if ($(`[data-message-id="${msg.id}"]`).length > 0) {
+            return;
+        }
+
+        $('#chatMessages').append(`
+            <div class="mb-3 ${alignmentClass}" data-message-id="${msg.id}">
+                <div class="d-inline-block message-bubble shadow-sm">
+                    ${escapeHtml(msg.message)}
+                </div>
+                <div class="d-block mt-1"><small class="text-muted">${time}</small></div>
+            </div>
+        `);
+
+        scrollToBottom();
+        
+        // Hide welcome message
+        $('.text-center.text-muted').hide();
+    }
+
+    // 🔹 Scroll to bottom of chat
+    function scrollToBottom() {
+        const chatMessages = $('#chatMessages');
+        chatMessages.scrollTop(chatMessages[0].scrollHeight);
+    }
+
+    // 🔹 Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // 🔹 Subscribe to global notifications channel for new conversations
+    const notificationsChannel = pusher.subscribe('private-seller.{{ auth()->id() }}');
+    notificationsChannel.bind('conversation.created', function(data) {
+        console.log('New conversation created:', data);
+        fetchConversations();
+    });
+
+    // Clean up on page unload
+    $(window).on('beforeunload', function() {
+        if (pusher) {
+            pusher.disconnect();
         }
     });
 });
 </script>
+@endpush

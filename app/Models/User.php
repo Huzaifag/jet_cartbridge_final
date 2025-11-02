@@ -54,7 +54,7 @@ class User extends Authenticatable
 
     public function contacts()
     {
-        return $this->hasMany(UserContact::class);
+        return $this->hasMany(UserContact::class, 'user_id');
     }
 
     public function userInquiries()
@@ -87,6 +87,11 @@ class User extends Authenticatable
         return $this->hasOne(WareHouse::class);
     }
 
+    public function deliveryman()
+    {
+        return $this->hasOne(DeliveryMan::class);
+    }
+
     public function messages()
     {
         return $this->hasMany(Message::class, 'customer_id');
@@ -110,6 +115,19 @@ class User extends Authenticatable
         });
     }
 
+    public function followedSellers()
+    {
+        return $this->belongsToMany(Seller::class, 'user_follows_sellers');
+    }
 
+    public function followedManufacturers()
+    {
+        return $this->belongsToMany(Manufacturer::class, 'user_follows_manufacturers');
+    }
+
+    public function customerProfile()
+    {
+        return $this->hasOne(CustomerProfile::class);
+    }
 
 }

@@ -2,28 +2,201 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Manufacturer;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\UserInquiry;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class FrontendController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
-        // Fetch all active products with seller and creator
-        $featuredProducts = Product::where('status', 'active')
-            ->with('seller')
+        // Base query
+        $query = Product::query()
+            ->select('products.*')
+            ->where('products.status', 'active')
+            ->with('seller', 'category');
+
+        /* ==============================
+         * 🔍 SEARCH FILTER
+         * ============================== */
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('products.name', 'like', "%{$search}%")
+                    ->orWhere('products.description', 'like', "%{$search}%")
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('categories.name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        /* ==============================
+         * 💰 PRICE FILTER
+         * ============================== */
+        if ($request->filled('price')) {
+            switch ($request->price) {
+                case 'low_to_high':
+                    $query->orderBy('products.b2c_price', 'asc');
+                    break;
+                case 'high_to_low':
+                    $query->orderBy('products.b2c_price', 'desc');
+                    break;
+                case 'under_100':
+                    $query->where('products.b2c_price', '<', 100);
+                    break;
+                case '100_500':
+                    $query->whereBetween('products.b2c_price', [100, 500]);
+                    break;
+                case 'over_500':
+                    $query->where('products.b2c_price', '>', 500);
+                    break;
+            }
+        }
+
+        /* ==============================
+         * ⭐ RATING FILTER
+         * ============================== */
+        if ($request->filled('rating')) {
+            $rating = $request->rating;
+            $query->whereHas('reviews', function ($q) use ($rating) {
+                $q->selectRaw('product_id, AVG(rating) as avg_rating')
+                    ->groupBy('product_id')
+                    ->havingRaw('AVG(rating) >= ?', [$rating]);
+            });
+        }
+
+        /* ==============================
+         * 🏪 SELLER TYPE FILTER
+         * ============================== */
+        if ($request->filled('seller_type')) {
+            $sellerTypes = $request->seller_type;
+
+            $query->whereHas('seller', function ($q) use ($sellerTypes) {
+                if (in_array('verified_manuf', $sellerTypes)) {
+                    $q->where('sellers.is_verified', true);
+                }
+            });
+
+            if (in_array('bulk_orders', $sellerTypes)) {
+                $query->where('products.b2b_moq', '>', 0);
+            }
+        }
+
+        /* ==============================
+         * 📍 LOCATION FILTER (GPS NEAREST)
+         * ============================== */
+        if ($request->filled('location') && in_array('nearest', $request->location)) {
+            $userLat = $request->input('user_lat');
+            $userLng = $request->input('user_lng');
+            $radius = $request->input('radius', 10);
+
+            if ($userLat && $userLng) {
+                $query->join('sellers', 'products.seller_id', '=', 'sellers.id')
+                    ->whereNotNull('sellers.latitude')
+                    ->whereNotNull('sellers.longitude')
+                    ->selectRaw("
+                    products.*, 
+                    (6371 * acos(
+                        cos(radians(?)) * cos(radians(sellers.latitude)) *
+                        cos(radians(sellers.longitude) - radians(?)) +
+                        sin(radians(?)) * sin(radians(sellers.latitude))
+                    )) AS distance
+                ", [$userLat, $userLng, $userLat])
+                    ->having('distance', '<=', $radius)
+                    ->orderBy('distance', 'asc');
+            }
+        }
+
+        /* ==============================
+         * 📦 CATEGORY FILTER
+         * ============================== */
+        if ($request->filled('category')) {
+            $query->where('products.category_id', $request->category);
+        }
+
+        /* ==============================
+         * 🧭 SORTING PRIORITIES
+         * ============================== */
+        $query->leftJoin('sellers', 'products.seller_id', '=', 'sellers.id');
+
+        $query->orderByRaw('(SELECT COUNT(*) FROM reviews WHERE reviews.product_id = products.id) DESC')
+            ->orderBy('products.rating', 'desc')
+            ->orderByRaw('CASE WHEN products.is_featured = 1 THEN 1 ELSE 0 END DESC')
+            ->orderByRaw('CASE WHEN sellers.is_premium = 1 THEN 1 ELSE 0 END DESC');
+
+        /* ==============================
+         * 🔠 RELEVANCE SORT (SEARCH)
+         * ============================== */
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+                ->orderByRaw("CASE
+                WHEN products.name LIKE ? THEN 1
+                WHEN products.description LIKE ? THEN 2
+                WHEN categories.name LIKE ? THEN 3
+                ELSE 4
+            END ASC", ["%{$search}%", "%{$search}%", "%{$search}%"]);
+        }
+
+        /* ==============================
+         * 📍 FALLBACK LOGIC (IF EMPTY)
+         * ============================== */
+        $featuredProducts = $query->paginate(12);
+
+        if ($request->filled('location') && in_array('nearest', $request->location) && $featuredProducts->isEmpty()) {
+            foreach ([25, 50, 100] as $newRadius) {
+                $query = Product::query()
+                    ->select('products.*')
+                    ->where('products.status', 'active')
+                    ->with('seller');
+
+                $userLat = $request->input('user_lat');
+                $userLng = $request->input('user_lng');
+                if ($userLat && $userLng) {
+                    $query->join('sellers', 'products.seller_id', '=', 'sellers.id')
+                        ->selectRaw("
+                        products.*, 
+                        (6371 * acos(
+                            cos(radians(?)) * cos(radians(sellers.latitude)) *
+                            cos(radians(sellers.longitude) - radians(?)) +
+                            sin(radians(?)) * sin(radians(sellers.latitude))
+                        )) AS distance
+                    ", [$userLat, $userLng, $userLat])
+                        ->having('distance', '<=', $newRadius)
+                        ->orderBy('distance', 'asc');
+                }
+
+                $featuredProducts = $query->paginate(12);
+                if (!$featuredProducts->isEmpty())
+                    break;
+            }
+        }
+
+        /* ==============================
+         * 🏭 FETCH RELATED DATA
+         * ============================== */
+        $sellers = Seller::with('products')
+            ->where('sellers.status', 'approved')
             ->latest()
-            ->get();
+            ->paginate(6);
 
-        $sellers = Seller::with('products')->where('status', 'approved')->latest()->paginate(6);
+        $manufacturers = Manufacturer::with('products')
+            ->latest()
+            ->paginate(6);
 
+        $categories = Category::withCount('products')->get();
 
-
-        return view('frontend.pages.index', compact('featuredProducts', 'sellers'));
+        /* ==============================
+         * 🖥️ RETURN VIEW
+         * ============================== */
+        return view('frontend.pages.index', compact('featuredProducts', 'sellers', 'manufacturers', 'categories'));
     }
+
 
     public function showProduct($slug)
     {
@@ -50,13 +223,13 @@ class FrontendController extends Controller
     {
 
         $validated = $request->validate([
-            'contact_id'   => 'required|exists:user_contacts,id',
-            'product_id'   => 'required|exists:products,id',
-            'quantity'     => 'required|integer|min:1',
+            'contact_id' => 'required|exists:user_contacts,id',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
             'target_price' => 'nullable|numeric|min:0',
-            'destination'  => 'nullable|string|max:255',
-            'deadline'     => 'nullable|date',
-            'message'      => 'nullable|string|max:1000',
+            'destination' => 'nullable|string|max:255',
+            'deadline' => 'nullable|date',
+            'message' => 'nullable|string|max:1000',
         ]);
 
         $product = Product::findOrFail($validated['product_id']);
@@ -66,8 +239,8 @@ class FrontendController extends Controller
         $seller = $product->seller;
 
         $inquiry = UserInquiry::create(array_merge($validated, [
-            'seller_id'    => $seller->id,
-            'customer_id'  => auth()->id(),
+            'seller_id' => $seller->id,
+            'customer_id' => auth()->id(),
         ]));
 
         return redirect()
@@ -82,6 +255,38 @@ class FrontendController extends Controller
         // dd($orders->toArray());
 
         return view('frontend.pages.track-order', compact('orders'));
+    }
+
+    public function profile()
+    {
+        $user = auth()->user();
+
+        // Products Purchased - get from orders
+        $purchasedProducts = $user->orders()
+            ->with(['orderItems.product'])
+            ->get()
+            ->pluck('orderItems')
+            ->flatten()
+            ->pluck('product')
+            ->unique('id');
+
+        // Followed Sellers/Manufacturers
+        $followedSellers = $user->followedSellers()->with('products')->get();
+        $followedManufacturers = $user->followedManufacturers()->with('products')->get();
+
+        // Liked/Uploaded Reviews & Videos
+        $userReviews = $user->reviews()->with('product')->latest()->get();
+
+        // Coins Balance
+        $coinsBalance = $user->customerProfile ? $user->customerProfile->coins : 0;
+
+        return view('frontend.pages.profile', compact(
+            'purchasedProducts',
+            'followedSellers',
+            'followedManufacturers',
+            'userReviews',
+            'coinsBalance'
+        ));
     }
 
     // public function seller($slug)

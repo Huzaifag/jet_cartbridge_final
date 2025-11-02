@@ -13,8 +13,8 @@
         </li>
 
         <li class="nav-item">
-            <a href="{{ route('warehouse.warehouse-orders.index') }}"
-                class="nav-link {{ request()->routeIs('accountant.confirmed-orders.index') ? 'active' : '' }}">
+            <a href="{{ route('warehouse.orders.index') }}"
+                class="nav-link {{ request()->routeIs('warehouse.orders.index') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart"></i>
                 Confirmed Orders
             </a>

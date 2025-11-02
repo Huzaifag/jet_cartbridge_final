@@ -470,7 +470,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <p class="product-category-pro">{{ $product->category ?? 'Machinery > Manufacturing > CNC Machines' }}
+                    <p class="product-category-pro">{{ $product->category->name ?? 'Machinery > Manufacturing > CNC Machines' }}
                     </p>
                     <h1 class="product-title-pro">
                         {{ $product->name ?? 'Industrial CNC Milling Machine - 5 Axis Precision' }}
@@ -488,7 +488,7 @@
                         {{-- Main Image Area - Made Sticky --}}
                         <div class="product-main-image-pro mb-3">
                             <img id="main-product-image"
-                                src="{{ asset('storage/' . ($product['images'][0] ?? 'placeholder.jpg')) }}"
+                                src="{{ asset(($product['images'][0] ?? 'placeholder.jpg')) }}"
                                 class="img-fluid" alt="{{ $product['name'] ?? 'Product Image' }}">
                         </div>
 
@@ -496,7 +496,7 @@
                         <div class="product-thumbnails-pro">
                             @foreach ($product['images'] as $index => $image)
                                 <img class="thumbnail-pro {{ $index === 0 ? 'active' : '' }}"
-                                    src="{{ asset('storage/' . $image) }}" alt="Thumbnail {{ $index + 1 }}"
+                                    src="{{ asset($image) }}" alt="Thumbnail {{ $index + 1 }}"
                                     style="width:100px; height:100px; object-fit:cover; cursor:pointer;">
                             @endforeach
                             {{-- Placeholder for Video Thumbnail --}}
@@ -511,8 +511,7 @@
                     <div class="mt-4">
                         <h5 class="card-title-pro"><i class="fas fa-video me-2"></i>Product Demonstration</h5>
                         <div class="ratio ratio-16x9 rounded-3 shadow-sm">
-                            <iframe id="product-video-iframe" src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                                title="Product Video" allowfullscreen></iframe>
+                            <iframe id="product-video-iframe" width="560" height="315" src="https://www.youtube.com/embed/CDm2oU4NpMU?si=ikYh_08pzkOGizuQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
@@ -719,9 +718,9 @@
                                 Minimum Order Quantity (MOQ): <strong>{{ $product->moq ?? 1 }} unit</strong>
                             </div>
 
-                            <button class="btn action-btn-pro btn-primary-custom mb-2">
+                            <a href="{{ route('inquiry.form', $product->slug) }}" class="btn action-btn-pro btn-primary-custom mb-2">
                                 <i class="fas fa-paper-plane me-2"></i>Send Detailed Inquiry
-                            </button>
+                            </a>
                             <form id="startChatForm">
                                 @csrf
                                 <input type="hidden" name="seller_id" value="{{ $product->seller->id }}">
@@ -963,345 +962,518 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="{{ mix('js/app.js') }}"></script>
     <script>
-        $(document).ready(function () {
+    $(document).ready(function () {
+        let pusher = null;
+        let currentChannel = null;
+        let currentConversationId = null;
 
-            // 1️⃣ When customer clicks "Live Chat with Seller"
-            $('#startChatForm').on('submit', function (e) {
-                e.preventDefault();
-
-                let seller_id = $(this).find('input[name="seller_id"]').val();
-
-                $.ajax({
-                    url: "{{ route('chat.start') }}",
-                    method: "POST",
-                    data: {
-                        seller_id: seller_id,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function (res) {
-                        if (res.success) {
-                            $('#conversation_id').val(res.conversation.id);
-                            $('#chatBox').addClass('show');
-                            loadMessages(res.conversation.id);
-                        }
-                    },
-                    error: function (err) {
-                        alert("Please login as customer to chat.");
-                        console.error(err);
+        // 🔹 Initialize Pusher
+        function initializePusher() {
+            // Enable pusher logging for development (disable in production)
+            Pusher.logToConsole = true;
+            
+            pusher = new Pusher('1631bf206e381798697b', {
+                cluster: 'ap2',
+                encrypted: true,
+                authEndpoint: '/broadcasting/auth',
+                auth: {
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
                     }
-                });
-            });
-
-            // Close chat button
-            $('#closeChatBtn').on('click', function () {
-                $('#chatBox').removeClass('show');
-            });
-
-            // 2️⃣ Send message
-            $('#sendMessageForm').on('submit', function (e) {
-                e.preventDefault();
-
-                let conversation_id = $('#conversation_id').val();
-                let message = $('#messageInput').val();
-
-                if (message.trim() === '') return;
-
-                // Show own message immediately
-                appendMessage({
-                    message: message,
-                    sender_type: 'customer',
-                    created_at: new Date().toISOString()
-                });
-
-                $('#messageInput').val('').prop('disabled', true);
-
-                $.ajax({
-                    url: "{{ route('chat.send') }}",
-                    method: "POST",
-                    data: {
-                        conversation_id: conversation_id,
-                        message: message,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function (res) {
-                        $('#messageInput').prop('disabled', false);
-                        // Update with server message if needed
-                    },
-                    error: function (err) {
-                        $('#messageInput').prop('disabled', false);
-                        console.error(err);
-                    }
-                });
-            });
-
-            // 3️⃣ Fetch and display messages
-            function loadMessages(conversation_id) {
-                $.get("{{ url('customer/chat/messages') }}/" + conversation_id, function (res) {
-                    if (res.success) {
-                        $('#chatMessages').empty();
-                        res.messages.forEach(msg => appendMessage(msg));
-                    }
-                });
-            }
-
-            // 4️⃣ Enhanced Append message to chat box
-            function appendMessage(msg) {
-                const isCustomer = msg.sender_type === 'customer';
-                const senderName = isCustomer ? 'You' : (msg.sender_name || 'Seller');
-                const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                let msgHtml = `
-                                <div class="message-bubble ${isCustomer ? 'customer' : 'seller'}">
-                                    ${!isCustomer ? `<div class="message-sender">${senderName}</div>` : ''}
-                                    <div class="message-content">
-                                        ${msg.message}
-                                    </div>
-                                    <span class="message-time">${time}</span>
-                                </div>
-                            `;
-                $('#chatMessages').append(msgHtml);
-                $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
-
-                // Hide welcome message if first
-                $('.text-center.text-muted').hide();
-            }
-
-            // Auto-scroll on new messages (can be extended with WebSockets)
-            const chatMessages = $('#chatMessages');
-            chatMessages.scroll(function () {
-                // Logic for loading older messages if needed
-            });
-
-            // Enter key to send
-            $('#messageInput').on('keypress', function (e) {
-                if (e.which === 13) {
-                    $('#sendMessageForm').submit();
                 }
             });
 
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            // 🟢 Open modal when "Request Meeting" button clicked
-            const requestBtn = document.querySelector('#requestMeetingForm');
-            const modal = new bootstrap.Modal(document.getElementById('requestMeetingModal'));
-
-            requestBtn.addEventListener('submit', function (e) {
-                e.preventDefault();
-                modal.show();
+            // Connection state monitoring
+            pusher.connection.bind('connected', function() {
+                console.log('Pusher connected successfully');
             });
 
-            // 🟢 Handle meeting form submission (AJAX)
-            const meetingForm = document.getElementById('submitMeetingRequestForm');
-
-            meetingForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                const formData = new FormData(this);
-
-                fetch("{{ route('customer.meeting.request') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('✅ Meeting request sent successfully!');
-                            modal.hide();
-                            meetingForm.reset();
-                        } else {
-                            alert('⚠️ ' + (data.message || 'Something went wrong.'));
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('❌ Server error while sending meeting request.');
-                    });
-            });
-        });
-    </script>
-
-
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const mainImage = document.getElementById('main-product-image');
-            const productVideoIframe = document.getElementById('product-video-iframe');
-            const thumbnails = document.querySelectorAll('.product-thumbnails-pro .thumbnail-pro');
-            const videoThumbnail = document.querySelector('.product-thumbnails-pro .active-video');
-            const defaultImageSrc = mainImage.src;
-            const defaultVideoSrc = productVideoIframe.src;
-
-            // Function to reset the main area to display an image
-            function showImage(src) {
-                mainImage.src = src;
-                mainImage.style.display = 'block';
-                productVideoIframe.parentNode.style.display = 'none';
-            }
-
-            // Function to set the main area to display a video
-            function showVideo(url) {
-                // Stop any video that might be playing if this logic were more advanced
-                productVideoIframe.src = url;
-                mainImage.style.display = 'none';
-                productVideoIframe.parentNode.style.display = 'block';
-            }
-
-            // Initialize: hide video iframe and show default image
-            if (productVideoIframe) {
-                productVideoIframe.parentNode.style.display = 'none';
-            }
-
-            thumbnails.forEach(thumbnail => {
-                thumbnail.addEventListener('click', function () {
-                    // Remove 'active' class from all thumbnails and video selector
-                    document.querySelectorAll('.product-thumbnails-pro > *').forEach(t => t
-                        .classList.remove('active'));
-
-                    // Add 'active' class to the clicked thumbnail
-                    this.classList.add('active');
-
-                    // Update the main image source
-                    showImage(this.src);
-                });
+            pusher.connection.bind('error', function(err) {
+                console.error('Pusher connection error:', err);
             });
 
-            // Video Thumbnail Click Handler
-            if (videoThumbnail) {
-                videoThumbnail.addEventListener('click', function () {
-                    // Remove 'active' class from all thumbnails and image selector
-                    document.querySelectorAll('.product-thumbnails-pro > *').forEach(t => t.classList
-                        .remove('active'));
-
-                    // Add 'active' class to the clicked element
-                    this.classList.add('active');
-
-                    // Switch to video view
-                    const videoUrl = this.dataset.videoUrl;
-                    showVideo(videoUrl);
-                });
-            }
-
-            // Star Rating Functionality
-            const stars = document.querySelectorAll('#reviewRating .star');
-            const ratingInput = document.getElementById('ratingInput');
-
-            stars.forEach(star => {
-                star.addEventListener('click', function () {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    ratingInput.value = rating;
-
-                    // Update star display
-                    stars.forEach((s, index) => {
-                        if (index < rating) {
-                            s.classList.remove('far');
-                            s.classList.add('fas');
-                        } else {
-                            s.classList.remove('fas');
-                            s.classList.add('far');
-                        }
-                    });
-                });
-
-                star.addEventListener('mouseover', function () {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    stars.forEach((s, index) => {
-                        if (index < rating) {
-                            s.classList.remove('far');
-                            s.classList.add('fas');
-                        } else {
-                            s.classList.remove('fas');
-                            s.classList.add('far');
-                        }
-                    });
-                });
-
-                star.addEventListener('mouseout', function () {
-                    const currentRating = parseInt(ratingInput.value);
-                    stars.forEach((s, index) => {
-                        if (index < currentRating) {
-                            s.classList.remove('far');
-                            s.classList.add('fas');
-                        } else {
-                            s.classList.remove('fas');
-                            s.classList.add('far');
-                        }
-                    });
-                });
+            pusher.connection.bind('disconnected', function() {
+                console.log('Pusher disconnected');
             });
+        }
 
-            // Review Form Submission
-            const reviewForm = document.getElementById('reviewForm');
-            const submitReviewBtn = document.getElementById('submitReviewBtn');
+        // Initialize Pusher on page load
+        initializePusher();
 
-            submitReviewBtn.addEventListener('click', function (e) {
-                e.preventDefault();
+        // 1️⃣ When customer clicks "Live Chat with Seller"
+        $('#startChatForm').on('submit', function (e) {
+            e.preventDefault();
 
-                const formData = new FormData(reviewForm);
+            let seller_id = $(this).find('input[name="seller_id"]').val();
 
-                // Disable button to prevent multiple submissions
-                submitReviewBtn.disabled = true;
-                submitReviewBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+            // Show loading state
+            $(this).find('button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Connecting...');
 
-                fetch('/product/{{ $product->slug }}/review', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
+            $.ajax({
+                url: "{{ route('chat.start') }}",
+                method: "POST",
+                data: {
+                    seller_id: seller_id,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (res) {
+                    if (res.success) {
+                        currentConversationId = res.conversation.id;
+                        $('#conversation_id').val(res.conversation.id);
+                        $('#chatBox').addClass('show');
+                        loadMessages(res.conversation.id);
+                        subscribeToChat(res.conversation.id);
                     }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Close modal
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('submitReviewModal'));
-                            modal.hide();
-
-                            // Reset form
-                            reviewForm.reset();
-                            document.querySelectorAll('#reviewRating .star').forEach(star => {
-                                star.classList.remove('fas');
-                                star.classList.add('far');
-                            });
-                            document.getElementById('ratingInput').value = '0';
-
-                            // Show success message
-                            alert(data.message);
-
-                            // Optionally reload the page to show the new review
-                            location.reload();
-                        } else {
-                            // Show errors
-                            let errorMessage = 'Please fix the following errors:\n';
-                            if (data.errors) {
-                                for (let field in data.errors) {
-                                    errorMessage += data.errors[field].join('\n') + '\n';
-                                }
-                            } else {
-                                errorMessage = data.message;
-                            }
-                            alert(errorMessage);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while submitting your review. Please try again.');
-                    })
-                    .finally(() => {
-                        // Re-enable button
-                        submitReviewBtn.disabled = false;
-                        submitReviewBtn.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Post Review';
-                    });
+                },
+                error: function (err) {
+                    if (err.status === 401) {
+                        alert("Please login as customer to chat.");
+                    } else {
+                        alert("Failed to start chat. Please try again.");
+                    }
+                    console.error(err);
+                },
+                complete: function() {
+                    $('#startChatForm button').prop('disabled', false).html('<i class="fas fa-comments me-2"></i> Live Chat with Seller');
+                }
             });
         });
+
+        // Close chat button
+        $('#closeChatBtn').on('click', function () {
+            $('#chatBox').removeClass('show');
+            
+            // Unsubscribe from channel when closing chat
+            if (currentChannel && pusher) {
+                pusher.unsubscribe(currentChannel.name);
+                currentChannel = null;
+            }
+        });
+
+        // 2️⃣ Send message
+        $('#sendMessageForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let conversation_id = $('#conversation_id').val();
+            let message = $('#messageInput').val().trim();
+
+            if (message === '' || !conversation_id) return;
+
+            // Disable input and show loading
+            $('#messageInput').prop('disabled', true);
+            $('#sendMessageForm button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+            $.ajax({
+                url: "{{ route('chat.send') }}",
+                method: "POST",
+                data: {
+                    conversation_id: conversation_id,
+                    message: message,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (res) {
+                    $('#messageInput').val('').prop('disabled', false).focus();
+                    $('#sendMessageForm button').prop('disabled', false).html('<i class="fas fa-paper-plane"></i>');
+                    
+                    // Append message immediately for better UX
+                    if (res.message) {
+                        appendMessage(res.message);
+                    }
+                },
+                error: function (err) {
+                    $('#messageInput').prop('disabled', false).focus();
+                    $('#sendMessageForm button').prop('disabled', false).html('<i class="fas fa-paper-plane"></i>');
+                    
+                    let errorMsg = 'Failed to send message';
+                    if (err.responseJSON && err.responseJSON.message) {
+                        errorMsg = err.responseJSON.message;
+                    }
+                    alert(errorMsg);
+                    console.error(err);
+                }
+            });
+        });
+
+        // 3️⃣ Fetch and display messages
+        function loadMessages(conversation_id) {
+            // Show loading indicator
+            $('#chatMessages').html('<div class="text-center text-primary py-4"><i class="fas fa-circle-notch fa-spin fa-2x"></i><p class="mt-2">Loading messages...</p></div>');
+
+            $.get("{{ url('customer/chat/messages') }}/" + conversation_id, function (res) {
+                if (res.success) {
+                    $('#chatMessages').empty();
+                    if (res.messages.length === 0) {
+                        $('#chatMessages').html('<div class="text-center text-muted py-4"><i class="fas fa-comments fa-2x mb-2"></i><p>Start a conversation!</p></div>');
+                    } else {
+                        res.messages.forEach(msg => appendMessage(msg));
+                        scrollToBottom();
+                    }
+                }
+            }).fail(function(err) {
+                $('#chatMessages').html('<div class="text-center text-danger py-4"><p>Failed to load messages</p></div>');
+                console.error(err);
+            });
+        }
+
+        // 4️⃣ Enhanced Append message to chat box
+        function appendMessage(msg) {
+            const isCustomer = msg.sender_type === 'customer';
+            const senderName = isCustomer ? 'You' : (msg.sender_name || 'Seller');
+            const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Check if message already exists (prevent duplicates)
+            if ($(`[data-message-id="${msg.id}"]`).length > 0) {
+                return;
+            }
+
+            let msgHtml = `
+                <div class="message-bubble ${isCustomer ? 'customer' : 'seller'}" data-message-id="${msg.id}">
+                    ${!isCustomer ? `<div class="message-sender">${escapeHtml(senderName)}</div>` : ''}
+                    <div class="message-content">
+                        ${escapeHtml(msg.message)}
+                    </div>
+                    <span class="message-time">${time}</span>
+                </div>
+            `;
+            
+            $('#chatMessages').append(msgHtml);
+            scrollToBottom();
+
+            // Hide welcome message if first
+            $('#chatMessages .text-center.text-muted').hide();
+        }
+
+        // 5️⃣ Subscribe to real-time chat updates using Pusher
+        function subscribeToChat(conversationId) {
+            // Unsubscribe from previous channel if exists
+            if (currentChannel && pusher) {
+                pusher.unsubscribe(currentChannel.name);
+            }
+
+            // Subscribe to the conversation channel
+            const channelName = `private-conversation.${conversationId}`;
+            currentChannel = pusher.subscribe(channelName);
+
+            console.log('Subscribing to channel:', channelName);
+
+            // Listen for new messages
+            currentChannel.bind('message.sent', function(data) {
+                console.log('New message received:', data);
+                
+                // Only append if message is from seller (not customer)
+                if (data.message && data.message.sender_type !== 'customer') {
+                    appendMessage(data.message);
+                    
+                    // Show notification sound (optional)
+                    playNotificationSound();
+                }
+            });
+
+            // Listen for typing indicator
+            currentChannel.bind('user.typing', function(data) {
+                console.log('User typing:', data);
+                if (data.sender_type === 'seller') {
+                    showTypingIndicator();
+                }
+            });
+
+            // Handle subscription success
+            currentChannel.bind('pusher:subscription_succeeded', function() {
+                console.log('Successfully subscribed to channel:', channelName);
+            });
+
+            // Handle subscription errors
+            currentChannel.bind('pusher:subscription_error', function(status) {
+                console.error('Pusher subscription error:', status);
+                alert('Unable to connect to real-time chat. Messages may be delayed.');
+            });
+        }
+
+        // 6️⃣ Show typing indicator
+        function showTypingIndicator() {
+            $('#typingIndicator').addClass('show');
+            scrollToBottom();
+            
+            // Hide after 3 seconds
+            setTimeout(function() {
+                $('#typingIndicator').removeClass('show');
+            }, 3000);
+        }
+
+        // 7️⃣ Scroll to bottom of chat
+        function scrollToBottom() {
+            const chatMessages = $('#chatMessages');
+            chatMessages.stop().animate({
+                scrollTop: chatMessages[0].scrollHeight
+            }, 300);
+        }
+
+        // 8️⃣ Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // 9️⃣ Play notification sound (optional)
+        function playNotificationSound() {
+            // Create a subtle notification sound
+            try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWeD7OihUg8MUqzn77BfGwU7k9jxynkrBSR3yO/cjz8IFV6y6+mmVhMKQJ7d8b4DAAAADwACAAMABAALABEAFwAbACAAJAApAC4AMwA7AEAARABHAE4AVQBdAGQAbAB0AHwAhACMAJQAnACkAK0AtQC9AMUAzgDWAN8A6ADxAPkAAQEKARMBHAEkAS0BNgE/AUgBUQFaAWMBbAF1AX4BhwGQAZkBogGrAbQBvQHHAdAB2QLGAboBtgGuAaYBngGWAY4BhgF+AXYBbgFmAV4BVgFOAUYBPgE2AS4BJgEeARYBDgEGAP7/9v/u/+b/3v/W/87/xv++/7b/rv+m/57/lv+O/4b/fv92/27/Zv9e/1b/Tv9G/z7/Nv8u/yb/Hv8W/w7/Bv/+/vb+7v7m/t7+1v7O/sb+vv62/q7+pv6e/pb+jv6G/n7+dv5u/mb+Xv5W/k7+Rv4+/jb+Lv4m/h7+Fv4O/gb+');
+                audio.volume = 0.3;
+                audio.play().catch(e => console.log('Could not play sound:', e));
+            } catch(e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        // 🔟 Enter key to send message
+        $('#messageInput').on('keypress', function (e) {
+            if (e.which === 13 && !e.shiftKey) {
+                e.preventDefault();
+                $('#sendMessageForm').submit();
+            }
+        });
+
+        // Optional: Send typing indicator
+        let typingTimer;
+        $('#messageInput').on('input', function() {
+            clearTimeout(typingTimer);
+            
+            // Emit typing event (you'll need to implement this on backend)
+            if (currentConversationId && pusher) {
+                $.post("{{ url('customer/chat/typing') }}", {
+                    conversation_id: currentConversationId,
+                    _token: "{{ csrf_token() }}"
+                }).catch(e => console.log('Typing indicator failed'));
+            }
+            
+            typingTimer = setTimeout(function() {
+                // Stop typing indicator after 3 seconds
+            }, 3000);
+        });
+
+        // Clean up on page unload
+        $(window).on('beforeunload', function() {
+            if (currentChannel && pusher) {
+                pusher.unsubscribe(currentChannel.name);
+            }
+            if (pusher) {
+                pusher.disconnect();
+            }
+        });
+
+        // Handle visibility change (stop polling when tab is inactive)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('Tab is hidden');
+            } else {
+                console.log('Tab is visible');
+                // Optionally reload messages when tab becomes visible
+                if (currentConversationId) {
+                    loadMessages(currentConversationId);
+                }
+            }
+        });
+    });
+    </script>
+
+    <script>
+    // Keep your existing meeting request script here
+    document.addEventListener('DOMContentLoaded', function () {
+        const requestBtn = document.querySelector('#requestMeetingForm');
+        const modal = new bootstrap.Modal(document.getElementById('requestMeetingModal'));
+
+        requestBtn.addEventListener('submit', function (e) {
+            e.preventDefault();
+            modal.show();
+        });
+
+        const meetingForm = document.getElementById('submitMeetingRequestForm');
+
+        meetingForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch("{{ route('customer.meeting.request') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Meeting request sent successfully!');
+                    modal.hide();
+                    meetingForm.reset();
+                } else {
+                    alert('⚠️ ' + (data.message || 'Something went wrong.'));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('❌ Server error while sending meeting request.');
+            });
+        });
+    });
+    </script>
+
+    <script>
+    // Keep your existing product image slider and review script here
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainImage = document.getElementById('main-product-image');
+        const productVideoIframe = document.getElementById('product-video-iframe');
+        const thumbnails = document.querySelectorAll('.product-thumbnails-pro .thumbnail-pro');
+        const videoThumbnail = document.querySelector('.product-thumbnails-pro .active-video');
+
+        function showImage(src) {
+            mainImage.src = src;
+            mainImage.style.display = 'block';
+            productVideoIframe.parentNode.style.display = 'none';
+        }
+
+        function showVideo(url) {
+            productVideoIframe.src = url;
+            mainImage.style.display = 'none';
+            productVideoIframe.parentNode.style.display = 'block';
+        }
+
+        if (productVideoIframe) {
+            productVideoIframe.parentNode.style.display = 'none';
+        }
+
+        thumbnails.forEach(thumbnail => {
+            thumbnail.addEventListener('click', function () {
+                document.querySelectorAll('.product-thumbnails-pro > *').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                showImage(this.src);
+            });
+        });
+
+        if (videoThumbnail) {
+            videoThumbnail.addEventListener('click', function () {
+                document.querySelectorAll('.product-thumbnails-pro > *').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                const videoUrl = this.dataset.videoUrl;
+                showVideo("https://www.youtube.com/embed/CDm2oU4NpMU?si=ikYh_08pzkOGizuQ");
+            });
+        }
+
+        // Star Rating Functionality
+        const stars = document.querySelectorAll('#reviewRating .star');
+        const ratingInput = document.getElementById('ratingInput');
+
+        stars.forEach(star => {
+            star.addEventListener('click', function () {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                ratingInput.value = rating;
+
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            });
+
+            star.addEventListener('mouseover', function () {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            });
+
+            star.addEventListener('mouseout', function () {
+                const currentRating = parseInt(ratingInput.value);
+                stars.forEach((s, index) => {
+                    if (index < currentRating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            });
+        });
+
+        // Review Form Submission
+        const reviewForm = document.getElementById('reviewForm');
+        const submitReviewBtn = document.getElementById('submitReviewBtn');
+
+        submitReviewBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(reviewForm);
+
+            submitReviewBtn.disabled = true;
+            submitReviewBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+
+            fetch('/product/{{ $product->slug }}/review', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('submitReviewModal'));
+                    modal.hide();
+
+                    reviewForm.reset();
+                    document.querySelectorAll('#reviewRating .star').forEach(star => {
+                        star.classList.remove('fas');
+                        star.classList.add('far');
+                    });
+                    document.getElementById('ratingInput').value = '0';
+
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    let errorMessage = 'Please fix the following errors:\n';
+                    if (data.errors) {
+                        for (let field in data.errors) {
+                            errorMessage += data.errors[field].join('\n') + '\n';
+                        }
+                    } else {
+                        errorMessage = data.message;
+                    }
+                    alert(errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting your review. Please try again.');
+            })
+            .finally(() => {
+                submitReviewBtn.disabled = false;
+                submitReviewBtn.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Post Review';
+            });
+        });
+    });
     </script>
 @endsection
