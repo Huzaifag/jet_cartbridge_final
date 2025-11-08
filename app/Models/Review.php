@@ -15,6 +15,8 @@ class Review extends Model
         'review_text',
         'review_type',
         'media_urls',
+        'video_views',
+        'video_likes',
         'is_verified_purchase',
         'referral_code'
     ];

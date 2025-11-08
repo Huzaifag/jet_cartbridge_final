@@ -50,12 +50,94 @@
             </div>
         </div>
     </section>
+
+    <!-- Premium Trust Badges Section -->
+    <section class="trust-badges-section py-4 bg-white">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="trust-badge">
+                        <i class="fas fa-shield-alt fa-2x text-primary mb-2"></i>
+                        <h6 class="mb-0">Secure Payments</h6>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="trust-badge">
+                        <i class="fas fa-truck fa-2x text-success mb-2"></i>
+                        <h6 class="mb-0">Fast Shipping</h6>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="trust-badge">
+                        <i class="fas fa-certificate fa-2x text-warning mb-2"></i>
+                        <h6 class="mb-0">Verified Sellers</h6>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="trust-badge">
+                        <i class="fas fa-headset fa-2x text-info mb-2"></i>
+                        <h6 class="mb-0">24/7 Support</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @auth
+    <!-- Products from Followed Sellers/Manufacturers -->
+    @if($followedProducts->count() > 0)
+    <section class="container my-5">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title mb-1">
+                    <i class="fas fa-heart text-danger me-2"></i>From Your Followed Sellers
+                </h2>
+                <p class="text-muted">Exclusive products from sellers and manufacturers you trust</p>
+            </div>
+        </div>
+        <div class="premium-products-slider">
+            <div class="row g-4">
+                @foreach($followedProducts as $product)
+                <div class="col-md-6 col-lg-3">
+                    @include('frontend.pages.partials.product-card', ['product' => $product])
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+    @endauth
+
+    <!-- Trending Products Section -->
+    @if($trendingProducts->count() > 0)
+    <section class="trending-section py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2 class="section-title mb-2">
+                    <i class="fas fa-fire text-danger me-2"></i>Trending Now
+                </h2>
+                <p class="text-muted">Most popular products loved by our community</p>
+            </div>
+            <div class="row g-4">
+                @foreach($trendingProducts as $product)
+                <div class="col-md-6 col-lg-3">
+                    @include('frontend.pages.partials.product-card', ['product' => $product, 'showTrendingBadge' => true])
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
     <!-- Categories Section -->
     <section class="container my-5">
-        <h2 class="text-center mb-4">Top Categories</h2>
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title mb-2">Shop by Category</h2>
+            <p class="text-muted">Explore our wide range of product categories</p>
+        </div>
         <div class="row g-4">
             <div class="col-md-3">
-                <div class="category-card card">
+                <div class="category-card card premium-card">
                     <img src="https://img.freepik.com/free-photo/electronic-devices_144627-41317.jpg" class="category-img"
                         alt="Electronics">
                     <div class="card-body">
@@ -65,7 +147,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="category-card card">
+                <div class="category-card card premium-card">
                     <img src="https://img.freepik.com/free-photo/industrial-machines_1127-3426.jpg" class="category-img"
                         alt="Machinery">
                     <div class="card-body">
@@ -75,7 +157,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="category-card card">
+                <div class="category-card card premium-card">
                     <img src="https://img.freepik.com/free-photo/fabric-samples-textile-swatches_93675-130843.jpg"
                         class="category-img" alt="Textiles">
                     <div class="card-body">
@@ -85,7 +167,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="category-card card">
+                <div class="category-card card premium-card">
                     <img src="https://img.freepik.com/free-photo/construction-equipment_1127-3294.jpg" class="category-img"
                         alt="Construction">
                     <div class="card-body">
@@ -97,8 +179,52 @@
         </div>
     </section>
 
+    <!-- Premium Sellers Spotlight -->
+    @if($premiumSellers->count() > 0)
+    <section class="premium-sellers-section py-5 bg-white">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2 class="section-title mb-2">
+                    <i class="fas fa-crown text-warning me-2"></i>Premium Sellers
+                </h2>
+                <p class="text-muted">Verified premium sellers with exceptional ratings</p>
+            </div>
+            <div class="row g-4">
+                @foreach($premiumSellers as $seller)
+                <div class="col-md-4">
+                    <div class="premium-seller-card card h-100">
+                        <div class="card-body text-center">
+                            <div class="premium-badge">
+                                <i class="fas fa-crown"></i> PREMIUM
+                            </div>
+                            @if($seller->logo)
+                                <img src="{{ asset('storage/' . $seller->logo) }}" alt="{{ $seller->company_name }}" 
+                                     class="seller-logo mb-3">
+                            @else
+                                <div class="seller-logo-placeholder mb-3">
+                                    <i class="fas fa-store fa-3x"></i>
+                                </div>
+                            @endif
+                            <h5 class="card-title mb-2">{{ $seller->company_name }}</h5>
+                            <div class="seller-rating mb-2">
+                                <span class="text-warning">★★★★★</span>
+                                <small class="text-muted">(4.9)</small>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                <i class="fas fa-box me-1"></i>{{ $seller->products->count() }} Products
+                            </p>
+                            <a href="#" class="btn btn-outline-primary btn-sm">View Store</a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
     <!-- Main Content -->
-    <div class="container">
+    <div class="container my-5">
         <div class="row">
             <!-- Filters Sidebar -->
             <div class="col-lg-3">
@@ -179,120 +305,22 @@
             </div>
 
             <div class="col-lg-9">
+                <div class="section-header mb-4">
+                    <h3 class="mb-1">All Products</h3>
+                    <p class="text-muted">Discover quality products from verified sellers</p>
+                </div>
+                
                 @if($featuredProducts->count() > 0)
                     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
                         @foreach ($featuredProducts as $product)
                         <div class="col">
-                            {{-- CARD START --}}
-                            @php
-                                $stock = $product->stock_quantity > 0 ? 'In Stock' : 'Out of Stock';
-                                $images = is_array($product->images)
-                                    ? $product->images
-                                    : json_decode($product->images, true);
-                                $firstImage = str_replace('\/', '/', $images[0] ?? 'default.png'); // ✅ fix escaped slashes
-                            @endphp
-
-                            <div class="card h-100 shadow-sm">
-                                <a href="{{ route('product.show', $product->slug) }}" class="text-decoration-none">
-                                    <div class="product-img-container">
-                                        <img src="{{ asset($firstImage) }}" alt="{{ $firstImage }}" class="card-img-top modern-product-img">
-                                    </div>
-                                </a>
-
-                                <div class="card-body d-flex flex-column">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <a href="{{ route('product.show', $product->slug) }}"
-                                            class="text-decoration-none text-dark">
-                                            <h5 class="card-title fw-semibold mb-0">{{ $product->name }}</h5>
-                                        </a>
-                                        <span
-                                            class="user-type-badge badge rounded-pill bg-success-subtle text-success ms-2">
-                                            {{ $stock }}
-                                        </span>
-                                    </div>
-
-                                    <div class="modern-rating mb-2">
-                                        <span class="text-warning">
-                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                                class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-                                        </span>
-                                        <small class="text-muted ms-1">({{ number_format(128) }})</small>
-                                    </div>
-
-                                    <p class="card-text text-muted mb-3 small">
-                                        {{ Str::limit($product->description, 70) }}
-                                    </p>
-
-                                    {{-- Price Section --}}
-                                    <div class="mt-auto">
-                                        @auth
-                                            @if (Auth::user()->role === 'b2c')
-                                                @if ($product->activePromotion && $product->activePromotion->type == 'buy_get')
-                                                    <span class="badge bg-warning text-dark mb-2 d-inline-block">
-                                                        Buy {{ $product->activePromotion->rules->first()->buy_quantity }}
-                                                        Get {{ $product->activePromotion->rules->first()->get_quantity }} Free
-                                                    </span>
-                                                @endif
-                                                <div class="price-section mb-3">
-                                                    <p class="product-price fs-5 fw-bold text-dark mb-0">
-                                                        ${{ number_format($product->b2c_price, 2) }}
-                                                        @if ($product->b2c_compare_price)
-                                                            <span class="text-muted text-decoration-line-through small ms-2">
-                                                                ${{ number_format($product->b2c_compare_price, 2) }}
-                                                            </span>
-                                                        @endif
-                                                    </p>
-                                                    <p class="text-secondary small mb-0">Min. order: 1 piece</p>
-                                                </div>
-                                            @elseif (Auth::user()->role === 'b2b')
-                                                <div class="price-section mb-3">
-                                                    <p class="product-price fs-5 fw-bold text-dark mb-0">
-                                                        ${{ number_format($product->b2b_price, 2) }}
-                                                    </p>
-                                                    <p class="text-secondary small mb-0">
-                                                        Min. order: {{ $product->b2b_moq }} pieces
-                                                    </p>
-                                                </div>
-                                            @endif
-                                        @endauth
-                                    </div>
-
-                                    {{-- Action Buttons --}}
-                                    @auth
-                                        @if (Auth::user()->role === 'b2c')
-                                            <div class="action-group d-flex gap-2">
-                                                <form action="{{ route('addToCart', $product) }}" method="POST"
-                                                    class="flex-grow-1">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-outline-dark w-100 btn-sm">
-                                                        <i class="fas fa-shopping-cart"></i> Add
-                                                    </button>
-                                                </form>
-                                                <button class="btn btn-primary w-100 btn-sm">
-                                                    <i class="fas fa-bolt"></i> Buy Now
-                                                </button>
-                                            </div>
-                                        @elseif (Auth::user()->role === 'b2b')
-                                            <div class="action-group">
-                                                <a href="{{ route('inquiry.form', $product->slug) }}"
-                                                    class="btn btn-primary w-100">
-                                                    <i class="fas fa-envelope me-1"></i> Send Inquiry
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @else
-                                        <div class="action-group text-center border-top pt-3">
-                                            <a href="{{ route('login') }}" class="btn btn-outline-secondary w-100">
-                                                <i class="fas fa-lock me-1"></i> Sign In to See Price
-                                            </a>
-                                        </div>
-                                    @endauth
-                                </div>
-                            </div>
-                            {{-- CARD END --}}
+                            @include('frontend.pages.partials.product-card', ['product' => $product])
                         </div>
                     @endforeach
+                </div>
+
+                <div class="d-flex justify-content-center mt-5">
+                    {{ $featuredProducts->links() }}
                 </div>
                 @else
                     <div class="text-center py-5">
@@ -309,18 +337,21 @@
     <!-- Sellers and Manufacturers Section -->
     @auth
     <section class="container my-5">
-        <h2 class="text-center mb-4">Follow Sellers & Manufacturers</h2>
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title mb-2">Discover Sellers & Manufacturers</h2>
+            <p class="text-muted">Connect with verified suppliers worldwide</p>
+        </div>
 
         <!-- Sellers -->
         @if($sellers->count() > 0)
         <div class="mb-5">
-            <h4 class="mb-3">
+            <h4 class="mb-4">
                 <i class="fas fa-store text-primary me-2"></i>Verified Sellers
             </h4>
             <div class="row g-4">
                 @foreach($sellers as $seller)
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
+                    <div class="card h-100 shadow-sm seller-card-hover">
                         <div class="card-body text-center">
                             @if($seller->logo)
                                 <img src="{{ asset('storage/' . $seller->logo) }}" alt="{{ $seller->company_name }}" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
@@ -360,13 +391,13 @@
         <!-- Manufacturers -->
         @if($manufacturers->count() > 0)
         <div class="mb-5">
-            <h4 class="mb-3">
+            <h4 class="mb-4">
                 <i class="fas fa-industry text-success me-2"></i>Verified Manufacturers
             </h4>
             <div class="row g-4">
                 @foreach($manufacturers as $manufacturer)
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
+                    <div class="card h-100 shadow-sm seller-card-hover">
                         <div class="card-body text-center">
                             @if($manufacturer->company_profile && isset($manufacturer->company_profile['logo']))
                                 <img src="{{ asset('storage/' . $manufacturer->company_profile['logo']) }}" alt="{{ $manufacturer->company_name }}" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
@@ -404,5 +435,4 @@
         @endif
     </section>
     @endauth
-    </div>
 @endsection

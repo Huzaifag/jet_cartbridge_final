@@ -21,7 +21,7 @@ class WarehouseOrdersController extends Controller
             ->seller
             ->orders()
             ->whereNotNull('invoice')
-            ->where('status', 'Confirmed')
+            ->where('status', 'In P')
             ->orderBy('id', 'desc')
             ->paginate(10);
 

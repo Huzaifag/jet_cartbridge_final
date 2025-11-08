@@ -192,9 +192,55 @@ class FrontendController extends Controller
         $categories = Category::withCount('products')->get();
 
         /* ==============================
+         * 👥 FOLLOWED SELLERS/MANUFACTURERS PRODUCTS
+         * ============================== */
+        $followedProducts = collect();
+        $trendingProducts = collect();
+        $premiumSellers = collect();
+        
+        if (auth()->check()) {
+            // Get products from followed sellers
+            $followedSellerIds = auth()->user()->followedSellers()->pluck('seller_id');
+            $followedManufacturerIds = auth()->user()->followedManufacturers()->pluck('manufacturer_id');
+            
+            $followedProducts = Product::where('status', 'active')
+                ->where(function($q) use ($followedSellerIds, $followedManufacturerIds) {
+                    $q->whereIn('seller_id', $followedSellerIds)
+                      ->orWhereIn('manufacturer_id', $followedManufacturerIds);
+                })
+                ->with(['seller', 'manufacturer'])
+                ->latest()
+                ->take(8)
+                ->get();
+        }
+
+        // Get trending products (most reviewed/rated)
+        $trendingProducts = Product::where('status', 'active')
+            ->withCount('reviews')
+            ->orderBy('reviews_count', 'desc')
+            ->orderBy('rating', 'desc')
+            ->take(8)
+            ->get();
+
+        // Get premium sellers
+        $premiumSellers = Seller::where('status', 'approved')
+            ->where('is_premium', true)
+            ->with('products')
+            ->take(6)
+            ->get();
+
+        /* ==============================
          * 🖥️ RETURN VIEW
          * ============================== */
-        return view('frontend.pages.index', compact('featuredProducts', 'sellers', 'manufacturers', 'categories'));
+        return view('frontend.pages.index', compact(
+            'featuredProducts', 
+            'sellers', 
+            'manufacturers', 
+            'categories',
+            'followedProducts',
+            'trendingProducts',
+            'premiumSellers'
+        ));
     }
 
 
@@ -287,6 +333,143 @@ class FrontendController extends Controller
             'userReviews',
             'coinsBalance'
         ));
+    }
+
+    public function contributorDashboard()
+    {
+        $user = auth()->user();
+
+        // Check if user is seller or manufacturer
+        $isSellerOrManufacturer = $user->seller || $user->manufacturer;
+
+        if ($isSellerOrManufacturer) {
+            // For sellers/manufacturers: Product Uploads
+            $productUploads = 0;
+            if ($user->seller) {
+                $productUploads = $user->seller->products()->count();
+            } elseif ($user->manufacturer) {
+                $productUploads = $user->manufacturer->products()->count();
+            }
+
+            // Number of Reviews (reviews received on their products)
+            $reviewsReceived = \App\Models\Review::whereHas('product', function ($q) use ($user) {
+                if ($user->seller) {
+                    $q->where('seller_id', $user->seller->id);
+                } elseif ($user->manufacturer) {
+                    $q->where('manufacturer_id', $user->manufacturer->id);
+                }
+            })->count();
+
+            // Video Views & Likes (from reviews on their products)
+            $videoViews = \App\Models\Review::whereHas('product', function ($q) use ($user) {
+                if ($user->seller) {
+                    $q->where('seller_id', $user->seller->id);
+                } elseif ($user->manufacturer) {
+                    $q->where('manufacturer_id', $user->manufacturer->id);
+                }
+            })->sum('video_views');
+
+            $videoLikes = \App\Models\Review::whereHas('product', function ($q) use ($user) {
+                if ($user->seller) {
+                    $q->where('seller_id', $user->seller->id);
+                } elseif ($user->manufacturer) {
+                    $q->where('manufacturer_id', $user->manufacturer->id);
+                }
+            })->sum('video_likes');
+
+            // Coins Earned (if applicable)
+            $coinsEarned = $user->customerProfile ? $user->customerProfile->coins : 0;
+
+            // Referral Link Shares
+            $referralShares = $user->customerProfile ? $user->customerProfile->referral_shares : 0;
+
+            return view('frontend.pages.contributor-dashboard', compact(
+                'isSellerOrManufacturer',
+                'productUploads',
+                'reviewsReceived',
+                'videoViews',
+                'videoLikes',
+                'coinsEarned',
+                'referralShares'
+            ));
+        } else {
+            // For customers: Number of Reviews, Video Views & Likes, Coins Earned, Referral Link Shares
+            $numberOfReviews = $user->reviews()->count();
+
+            // Video Views & Likes (from user's reviews)
+            $videoViews = $user->reviews()->sum('video_views');
+            $videoLikes = $user->reviews()->sum('video_likes');
+
+            // Coins Earned
+            $coinsEarned = $user->customerProfile ? $user->customerProfile->coins : 0;
+
+            // Referral Link Shares
+            $referralShares = $user->customerProfile ? $user->customerProfile->referral_shares : 0;
+
+            return view('frontend.pages.contributor-dashboard', compact(
+                'isSellerOrManufacturer',
+                'numberOfReviews',
+                'videoViews',
+                'videoLikes',
+                'coinsEarned',
+                'referralShares'
+            ));
+        }
+    }
+
+    public function about()
+    {
+        return view('frontend.pages.about');
+    }
+
+    public function contact()
+    {
+        return view('frontend.pages.contact');
+    }
+
+    public function terms()
+    {
+        return view('frontend.pages.terms');
+    }
+
+    public function privacy()
+    {
+        return view('frontend.pages.privacy');
+    }
+
+    public function faq()
+    {
+        return view('frontend.pages.faq');
+    }
+
+    public function categories()
+    {
+        $categories = Category::withCount('products')->get();
+        return view('frontend.pages.categories', compact('categories'));
+    }
+
+    public function sellers()
+    {
+        $sellers = Seller::with('products')
+            ->where('status', 'approved')
+            ->latest()
+            ->paginate(12);
+        return view('frontend.pages.sellers', compact('sellers'));
+    }
+
+    public function manufacturers()
+    {
+        $manufacturers = Manufacturer::with('products')
+            ->latest()
+            ->paginate(12);
+        return view('frontend.pages.manufacturers', compact('manufacturers'));
+    }
+
+    public function resources()
+    {
+        // For now, return a basic resources/blog page
+        // Later this can be expanded with actual blog posts
+        return view('frontend.pages.resources');
     }
 
     // public function seller($slug)

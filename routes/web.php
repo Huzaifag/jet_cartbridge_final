@@ -74,9 +74,21 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/', [FrontendController::class, 'index'])->name('home');
 
+// Frontend Pages
+Route::get('/about', [FrontendController::class, 'about'])->name('about');
+Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
+Route::get('/terms', [FrontendController::class, 'terms'])->name('terms');
+Route::get('/privacy', [FrontendController::class, 'privacy'])->name('privacy');
+Route::get('/faq', [FrontendController::class, 'faq'])->name('faq');
+Route::get('/categories', [FrontendController::class, 'categories'])->name('categories');
+Route::get('/sellers', [FrontendController::class, 'sellers'])->name('sellers');
+Route::get('/manufacturers', [FrontendController::class, 'manufacturers'])->name('manufacturers');
+Route::get('/resources', [FrontendController::class, 'resources'])->name('resources');
+
 Route::get('/product/{slug}', [FrontendController::class, 'showProduct'])->name('product.show');
 
 Route::get('/profile', [FrontendController::class, 'profile'])->name('user.profile')->middleware('auth');
+Route::get('/contributor-dashboard', [FrontendController::class, 'contributorDashboard'])->name('contributor.dashboard')->middleware('auth');
 
 Route::middleware('auth')->group(function () {
     Route::post('/follow/seller/{seller}', [App\Http\Controllers\FollowController::class, 'followSeller'])->name('follow.seller');

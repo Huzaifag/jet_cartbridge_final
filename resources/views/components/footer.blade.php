@@ -10,27 +10,27 @@
             <div class="col-md-3">
                 <h5 class="mb-3">Quick Links</h5>
                 <ul class="list-unstyled">
-                    <li><a href="#" class="text-light text-decoration-none">Products</a></li>
-                    <li><a href="#" class="text-light text-decoration-none">Suppliers</a></li>
-                    <li><a href="#" class="text-light text-decoration-none">Buyer Protection</a></li>
-                    <li><a href="#" class="text-light text-decoration-none">Blog</a></li>
+                    <li><a href="{{ route('categories') }}" class="text-light text-decoration-none">Product Categories</a></li>
+                    <li><a href="{{ route('sellers') }}" class="text-light text-decoration-none">Verified Sellers</a></li>
+                    <li><a href="{{ route('manufacturers') }}" class="text-light text-decoration-none">Manufacturers</a></li>
+                    <li><a href="{{ route('resources') }}" class="text-light text-decoration-none">Resources</a></li>
                 </ul>
             </div>
             <div class="col-md-3">
                 <h5 class="mb-3">Customer Service</h5>
                 <ul class="list-unstyled">
-                    <li><a href="#" class="text-light text-decoration-none">Help Center</a></li>
-                    <li><a href="#" class="text-light text-decoration-none">Contact Us</a></li>
+                    <li><a href="{{ route('faq') }}" class="text-light text-decoration-none">Help Center</a></li>
+                    <li><a href="{{ route('contact') }}" class="text-light text-decoration-none">Contact Us</a></li>
                     <li><a href="#" class="text-light text-decoration-none">Report IPR</a></li>
-                    <li><a href="#" class="text-light text-decoration-none">Privacy Policy</a></li>
+                    <li><a href="{{ route('privacy') }}" class="text-light text-decoration-none">Privacy Policy</a></li>
                 </ul>
             </div>
             <div class="col-md-3">
-                <h5 class="mb-3">Trade Services</h5>
+                <h5 class="mb-3">Legal</h5>
                 <ul class="list-unstyled">
+                    <li><a href="{{ route('terms') }}" class="text-light text-decoration-none">Terms of Service</a></li>
                     <li><a href="#" class="text-light text-decoration-none">Trade Assurance</a></li>
                     <li><a href="#" class="text-light text-decoration-none">Business Identity</a></li>
-                    <li><a href="#" class="text-light text-decoration-none">Logistics Service</a></li>
                     <li><a href="#" class="text-light text-decoration-none">Production Monitoring</a></li>
                 </ul>
             </div>

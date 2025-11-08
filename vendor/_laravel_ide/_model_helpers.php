@@ -1966,6 +1966,7 @@ namespace App\Models {
      *
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
+     * @property mixed $referral_shares
      * @property mixed $coins
      * @property string|null $avatar
      * @property mixed $user_id
@@ -1975,6 +1976,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<CustomerProfile>|CustomerProfile whereUserId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CustomerProfile>|CustomerProfile whereAvatar($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CustomerProfile>|CustomerProfile whereCoins($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<CustomerProfile>|CustomerProfile whereReferralShares($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CustomerProfile>|CustomerProfile whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CustomerProfile>|CustomerProfile whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CustomerProfile>|CustomerProfile newModelQuery()
@@ -5306,8 +5308,26 @@ namespace App\Models {
     /**
      * App\Models\OrderDelivery
      *
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property string|null $delivery_notes
+     * @property string|null $proof_of_delivery
+     * @property string|null $delivery_time
+     * @property string|null $delivery_date
+     * @property mixed $customer_id
+     * @property mixed $order_id
+     * @property int $id
      * @property-read \App\Models\Order $order
      * @property-read \App\Models\User $customer
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereOrderId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereCustomerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereDeliveryDate($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereDeliveryTime($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereProofOfDelivery($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereDeliveryNotes($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<OrderDelivery>|OrderDelivery query()
@@ -8196,6 +8216,8 @@ namespace App\Models {
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property boolean $is_verified_purchase
+     * @property mixed $video_likes
+     * @property mixed $video_views
      * @property array|null $media_urls
      * @property mixed $review_type
      * @property string|null $referral_code
@@ -8214,6 +8236,8 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Review>|Review whereReferralCode($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Review>|Review whereReviewType($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Review>|Review whereMediaUrls($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Review>|Review whereVideoViews($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Review>|Review whereVideoLikes($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Review>|Review whereIsVerifiedPurchase($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Review>|Review whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Review>|Review whereUpdatedAt($value)

@@ -123,12 +123,15 @@
                         Products
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="productsDropdown">
-                        <li><a class="dropdown-item" href="#">Category A</a></li>
-                        <li><a class="dropdown-item" href="#">Category B</a></li>
+                        @foreach(\App\Models\Category::take(5)->get() as $category)
+                        <li><a class="dropdown-item" href="{{ route('home', ['category' => $category->id]) }}">{{ $category->name }}</a></li>
+                        @endforeach
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="#">All Products</a></li>
+                        <li><a class="dropdown-item" href="{{ route('categories') }}">All Categories</a></li>
+                        <li><a class="dropdown-item" href="{{ route('sellers') }}">Browse Sellers</a></li>
+                        <li><a class="dropdown-item" href="{{ route('manufacturers') }}">Browse Manufacturers</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -139,13 +142,15 @@
                     <ul class="dropdown-menu" aria-labelledby="solutionsDropdown">
                         <li><a class="dropdown-item" href="#">For Enterprise</a></li>
                         <li><a class="dropdown-item" href="#">For Small Business</a></li>
+                        <li><a class="dropdown-item" href="#">Supply Chain Solutions</a></li>
+                        <li><a class="dropdown-item" href="#">Bulk Purchasing</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Resources</a>
+                    <a class="nav-link" href="{{ route('resources') }}">Resources</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">About Us</a>
+                    <a class="nav-link" href="{{ route('about') }}">About Us</a>
                 </li>
             </ul>
 
@@ -172,6 +177,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{{ route('user.profile') }}">My Account</a></li>
+                            <li><a class="dropdown-item" href="{{ route('contributor.dashboard') }}">Contributor Dashboard</a></li>
                             <li><a class="dropdown-item" href="{{ route('user.contacts.index') }}">My Contacts</a>
                             </li>
                             <li><a class="dropdown-item" href="#">Order History</a></li>

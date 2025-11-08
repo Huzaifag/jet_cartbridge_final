@@ -11,6 +11,7 @@ class CustomerProfile extends Model
         'user_id',
         'avatar',
         'coins',
+        'referral_shares',
     ];
 
     public function user(): BelongsTo
