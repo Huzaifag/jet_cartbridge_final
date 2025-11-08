@@ -11,6 +11,7 @@ class Order extends Model
 
     protected $fillable = [
         'seller_id',
+        'manufacturer_id',
         'delivery_person_id',
         'customer_id',
         'total',
@@ -27,7 +28,8 @@ class Order extends Model
         'dispatch_details',
         'courier_name',
         'tracking_number',
-        'dispatched_at'
+        'dispatched_at',
+        'order_number'
     ];
     
 
@@ -48,6 +50,11 @@ class Order extends Model
     public function seller()
     {
         return $this->belongsTo(Seller::class);
+    }
+
+    public function manufacturer()
+    {
+        return $this->belongsTo(Manufacturer::class);
     }
 
     public function customer()
@@ -87,5 +94,45 @@ class Order extends Model
     public function statuses()
     {
         return $this->hasMany(OrderStatus::class);
+    }
+
+    /**
+     * Get the vendor (seller or manufacturer) for this order
+     */
+    public function vendor()
+    {
+        if ($this->manufacturer_id) {
+            return $this->manufacturer;
+        }
+        return $this->seller;
+    }
+
+    /**
+     * Get the vendor type (seller or manufacturer)
+     */
+    public function vendorType()
+    {
+        return $this->manufacturer_id ? 'manufacturer' : 'seller';
+    }
+
+    /**
+     * Get current stage status
+     */
+    public function getCurrentStage()
+    {
+        return $this->statuses()
+            ->where('status', 'in_progress')
+            ->first();
+    }
+
+    /**
+     * Check if order is at a specific stage
+     */
+    public function isAtStage($stage)
+    {
+        return $this->statuses()
+            ->where('stage', $stage)
+            ->where('status', 'in_progress')
+            ->exists();
     }
 }

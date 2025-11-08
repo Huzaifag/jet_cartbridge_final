@@ -7,49 +7,77 @@
             <h1 class="h3 mb-0 text-gray-800">Order Details - #{{ $order->id }}</h1>
 
             <div class="d-flex align-items-center gap-2">
-                {{-- Create Invoice Button --}}
-                @if ($order->status === 'Confirmed')
-                    @role('accountant')
-                    <form action="{{ route('accountant.confirmed-orders.invoincing', $order->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="btn btn-success shadow-sm"
-                            onclick="return confirm('Are you sure you want to create an invoice for this order? This action cannot be undone.')">
-                            <i class="fas fa-file-invoice fa-sm text-white-50"></i> Create Invoice
-                        </button>
-                    </form>
-                    @endrole
+                {{-- Check if order is in out_for_delivery stage and in_progress --}}
+                @php
+                    $deliveryStage = collect($order->statuses)->firstWhere('stage', 'out_for_delivery');
+                    $canDeliver = $deliveryStage && $deliveryStage['status'] === 'in_progress';
+                    
+                    $deliveredStage = collect($order->statuses)->firstWhere('stage', 'delivered');
+                    $isDelivered = $deliveredStage && $deliveredStage['status'] === 'completed';
+                @endphp
+
+                @if ($canDeliver)
+                    <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#deliverModal">
+                        <i class="fas fa-check fa-sm text-white-50"></i> Mark as Delivered
+                    </button>
+                @elseif ($isDelivered)
+                    <span class="badge bg-success p-2">
+                        <i class="fas fa-check-circle"></i> Order Delivered
+                    </span>
                 @endif
 
                 <a href="{{ route('deliveryman.orders.index') }}" class="btn btn-sm btn-secondary shadow-sm">
                     <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Orders
                 </a>
-
-                {{-- Deliver Button --}}
-                @if ($order->status === 'Dispatched')
-                    <a href="{{ route('deliveryman.orders.edit' , $order->id) }}" type="button" class="btn btn-success" >
-                        <i class="fas fa-check"></i> Mark as Delivered
-</a>
-                @endif
             </div>
         </div>
 
         {{-- Order Status Alert --}}
         @php
-            $statusClass = match ($order->status) {
-                'Order Placed' => 'info',
-                'Processing', 'Confirmed' => 'warning',
-                'Invoiced', 'Shipped' => 'primary',
-                'Delivered' => 'success',
-                'Cancelled' => 'danger',
+            // Get current stage
+            $currentStage = collect($order->statuses)
+                ->filter(fn($s) => $s['status'] === 'in_progress' || $s['status'] === 'completed')
+                ->sortByDesc('updated_at')
+                ->first();
+            
+            $stageLabels = [
+                'order_placed' => 'Order Placed',
+                'salesman_review' => 'Salesman Review',
+                'accountant_billing' => 'Accountant Billing',
+                'warehouse_dispatch' => 'Warehouse Dispatch',
+                'out_for_delivery' => 'Out for Delivery',
+                'delivered' => 'Delivered'
+            ];
+            
+            $currentStageName = $stageLabels[$currentStage['stage']] ?? ucfirst(str_replace('_', ' ', $currentStage['stage']));
+            
+            $statusClass = match($currentStage['stage']) {
+                'order_placed' => 'info',
+                'salesman_review' => 'info',
+                'accountant_billing' => 'warning',
+                'warehouse_dispatch' => 'primary',
+                'out_for_delivery' => 'warning',
+                'delivered' => 'success',
                 default => 'secondary'
             };
         @endphp
         <div class="alert alert-{{ $statusClass }} shadow-sm mb-4" role="alert">
-            <h4 class="alert-heading">Current Status: {{ $order->status }}</h4>
+            <h4 class="alert-heading">
+                <i class="fas fa-info-circle"></i> Current Stage: {{ $currentStageName }}
+                @if ($currentStage['status'] === 'in_progress')
+                    <span class="badge bg-warning text-dark">In Progress</span>
+                @elseif ($currentStage['status'] === 'completed')
+                    <span class="badge bg-success">Completed</span>
+                @endif
+            </h4>
             <p class="mb-0">
-                Payment Status: <strong>{{ ucwords($order->payment_status) }}</strong> via
-                <strong>{{ strtoupper($order->payment_method) }}</strong>
+                <strong>Payment Status:</strong> {{ ucwords($order->payment_status) }} via {{ strtoupper($order->payment_method) }}
+                <br>
+                <strong>Order Number:</strong> {{ $order->order_number ?? 'N/A' }}
+                @if ($order->tracking_number)
+                    <br>
+                    <strong>Tracking Number:</strong> {{ $order->tracking_number }}
+                @endif
             </p>
         </div>
 
@@ -94,7 +122,7 @@
             {{-- Right Column: Addresses, Timeline, and Dispatch (if applicable) --}}
             <div class="col-xl-8 col-lg-7">
                 {{-- Dispatch Info (if dispatched) --}}
-                @if ($order->status === 'Dispatched' || $order->dispatched_at)
+                @if ($order->dispatched_at)
                     <div class="card shadow mb-4">
                         <div class="card-header bg-success text-white py-3">
                             <h6 class="m-0 font-weight-bold">Dispatch Information</h6>

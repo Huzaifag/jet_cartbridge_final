@@ -500,26 +500,32 @@
     color: var(--color-white);
 }
 
+[data-theme="light"] .partner-brands-slider::before {
+    background: linear-gradient(to right, #ffffff, transparent);
+}
+
+[data-theme="light"] .partner-brands-slider::after {
+    background: linear-gradient(to left, #ffffff, transparent);
+}
+
 [data-theme="light"] .partner-brand-item {
     background: var(--color-card-bg);
-    border: 1px solid rgba(58, 119, 255, 0.15);
+    border: 1px solid rgba(58, 119, 255, 0.2);
     box-shadow: var(--shadow-card);
 }
 
 [data-theme="light"] .partner-brand-item:hover {
     background: rgba(58, 119, 255, 0.05);
-    border-color: rgba(58, 119, 255, 0.3);
-    box-shadow: var(--shadow-hover);
+    border-color: var(--color-accent);
+    box-shadow: 0 10px 30px rgba(58, 119, 255, 0.2);
 }
 
 [data-theme="light"] .partner-logo {
-    filter: grayscale(100%) brightness(0.3);
-    opacity: 0.8;
+    /* No filter - keep original colors */
 }
 
 [data-theme="light"] .partner-brand-item:hover .partner-logo {
-    filter: none;
-    opacity: 1;
+    filter: drop-shadow(0 4px 12px rgba(58, 119, 255, 0.3));
 }
 
 [data-theme="light"] .testimonials-title {
@@ -948,4 +954,83 @@
 [data-theme="light"] .manufacturer-info {
     background: var(--color-surface);
     border-color: rgba(58, 119, 255, 0.2);
+}
+
+
+/* ========================================
+   PREMIUM CARD IMAGE - LIGHT THEME
+   ======================================== */
+
+[data-theme="light"] .premium-card-image {
+    /* No color filter - keep original image colors */
+}
+
+[data-theme="light"] .premium-card:hover .premium-card-image {
+    filter: drop-shadow(0 4px 8px rgba(58, 119, 255, 0.3));
+}
+
+
+/* ========================================
+   TESTIMONIALS SLIDER - LIGHT THEME
+   ======================================== */
+
+[data-theme="light"] .testimonials-slider::before {
+    background: linear-gradient(to right, #ffffff, transparent);
+}
+
+[data-theme="light"] .testimonials-slider::after {
+    background: linear-gradient(to left, #ffffff, transparent);
+}
+
+
+/* ========================================
+   HERO SLIDER - LIGHT THEME
+   ======================================== */
+
+[data-theme="light"] .hero-slide-overlay {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 249, 250, 0.88) 100%);
+}
+
+[data-theme="light"] .hero-slider-nav {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(58, 119, 255, 0.3);
+    color: var(--color-white);
+}
+
+[data-theme="light"] .hero-slider-nav:hover {
+    background: var(--color-accent);
+    color: #ffffff;
+}
+
+[data-theme="light"] .hero-dot {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(58, 119, 255, 0.5);
+}
+
+[data-theme="light"] .hero-dot:hover {
+    background: rgba(58, 119, 255, 0.5);
+}
+
+[data-theme="light"] .hero-dot.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+[data-theme="light"] .hero-search-wrapper {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(58, 119, 255, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .hero-search-icon {
+    color: var(--color-accent);
+}
+
+[data-theme="light"] .hero-search-btn {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+    color: #ffffff;
+}
+
+[data-theme="light"] .hero-search-btn:hover {
+    box-shadow: 0 8px 25px rgba(58, 119, 255, 0.4);
 }

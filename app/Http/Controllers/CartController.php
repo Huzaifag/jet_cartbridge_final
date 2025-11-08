@@ -11,13 +11,12 @@ use App\Models\OrderStatus;
 use App\Models\Product;
 use App\Models\PromotionRule;
 use App\Models\UserContact;
-use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rule;
-
+use Auth;
 
 class CartController extends Controller
 {
@@ -30,8 +29,8 @@ class CartController extends Controller
 
         $cart = auth()->user()->cart;
         $subtotal = $cart ? $cart->total() : 0;
-        $shipping = $subtotal > 50 ? 0 : 10; // Free shipping over $50
-        $tax = round($subtotal * 0.08, 2); // 8% tax
+        $shipping = $subtotal > 50 ? 0 : 10;  // Free shipping over $50
+        $tax = round($subtotal * 0.08, 2);  // 8% tax
         $total = $subtotal + $shipping + $tax;
 
         return view('frontend.cart.index', compact('cart', 'total', 'subtotal', 'shipping', 'tax'));
@@ -52,10 +51,10 @@ class CartController extends Controller
     {
         // Rate limiting to prevent spam
         $key = 'add-to-cart:' . auth()->id();
-        if (RateLimiter::tooManyAttempts($key, 10)) { // 10 attempts per minute
+        if (RateLimiter::tooManyAttempts($key, 10)) {  // 10 attempts per minute
             return redirect()->back()->with('error', 'Too many requests. Please try again later.');
         }
-        RateLimiter::hit($key, 60); // 60 second window
+        RateLimiter::hit($key, 60);  // 60 second window
 
         // Authorization check
         if (!auth()->check() || !auth()->user()->hasRole('customer')) {
@@ -90,7 +89,8 @@ class CartController extends Controller
         // Check for active promotion on this product
         $promotionRule = PromotionRule::where('applicable_product_id', $product->id)
             ->whereHas('promotion', function ($q) {
-                $q->where('is_active', true)
+                $q
+                    ->where('is_active', true)
                     ->where('start_date', '<=', now())
                     ->where('end_date', '>=', now());
             })
@@ -116,14 +116,16 @@ class CartController extends Controller
                     'product_id' => $product->id,
                     'quantity' => $quantityToAdd,
                     'price' => $product->b2c_price,
-                    'is_selected' => true, // Auto-select new items
+                    'is_selected' => true,  // Auto-select new items
                 ]);
             }
 
             // Handle free product addition
             if ($freeQty > 0) {
                 // Check if free product already exists in the cart
-                $freeItem = $cart->items()->where('product_id', $product->id)
+                $freeItem = $cart
+                    ->items()
+                    ->where('product_id', $product->id)
                     ->where('is_free', true)
                     ->first();
 
@@ -169,8 +171,8 @@ class CartController extends Controller
         // Calculate summary details for only selected items
         $itemCount = $selectedItems->count();
         $subtotal = $selectedItems->sum(fn($item) => $item->price * $item->quantity);
-        $shipping = $subtotal > 50 ? 0 : 5; // Free shipping for orders over $50
-        $tax = round($subtotal * 0.08, 2); // 8% tax
+        $shipping = $subtotal > 50 ? 0 : 5;  // Free shipping for orders over $50
+        $tax = round($subtotal * 0.08, 2);  // 8% tax
         $total = $subtotal + $shipping + $tax;
 
         // Return view with all necessary data
@@ -184,7 +186,6 @@ class CartController extends Controller
             'total'
         ));
     }
-
 
     public function payment(Request $request)
     {
@@ -226,8 +227,8 @@ class CartController extends Controller
 
         // Calculate order summary
         $subtotal = $selectedItems->sum(fn($item) => $item->price * $item->quantity);
-        $shipping = $subtotal > 50 ? 0 : 10; // Free shipping over $50
-        $tax = round($subtotal * 0.08, 2); // 8% tax
+        $shipping = $subtotal > 50 ? 0 : 10;  // Free shipping over $50
+        $tax = round($subtotal * 0.08, 2);  // 8% tax
         $total = $subtotal + $shipping + $tax;
 
         // Return payment view with data
@@ -241,9 +242,6 @@ class CartController extends Controller
             'total'
         ));
     }
-
-
-
 
     public function placeOrder(Request $request, Cart $cart)
     {
@@ -287,7 +285,8 @@ class CartController extends Controller
         }
 
         // Fetch selected items with lock for update
-        $selectedItems = $cart->items()
+        $selectedItems = $cart
+            ->items()
             ->where('is_selected', true)
             ->with('product')
             ->lockForUpdate()
@@ -309,24 +308,31 @@ class CartController extends Controller
         $createdOrders = [];
 
         DB::transaction(function () use ($cart, $selectedItems, $request, $selectedAddress, &$createdOrders) {
-
             // Format address string
             $addressString = "{$selectedAddress->address}, {$selectedAddress->city}, {$selectedAddress->state} {$selectedAddress->postal_code}, {$selectedAddress->country}";
 
-            // Group items by seller
-            $itemsBySeller = $selectedItems->groupBy(fn($item) => $item->product->seller_id);
+            // Group items by seller OR manufacturer
+            $itemsByVendor = $selectedItems->groupBy(function ($item) {
+                // Check if product belongs to manufacturer or seller
+                if ($item->product->manufacturer_id) {
+                    return 'manufacturer_' . $item->product->manufacturer_id;
+                } else {
+                    return 'seller_' . $item->product->seller_id;
+                }
+            });
 
-            foreach ($itemsBySeller as $sellerId => $items) {
-
+            foreach ($itemsByVendor as $vendorKey => $items) {
                 // Calculate total
                 $total = $items->sum(fn($item) => $item->price * $item->quantity);
 
+                // Determine if this is a manufacturer or seller order
+                [$vendorType, $vendorId] = explode('_', $vendorKey);
+
                 // Create order with unique order number
                 $orderNumber = 'ORD-' . strtoupper(uniqid());
-                $order = Order::create([
+                $orderData = [
                     'order_number' => $orderNumber,
                     'status' => 'Order Placed',
-                    'seller_id' => $sellerId,
                     'customer_id' => auth()->id(),
                     'total' => $total,
                     'payment_status' => 'pending',
@@ -334,15 +340,28 @@ class CartController extends Controller
                     'shipping_address' => $addressString,
                     'billing_address' => $addressString,
                     'notes' => '',
-                ]);
+                ];
 
-                // Insert order stages
+                // Set seller_id or manufacturer_id based on vendor type
+                if ($vendorType === 'manufacturer') {
+                    $orderData['manufacturer_id'] = $vendorId;
+                    $orderData['seller_id'] = null;
+                } else {
+                    $orderData['seller_id'] = $vendorId;
+                    $orderData['manufacturer_id'] = null;
+                }
+
+                $order = Order::create($orderData);
+
+                // Insert order stages following the correct lifecycle
+                // 1. Order Placed → 2. Salesman Review → 3. Accountant (Billing) → 4. Warehouse (Dispatch) → 5. Delivery
                 $stages = [
                     ['stage' => 'order_placed', 'status' => 'completed', 'started_at' => now(), 'completed_at' => now()],
-                    ['stage' => 'with_accountant', 'status' => 'pending'],
-                    ['stage' => 'invoice_stage', 'status' => 'pending'],
-                    ['stage' => 'in_production', 'status' => 'pending'],
-                    ['stage' => 'delivery', 'status' => 'pending'],
+                    ['stage' => 'salesman_review', 'status' => 'in_progress', 'started_at' => now()],
+                    ['stage' => 'accountant_billing', 'status' => 'pending'],
+                    ['stage' => 'warehouse_dispatch', 'status' => 'pending'],
+                    ['stage' => 'out_for_delivery', 'status' => 'pending'],
+                    ['stage' => 'delivered', 'status' => 'pending'],
                 ];
 
                 foreach ($stages as $stage) {
@@ -390,14 +409,14 @@ class CartController extends Controller
             ->with('success', 'Order placed successfully! Order numbers: ' . collect($createdOrders)->pluck('order_number')->join(', '));
     }
 
-
     public function order(Cart $cart)
     {
         // dd($cart);
         // Fetch only selected cart items with their related products
-        $selectedItems = $cart->items()
+        $selectedItems = $cart
+            ->items()
             ->where('is_selected', true)
-            ->with('product') // eager load product to get seller_id
+            ->with('product')  // eager load product to get seller_id
             ->get();
 
         // If no items selected, return warning
@@ -408,12 +427,10 @@ class CartController extends Controller
         $createdOrders = [];
 
         DB::transaction(function () use ($cart, $selectedItems, &$createdOrders) {
-
             // Group items by seller
             $itemsBySeller = $selectedItems->groupBy(fn($item) => $item->product->seller_id);
 
             foreach ($itemsBySeller as $sellerId => $items) {
-
                 // Calculate total for this seller
                 $total = $items->sum(fn($item) => $item->price * $item->quantity);
 
@@ -446,7 +463,6 @@ class CartController extends Controller
                     ], $stage));
                 }
 
-
                 // Create order items
                 foreach ($items as $item) {
                     OrderItem::create([
@@ -462,7 +478,8 @@ class CartController extends Controller
 
             // ✅ Instead of deleting cart or all items:
             // Remove only the ordered (selected) items from the cart
-            $cart->items()
+            $cart
+                ->items()
                 ->where('is_selected', true)
                 ->delete();
 
@@ -472,13 +489,11 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Order placed successfully!');
     }
 
-
-
     public function toggleItemSelection(Request $request, CartItem $cartItem)
     {
         // Rate limiting
         $key = 'cart-toggle:' . auth()->id();
-        if (RateLimiter::tooManyAttempts($key, 30)) { // 30 attempts per minute
+        if (RateLimiter::tooManyAttempts($key, 30)) {  // 30 attempts per minute
             return response()->json([
                 'success' => false,
                 'message' => 'Too many requests. Please try again later.'
@@ -516,7 +531,7 @@ class CartController extends Controller
     {
         // Rate limiting
         $key = 'cart-select-all:' . auth()->id();
-        if (RateLimiter::tooManyAttempts($key, 20)) { // 20 attempts per minute
+        if (RateLimiter::tooManyAttempts($key, 20)) {  // 20 attempts per minute
             return response()->json([
                 'success' => false,
                 'message' => 'Too many requests. Please try again later.'
@@ -549,7 +564,7 @@ class CartController extends Controller
     {
         // Rate limiting
         $key = 'cart-deselect-all:' . auth()->id();
-        if (RateLimiter::tooManyAttempts($key, 20)) { // 20 attempts per minute
+        if (RateLimiter::tooManyAttempts($key, 20)) {  // 20 attempts per minute
             return response()->json([
                 'success' => false,
                 'message' => 'Too many requests. Please try again later.'
@@ -582,7 +597,7 @@ class CartController extends Controller
     {
         // Rate limiting
         $key = 'cart-toggle-select-all:' . auth()->id();
-        if (RateLimiter::tooManyAttempts($key, 20)) { // 20 attempts per minute
+        if (RateLimiter::tooManyAttempts($key, 20)) {  // 20 attempts per minute
             return response()->json([
                 'success' => false,
                 'message' => 'Too many requests. Please try again later.'
@@ -625,7 +640,7 @@ class CartController extends Controller
     {
         // Rate limiting
         $key = 'cart-bulk-update:' . auth()->id();
-        if (RateLimiter::tooManyAttempts($key, 15)) { // 15 attempts per minute
+        if (RateLimiter::tooManyAttempts($key, 15)) {  // 15 attempts per minute
             return response()->json([
                 'success' => false,
                 'message' => 'Too many requests. Please try again later.'
@@ -642,7 +657,7 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'items' => 'required|array|min:1|max:50', // Limit to 50 items per request
+            'items' => 'required|array|min:1|max:50',  // Limit to 50 items per request
             'items.*.id' => 'required|integer|exists:cart_items,id',
             'items.*.is_selected' => 'required|boolean'
         ]);
@@ -694,8 +709,8 @@ class CartController extends Controller
         });
 
         $totalQuantity = $selectedItems->sum('quantity');
-        $shipping = $selectedItems->count() > 0 ? 15 : 0; // Default shipping
-        $tax = $subtotal * 0.08; // 8% tax
+        $shipping = $selectedItems->count() > 0 ? 15 : 0;  // Default shipping
+        $tax = $subtotal * 0.08;  // 8% tax
         $total = $subtotal + $shipping + $tax;
 
         return response()->json([
@@ -716,7 +731,7 @@ class CartController extends Controller
     {
         // Rate limiting
         $key = 'cart-update-quantity:' . auth()->id();
-        if (RateLimiter::tooManyAttempts($key, 30)) { // 30 attempts per minute
+        if (RateLimiter::tooManyAttempts($key, 30)) {  // 30 attempts per minute
             return response()->json([
                 'success' => false,
                 'message' => 'Too many requests. Please try again later.'
@@ -756,5 +771,4 @@ class CartController extends Controller
             'item_total' => number_format($cartItem->price * $cartItem->quantity, 2)
         ]);
     }
-
 }

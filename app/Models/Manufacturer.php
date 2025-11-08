@@ -48,4 +48,29 @@ class Manufacturer extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function accountants()
+    {
+        return $this->hasMany(Accountant::class);
+    }
+
+    public function salesmen()
+    {
+        return $this->hasMany(Salesman::class);
+    }
+
+    public function warehouses()
+    {
+        return $this->hasMany(Warehouse::class);
+    }
+
+    public function deliveryMen()
+    {
+        return $this->hasMany(DeliveryMan::class);
+    }
 }

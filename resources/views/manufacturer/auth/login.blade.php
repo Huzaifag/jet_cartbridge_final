@@ -72,7 +72,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('seller.login.submit') }}" method="POST">
+                <form action="{{ route('manufacturer.login.submit') }}" method="POST">
                     @csrf
                     <div class="mb-3">
                         <label for="email" class="form-label">Email address</label>
@@ -99,7 +99,7 @@
                 </form>
 
                 <div class="register-link">
-                    <p class="mb-0">Don't have an account? <a href="{{ route('seller.register') }}">Register here</a></p>
+                    <p class="mb-0">Don't have an account? <a href="{{ route('manufacturer.register') }}">Register here</a></p>
                 </div>
             </div>
         </div>

@@ -222,7 +222,7 @@
                     @endforelse
 
                     <li class="dropdown-footer text-center">
-                        <a href="{{ route('seller.meetings.index') }}" class="text-primary">View All Meetings</a>
+                        <a href="{{ route('manufacturer.meetings.index') }}" class="text-primary">View All Meetings</a>
                     </li>
                 </ul>
             </div>
@@ -242,7 +242,7 @@
                         <hr class="dropdown-divider">
                     </li>
                     {{-- <li>
-                        <a class="dropdown-item" href="{{ route('seller.orders.create') }}">
+                        <a class="dropdown-item" href="{{ route('manufacturer.orders.create') }}">
                             <i class="fas fa-plus-circle text-success me-2"></i>Create New Order
                         </a>
                     </li> --}}

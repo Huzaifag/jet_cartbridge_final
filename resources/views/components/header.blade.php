@@ -48,6 +48,18 @@
                             </a>
                         @break
 
+                        @case(auth()->user()->hasRole('manufacturer'))
+                            <a href="{{ route('manufacturer.dashboard') }}" class="premium-top-link">
+                                <i class="fas fa-industry me-1"></i>
+                                <span>Manufacturer Dashboard</span>
+                            </a>
+                        @break
+                            <a href="{{ route('deliveryman.dashboard') }}" class="premium-top-link">
+                                <i class="fas fa-truck me-1"></i>
+                                <span>Deliveryman Dashboard</span>
+                            </a>
+                        @break
+
                         @default
                             <a href="/" class="premium-top-link">
                                 <i class="fas fa-home me-1"></i>

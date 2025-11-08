@@ -59,6 +59,16 @@
         $products = $order['products'];
         $statuses = $order['statuses'];
 
+        // Stage label mapping for better display
+        $stageLabels = [
+            'order_placed' => 'Order Placed',
+            'salesman_review' => 'Salesman Review',
+            'accountant_billing' => 'Accountant Billing',
+            'warehouse_dispatch' => 'Warehouse Dispatch',
+            'out_for_delivery' => 'Out for Delivery',
+            'delivered' => 'Delivered'
+        ];
+
         // Helper function to map product details to order items
         $getProductDetails = function($productId, $products) {
             foreach ($products as $product) {
@@ -179,7 +189,7 @@
                 <div class="card detail-card">
                     <div class="card-header bg-white fw-bold py-3 border-bottom">
                         <i class="fas fa-sync-alt me-2 text-secondary"></i> Order Process Timeline
-                        <span class="float-end badge bg-info">{{ ucfirst(str_replace('_', ' ', $currentStatus)) }}</span>
+                        <span class="float-end badge bg-info">{{ $stageLabels[$currentStatus] ?? ucfirst(str_replace('_', ' ', $currentStatus)) }}</span>
                     </div>
                     <div class="card-body status-timeline">
                         @foreach ($statuses as $status)
@@ -190,7 +200,7 @@
                             @endphp
                             <div class="timeline-item {{ $timelineClass }}">
                                 <span class="timeline-marker"></span>
-                                <p class="mb-0 fw-bold text-capitalize">{{ str_replace('_', ' ', $status['stage']) }}</p>
+                                <p class="mb-0 fw-bold">{{ $stageLabels[$status['stage']] ?? ucfirst(str_replace('_', ' ', $status['stage'])) }}</p>
                                 <small class="text-muted">
                                     @if ($isCompleted)
                                         <i class="fas fa-check-circle text-success me-1"></i> Completed: {{ \Carbon\Carbon::parse($status['completed_at'])->format('M d, Y') }}

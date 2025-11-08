@@ -1,103 +1,193 @@
 @extends('frontend.layout.main')
 @section('content')
-    <!-- Premium Hero Section -->
-    <section class="premium-hero">
-        <div class="premium-container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <div class="premium-hero-content text-start">
-                        <h1 class="premium-hero-title">
-                            Your Gateway to <span class="accent-text">Global Trade</span> Excellence
+    <!-- Premium Hero Slider -->
+    <section class="premium-hero-slider">
+        <div class="hero-slider-container">
+            <!-- Slide 1 -->
+            <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+                <div class="hero-slide-overlay"></div>
+                <div class="premium-container">
+                    <div class="hero-slide-content">
+                        <h1 class="hero-slide-title" data-animation="fadeInUp">
+                            Your Gateway to <span class="accent-text">Global Trade</span>
                         </h1>
-                        <p class="premium-hero-subtitle">
-                            Connect with verified suppliers and buyers worldwide to secure premium deals on bulk orders with confidence and efficiency.
+                        <p class="hero-slide-subtitle" data-animation="fadeInUp" data-delay="200">
+                            Connect with verified suppliers and buyers worldwide
                         </p>
-
-                        <form method="GET" action="{{ route('home') }}" class="mb-4">
-                            <div class="input-group input-group-lg">
-                                <input type="text" name="search" class="premium-form-input"
-                                    placeholder="What are you looking for? (e.g., electronics, textiles, machinery)"
-                                    value="{{ request('search') }}">
-                                <button type="submit" class="btn-premium btn-premium-primary">
-                                    <i class="fas fa-search me-2"></i> Search
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="popular-searches-wrapper mt-4">
-                            <div class="d-flex flex-wrap align-items-center gap-3">
-                                <div class="popular-label">
-                                    <i class="fas fa-fire"></i>
-                                    <span>Popular Searches</span>
+                        
+                        <!-- Search Bar Inside Hero -->
+                        <div class="hero-search-inline" data-animation="fadeInUp" data-delay="300">
+                            <form method="GET" action="{{ route('home') }}">
+                                <div class="hero-search-wrapper">
+                                    <i class="fas fa-search hero-search-icon"></i>
+                                    <input type="text" name="search" class="hero-search-input"
+                                        placeholder="Search for products, categories, or suppliers..."
+                                        value="{{ request('search') }}">
+                                    <button type="submit" class="hero-search-btn">
+                                        Search
+                                    </button>
                                 </div>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <a href="{{ route('home', ['search' => 'Electronics']) }}" class="popular-search-badge">
-                                        <i class="fas fa-microchip"></i>
-                                        <span>Electronics</span>
-                                    </a>
-                                    <a href="{{ route('home', ['search' => 'Machinery']) }}" class="popular-search-badge">
-                                        <i class="fas fa-cogs"></i>
-                                        <span>Machinery</span>
-                                    </a>
-                                    <a href="{{ route('home', ['search' => 'Textiles']) }}" class="popular-search-badge">
-                                        <i class="fas fa-tshirt"></i>
-                                        <span>Textiles</span>
-                                    </a>
-                                    <a href="{{ route('home', ['search' => 'Raw Materials']) }}" class="popular-search-badge">
-                                        <i class="fas fa-cubes"></i>
-                                        <span>Raw Materials</span>
-                                    </a>
-                                </div>
-                            </div>
+                            </form>
                         </div>
-
-                        <div class="row mt-5">
-                            <div class="col-4 text-center">
-                                <div class="text-accent" style="font-size: 2.5rem; font-weight: 800;">50K+</div>
-                                <div class="text-dim">Verified Suppliers</div>
+                        
+                        <div class="hero-stats" data-animation="fadeInUp" data-delay="500">
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">50K+</div>
+                                <div class="hero-stat-label">Verified Suppliers</div>
                             </div>
-                            <div class="col-4 text-center">
-                                <div class="text-accent" style="font-size: 2.5rem; font-weight: 800;">120+</div>
-                                <div class="text-dim">Countries</div>
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">120+</div>
+                                <div class="hero-stat-label">Countries</div>
                             </div>
-                            <div class="col-4 text-center">
-                                <div class="text-accent" style="font-size: 2.5rem; font-weight: 800;">$10B+</div>
-                                <div class="text-dim">Annual Trade</div>
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">$10B+</div>
+                                <div class="hero-stat-label">Annual Trade</div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="text-center">
-                        <img src="https://img.freepik.com/free-vector/global-business-connection-illustration_53876-17394.jpg"
-                            alt="Global business connections" class="img-fluid rounded-3 premium-shadow-card">
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+                <div class="hero-slide-overlay"></div>
+                <div class="premium-container">
+                    <div class="hero-slide-content">
+                        <h1 class="hero-slide-title" data-animation="fadeInUp">
+                            Premium <span class="accent-text">B2B Solutions</span>
+                        </h1>
+                        <p class="hero-slide-subtitle" data-animation="fadeInUp" data-delay="200">
+                            Bulk orders with exclusive pricing and dedicated support
+                        </p>
+                        
+                        <!-- Search Bar Inside Hero -->
+                        <div class="hero-search-inline" data-animation="fadeInUp" data-delay="300">
+                            <form method="GET" action="{{ route('home') }}">
+                                <div class="hero-search-wrapper">
+                                    <i class="fas fa-search hero-search-icon"></i>
+                                    <input type="text" name="search" class="hero-search-input"
+                                        placeholder="Search for products, categories, or suppliers..."
+                                        value="{{ request('search') }}">
+                                    <button type="submit" class="hero-search-btn">
+                                        Search
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="hero-stats" data-animation="fadeInUp" data-delay="500">
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">24/7</div>
+                                <div class="hero-stat-label">Support</div>
+                            </div>
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">100%</div>
+                                <div class="hero-stat-label">Secure</div>
+                            </div>
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">Fast</div>
+                                <div class="hero-stat-label">Shipping</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+                <div class="hero-slide-overlay"></div>
+                <div class="premium-container">
+                    <div class="hero-slide-content">
+                        <h1 class="hero-slide-title" data-animation="fadeInUp">
+                            Trusted by <span class="accent-text">Thousands</span>
+                        </h1>
+                        <p class="hero-slide-subtitle" data-animation="fadeInUp" data-delay="200">
+                            Join the leading B2B marketplace for quality products
+                        </p>
+                        
+                        <!-- Search Bar Inside Hero -->
+                        <div class="hero-search-inline" data-animation="fadeInUp" data-delay="300">
+                            <form method="GET" action="{{ route('home') }}">
+                                <div class="hero-search-wrapper">
+                                    <i class="fas fa-search hero-search-icon"></i>
+                                    <input type="text" name="search" class="hero-search-input"
+                                        placeholder="Search for products, categories, or suppliers..."
+                                        value="{{ request('search') }}">
+                                    <button type="submit" class="hero-search-btn">
+                                        Search
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="hero-stats" data-animation="fadeInUp" data-delay="500">
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">4.9/5</div>
+                                <div class="hero-stat-label">Rating</div>
+                            </div>
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">50K+</div>
+                                <div class="hero-stat-label">Reviews</div>
+                            </div>
+                            <div class="hero-stat-item">
+                                <div class="hero-stat-number">98%</div>
+                                <div class="hero-stat-label">Satisfaction</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slider Controls -->
+        <button class="hero-slider-nav hero-slider-prev">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="hero-slider-nav hero-slider-next">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Slider Dots -->
+        <div class="hero-slider-dots">
+            <button class="hero-dot active" data-slide="0"></button>
+            <button class="hero-dot" data-slide="1"></button>
+            <button class="hero-dot" data-slide="2"></button>
+        </div>
+
+
             </div>
         </div>
     </section>
 
     <!-- Premium Trust Badges Section -->
-    <section class="premium-section py-5">
+    <section class="premium-section" style="padding-top: 4rem; padding-bottom: 3rem;">
         <div class="premium-container">
             <div class="premium-grid premium-grid-4">
                 <div class="premium-card premium-fade-in">
-                    <i class="fas fa-shield-alt premium-card-icon"></i>
+                    <div class="premium-card-icon-wrapper">
+                        <img src="{{asset('images/credit-card.png')}}" alt="Secure Payments" class="premium-card-image">
+                    </div>
                     <h3 class="premium-card-title">Secure Payments</h3>
                     <p class="premium-card-text">Bank-level security for all transactions</p>
                 </div>
                 <div class="premium-card premium-fade-in">
-                    <i class="fas fa-truck premium-card-icon"></i>
+                    <div class="premium-card-icon-wrapper">
+                        <img src="{{asset('images/fast-delivery.png')}}" alt="Secure Payments" class="premium-card-image">
+                    </div>
                     <h3 class="premium-card-title">Fast Shipping</h3>
                     <p class="premium-card-text">Global logistics network</p>
                 </div>
                 <div class="premium-card premium-fade-in">
-                    <i class="fas fa-certificate premium-card-icon"></i>
+                    <div class="premium-card-icon-wrapper">
+                        <img src="{{asset('images/merchant.png')}}" alt="Secure Payments" class="premium-card-image">
+                    </div>
                     <h3 class="premium-card-title">Verified Sellers</h3>
                     <p class="premium-card-text">Thoroughly vetted suppliers</p>
                 </div>
                 <div class="premium-card premium-fade-in">
-                    <i class="fas fa-headset premium-card-icon"></i>
+                    <div class="premium-card-icon-wrapper">
+                        <img src="{{asset('images/call-center.png')}}" alt="Secure Payments" class="premium-card-image">
+                    </div>
                     <h3 class="premium-card-title">24/7 Support</h3>
                     <p class="premium-card-text">Dedicated customer success</p>
                 </div>
@@ -248,37 +338,36 @@
 
                 <!-- Feature 1: Bulk Pricing -->
                 <div class="b2b-feature-tile">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
+                    <div class="premium-card-icon-wrapper">
+                        <img src="{{asset('images/tag.png')}}" alt="Secure Payments" class="premium-card-image">
+                    </div>
                     <h3>Tiered Bulk Pricing</h3>
                     <p>Maximize profitability with special volume discounts and scalable pricing structures.</p>
                 </div>
 
                 <!-- Feature 2: Dedicated Manager -->
                 <div class="b2b-feature-tile">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
+                    <div class="premium-card-icon-wrapper">
+                        <img src="{{asset('images/accountant.png')}}" alt="Secure Payments" class="premium-card-image">
+                    </div>
                     <h3>Dedicated Account Manager</h3>
                     <p>Receive one-on-one attention for seamless ordering, logistics, and strategic planning.</p>
                 </div>
 
                 <!-- Feature 3: Invoice Billing -->
                 <div class="b2b-feature-tile">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-4 10h4m-4 0a2 2 0 01-2-2v-6H7v6a2 2 0 002 2z"></path>
-                    </svg>
+                    <div class="premium-card-icon-wrapper">
+                        <img src="{{asset('images/bill.png')}}" alt="Secure Payments" class="premium-card-image">
+                    </div>
                     <h3>Flexible Invoice Billing</h3>
                     <p>Streamline procurement with net 30/60 payment terms and official invoice documentation.</p>
                 </div>
 
                 <!-- Feature 4: Custom Orders -->
                 <div class="b2b-feature-tile">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0v4m-2 4h-4m4 0a2 2 0 11-4 0m0 0v2m4-2v2m-4-2H8m4 2h2m0 0v2m-2-2v2m-2-2H6m4 2h2m0 0v2m-2-2v2m-2-2H4m4 2h2m0 0v2m-2-2v2m-2-2H2m4 2h2m0 0v2m-2-2v2m-2-2H0m4 2h2m0 0v2m-2-2v2m-2-2H-2m4 2h2m0 0v2m-2-2v2m-2-2H-4m4 2h2m0 0v2m-2-2v2m-2-2H-6m4 2h2m0 0v2m-2-2v2m-2-2H-8m4 2h2m0 0v2m-2-2v2m-2-2H-10m4 2h2m0 0v2m-2-2v2m-2-2H-12"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5 2h-4V7a4 4 0 00-4-4H5a4 4 0 00-4 4v10a4 4 0 004 4h14a4 4 0 004-4V14a2 2 0 00-2-2z"></path>
-                    </svg>
+                    <div class="premium-card-icon-wrapper">
+                        <img src="{{asset('images/modification.png')}}" alt="Secure Payments" class="premium-card-image">
+                    </div>
                     <h3>Custom Product Orders</h3>
                     <p>Access exclusive customization options and product sourcing for your unique business needs.</p>
                 </div>
@@ -411,24 +500,46 @@
             <!-- Partner Brands -->
             <div class="partner-brands-section premium-slide-up">
                 <h3 class="partner-brands-title">Trusted Partners & Suppliers</h3>
-                <div class="partner-brands-grid">
-                    <div class="partner-brand-item">
-                        <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft" class="partner-logo">
-                    </div>
-                    <div class="partner-brand-item">
-                        <img src="https://logo.clearbit.com/amazon.com" alt="Amazon" class="partner-logo">
-                    </div>
-                    <div class="partner-brand-item">
-                        <img src="https://logo.clearbit.com/google.com" alt="Google" class="partner-logo">
-                    </div>
-                    <div class="partner-brand-item">
-                        <img src="https://logo.clearbit.com/apple.com" alt="Apple" class="partner-logo">
-                    </div>
-                    <div class="partner-brand-item">
-                        <img src="https://logo.clearbit.com/samsung.com" alt="Samsung" class="partner-logo">
-                    </div>
-                    <div class="partner-brand-item">
-                        <img src="https://logo.clearbit.com/sony.com" alt="Sony" class="partner-logo">
+                <div class="partner-brands-slider">
+                    <div class="partner-brands-track">
+                        <!-- First set of logos -->
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/amazon.com" alt="Amazon" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/google.com" alt="Google" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/apple.com" alt="Apple" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/samsung.com" alt="Samsung" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/sony.com" alt="Sony" class="partner-logo">
+                        </div>
+                        <!-- Duplicate set for seamless loop -->
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/amazon.com" alt="Amazon" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/google.com" alt="Google" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/apple.com" alt="Apple" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/samsung.com" alt="Samsung" class="partner-logo">
+                        </div>
+                        <div class="partner-brand-item">
+                            <img src="https://logo.clearbit.com/sony.com" alt="Sony" class="partner-logo">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -436,51 +547,103 @@
             <!-- Customer Testimonials -->
             <div class="customer-testimonials-section premium-scale-in">
                 <h3 class="testimonials-title">What Our Customers Say</h3>
-                <div class="testimonials-grid">
-                    <div class="testimonial-card premium-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">"Exceptional service and quality products. The delivery was incredibly fast and the customer support team was very helpful."</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                <div class="testimonials-slider">
+                    <div class="testimonials-track">
+                        <!-- First set of testimonials -->
+                        <div class="testimonial-card premium-card">
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                            <div class="author-info">
-                                <strong>Emily Chen</strong>
-                                <span>Business Owner</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="testimonial-card premium-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">"I've been ordering from JetCartridge for over a year now. Their consistency in quality and service is unmatched."</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
-                            </div>
-                            <div class="author-info">
-                                <strong>Michael Rodriguez</strong>
-                                <span>Retail Manager</span>
+                            <p class="testimonial-text">"Exceptional service and quality products. The delivery was incredibly fast and the customer support team was very helpful."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://img.freepik.com/free-photo/beautiful-girl-stands-park_8353-5084.jpg?semt=ais_hybrid&w=740&q=80" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <strong>Emily Chen</strong>
+                                    <span>Business Owner</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="testimonial-card premium-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">"The return process was so smooth when I needed to exchange a product. Great customer experience overall!"</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                        
+                        <div class="testimonial-card premium-card">
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                            <div class="author-info">
-                                <strong>Lisa Thompson</strong>
-                                <span>Verified Customer</span>
+                            <p class="testimonial-text">"I've been ordering from JetCartridge for over a year now. Their consistency in quality and service is unmatched."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <strong>Michael Rodriguez</strong>
+                                    <span>Retail Manager</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="testimonial-card premium-card">
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"The return process was so smooth when I needed to exchange a product. Great customer experience overall!"</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <strong>Lisa Thompson</strong>
+                                    <span>Verified Customer</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Duplicate set for seamless loop -->
+                        <div class="testimonial-card premium-card">
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"Exceptional service and quality products. The delivery was incredibly fast and the customer support team was very helpful."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://img.freepik.com/free-photo/beautiful-girl-stands-park_8353-5084.jpg?semt=ais_hybrid&w=740&q=80" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <strong>Emily Chen</strong>
+                                    <span>Business Owner</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="testimonial-card premium-card">
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"I've been ordering from JetCartridge for over a year now. Their consistency in quality and service is unmatched."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <strong>Michael Rodriguez</strong>
+                                    <span>Retail Manager</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="testimonial-card premium-card">
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">"The return process was so smooth when I needed to exchange a product. Great customer experience overall!"</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <strong>Lisa Thompson</strong>
+                                    <span>Verified Customer</span>
+                                </div>
                             </div>
                         </div>
                     </div>

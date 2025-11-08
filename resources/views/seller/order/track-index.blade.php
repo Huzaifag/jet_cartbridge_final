@@ -63,22 +63,22 @@
             font-weight: 600;
         }
         
-        .status-accountant {
-            background-color: #e8f4ff;
-            color: #0d6efd;
+        .status-salesman-review {
+            background-color: #cfe2ff;
+            color: #084298;
         }
         
-        .status-invoice {
+        .status-accountant-billing {
             background-color: #fff3cd;
             color: #856404;
         }
         
-        .status-production {
+        .status-warehouse-dispatch {
             background-color: #d1e7dd;
             color: #0f5132;
         }
         
-        .status-delivery {
+        .status-out-for-delivery {
             background-color: #d63384;
             color: white;
         }
@@ -86,6 +86,11 @@
         .status-delivered {
             background-color: #198754;
             color: white;
+        }
+        
+        .status-order-placed {
+            background-color: #e8f4ff;
+            color: #0d6efd;
         }
         
         .order-amount {
@@ -314,13 +319,13 @@
             <div class="col-md-2 mb-3">
                 <div class="stats-card">
                     <div class="stats-number">2</div>
-                    <div class="stats-label">In Accounting</div>
+                    <div class="stats-label">Salesman Review</div>
                 </div>
             </div>
             <div class="col-md-2 mb-3">
                 <div class="stats-card">
                     <div class="stats-number">3</div>
-                    <div class="stats-label">In Production</div>
+                    <div class="stats-label">Warehouse Dispatch</div>
                 </div>
             </div>
             <div class="col-md-2 mb-3">
@@ -344,10 +349,11 @@
                     <label class="form-label">Status</label>
                     <select class="form-select">
                         <option value="">All Statuses</option>
-                        <option value="accountant">With Accountant</option>
-                        <option value="invoice">Invoice Stage</option>
-                        <option value="production">In Production</option>
-                        <option value="delivery">Assign for Delivery</option>
+                        <option value="order_placed">Order Placed</option>
+                        <option value="salesman_review">Salesman Review</option>
+                        <option value="accountant_billing">Accountant Billing</option>
+                        <option value="warehouse_dispatch">Warehouse Dispatch</option>
+                        <option value="out_for_delivery">Out for Delivery</option>
                         <option value="delivered">Delivered</option>
                     </select>
                 </div>
@@ -410,7 +416,7 @@
                                 <div class="order-amount">$897.50</div>
                             </div>
                             <div class="col-md-2">
-                                <span class="order-status status-production">In Production</span>
+                                <span class="order-status status-warehouse-dispatch">Warehouse Dispatch</span>
                             </div>
                             <div class="col-md-3 order-actions text-end">
                                 <button class="btn btn-view" data-bs-toggle="modal" data-bs-target="#orderModal">
@@ -443,7 +449,7 @@
                                 <div class="order-amount">$359.99</div>
                             </div>
                             <div class="col-md-2">
-                                <span class="order-status status-accountant">With Accountant</span>
+                                <span class="order-status status-accountant-billing">Accountant Billing</span>
                             </div>
                             <div class="col-md-3 order-actions text-end">
                                 <button class="btn btn-view" data-bs-toggle="modal" data-bs-target="#orderModal">
@@ -476,7 +482,7 @@
                                 <div class="order-amount">$49.98</div>
                             </div>
                             <div class="col-md-2">
-                                <span class="order-status status-delivery">Out for Delivery</span>
+                                <span class="order-status status-out-for-delivery">Out for Delivery</span>
                             </div>
                             <div class="col-md-3 order-actions text-end">
                                 <button class="btn btn-view" data-bs-toggle="modal" data-bs-target="#orderModal">

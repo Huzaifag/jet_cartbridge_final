@@ -36,7 +36,11 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\manufacturer\ManufacturerAuthController;
 use App\Http\Controllers\manufacturer\ManufacturerDashboardController;
 use App\Http\Controllers\manufacturer\ManufacturerProductController;
-
+use App\Http\Controllers\manufacturer\ManufacturerOrderController;
+use App\Http\Controllers\manufacturer\ManufacturerCategoryController;
+use App\Http\Controllers\manufacturer\ManufacturerInquiryController;
+use App\Http\Controllers\manufacturer\ManufacturerSettingController;
+use App\Http\Controllers\manufacturer\ManufacturerAccountantController;
 
 
 use App\Http\Controllers\Seller\ChatController as SellerChatController;
@@ -50,6 +54,26 @@ Route::get('/link-storage', function () {
     }
 });
 
+Route::get('/run-storage-setup', function () {
+    // Run commands one by one
+    Artisan::call('storage:link');
+    Artisan::call('config:clear');
+
+    // Run chmod using shell command (careful with permissions)
+    exec('chmod -R 775 storage');
+
+    return 'Storage linked, permissions updated, and config cleared successfully!';
+})->middleware('auth'); // ✅ optional but highly recommended
+
+Route::get('/optimize-clear', function () {
+    if (!app()->environment('local')) {
+        abort(403, 'Not allowed in this environment');
+    }
+
+    Artisan::call('optimize:clear');
+
+    return '✅ All caches cleared (config, route, view, and compiled files).';
+});
 
 
 Route::middleware(['auth'])->prefix('customer')->group(function () {
@@ -352,8 +376,7 @@ Route::prefix('manufacturer')
     ->middleware(['auth', 'role:manufacturer'])
     ->group(function () {
 
-        Route::get('/dashboard', [ManufacturerDashboardController
-        ::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [ManufacturerDashboardController::class, 'index'])->name('dashboard');
 
         Route::post('/logout', [ManufacturerAuthController::class, 'logout'])->name('logout');
 
@@ -362,74 +385,50 @@ Route::prefix('manufacturer')
         Route::get('products/create/bulk', [ManufacturerProductController::class, 'createBulk'])->name('products.createBulk');
         Route::post('products/bulk-delete', [ManufacturerProductController::class, 'bulkDelete'])->name('products.bulk-delete');
 
-        // ✅ Employees Routes
+        // Category Routes
+        Route::resource('categories', ManufacturerCategoryController::class);
+
+        // Employees Routes
         Route::prefix('employees')->name('employees.')->group(function () {
             Route::resource('accountant', ManufacturerAccountantController::class);
+            Route::resource('salesman', App\Http\Controllers\manufacturer\ManufacturerSalesmanController::class);
+            Route::resource('warehouse', App\Http\Controllers\manufacturer\ManufacturerWarehouseController::class);
+            Route::resource('delivery', App\Http\Controllers\manufacturer\ManufacturerDeliveryController::class);
         });
 
-        Route::get('/bulk-orders', [InquiryController::class, 'bulkIndex'])->name('bulk-orders.index');
+        // Inquiries Routes
+        Route::get('/inquiries', [ManufacturerInquiryController::class, 'index'])->name('inquiries.index');
+        Route::get('/inquiries/{inquiry}/bulk-order', [ManufacturerInquiryController::class, 'createBulkOrder'])->name('inquiries.bulk-order.create');
+        Route::post('/inquiries/bulk-order/store', [ManufacturerInquiryController::class, 'storeBulkOrder'])->name('inquiries.bulk-order.store');
+        Route::get('/inquiries/{inquiry}/response', [ManufacturerInquiryController::class, 'createResponse'])->name('inquiries.response.create');
 
+        // Bulk Orders
+        Route::get('/bulk-orders', [ManufacturerInquiryController::class, 'bulkIndex'])->name('bulk-orders.index');
+        Route::get('/bulk-orders/{bulkOrder}', [ManufacturerInquiryController::class, 'bulkShow'])->name('bulk-orders.show');
 
-        Route::get('/bulk-orders/{bulkOrder}', [InquiryController::class, 'bulkShow'])->name('bulk-orders.show');
+        // Orders Resource Routes
+        Route::resource('orders', ManufacturerOrderController::class);
 
-
-
-
-
-        // ✅ Orders Resource Routes
-        Route::resource('orders', OrderController::class);
-
-
-        // ✅ Order Tracking Routes
+        // Order Tracking Routes
         Route::prefix('orders/track')->name('orders.track.')->group(function () {
-            Route::get('/', [OrderController::class, 'tracking_view'])->name('index');
-            Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+            Route::get('/', [ManufacturerOrderController::class, 'tracking_view'])->name('index');
+            Route::get('/{order}', [ManufacturerOrderController::class, 'show'])->name('show');
         });
-        // ✅ Leads (single page, not resource)
-        Route::get('/leads', [LeadController::class, 'index'])->name('leads');
-        Route::get('/leads/{lead}/assign', [LeadController::class, 'assign'])->name('leads.assign');
 
-        // ✅ Promotions (full CRUD)
-        Route::resource('promotions', PromotionController::class);
-        Route::get('/lucky-draw/{luckyDraw}/entries', [LuckyDrawController::class, 'entries'])
-            ->name('lucky-draw.entries');
-
-        // ✅ Coins & Rewards (full CRUD if needed)
-        Route::resource('coins', CoinController::class);
-
-        // ✅ Communication (single page, not resource)
-        Route::get('/communication', [CommunicationController::class, 'index'])->name('communication');
-
-        // ✅ Settings (single page, not resource)
-        Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+        // Settings
+        Route::get('/settings', [ManufacturerSettingController::class, 'index'])->name('settings');
+        Route::post('/settings/profile', [ManufacturerSettingController::class, 'updateProfile'])->name('settings.profile');
+        Route::post('/settings/change-password', [ManufacturerSettingController::class, 'changePassword'])->name('settings.change-password');
         Route::post('payment-settings/store', [App\Http\Controllers\Seller\PaymentSettingsController::class, 'store'])->name('payment-settings.store');
-
         Route::post('notification-preferences/store', [App\Http\Controllers\Seller\NotificationPreferenceController::class, 'store'])->name('notification-preferences.store');
         Route::get('notification-preferences/show', [App\Http\Controllers\Seller\NotificationPreferenceController::class, 'show'])->name('notification-preferences.show');
         Route::post('twofactor/store', [App\Http\Controllers\Seller\TwoFactorController::class, 'store'])->name('twofactor.store');
-        Route::post('change-password', [App\Http\Controllers\Seller\SettingsController::class, 'changePassword'])->name('change-password');
+        Route::post('change-password', [ManufacturerSettingController::class, 'changePassword'])->name('change-password');
 
-        Route::prefix('chat')->name('chat.')->group(function () {
-            // Seller chat main page (sidebar + chat window)
-            Route::get('/', [SellerChatController::class, 'index'])->name('index');
-
-            // Fetch all conversations (for sidebar via AJAX)
-            Route::get('/conversations', [SellerChatController::class, 'fetchConversations'])->name('conversations');
-
-            // Fetch all messages of a conversation
-            Route::get('/messages/{conversationId}', [SellerChatController::class, 'fetchMessages'])->name('messages');
-
-            // Send message (Seller → Customer)
-            Route::post('/send', [SellerChatController::class, 'sendMessage'])->name('send');
-        });
-
-        Route::post('/meeting/{id}/accept', [MeetingController::class, 'accept'])
-            ->name('meeting.accept');
-        Route::post('/meeting/{id}/reject', [MeetingController::class, 'reject'])
-            ->name('/meeting.reject');
-
-        Route::get('/meetings', [MeetingController::class, 'index'])
-            ->name('meetings.index');
+        // Meetings
+        Route::post('/meeting/{id}/accept', [MeetingController::class, 'accept'])->name('meeting.accept');
+        Route::post('/meeting/{id}/reject', [MeetingController::class, 'reject'])->name('meeting.reject');
+        Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
     });
 
 
@@ -467,7 +466,7 @@ Route::prefix('accountant')
 
         Route::get('/confirmed-orders/{id}', [AccountantOrderController::class, 'show'])->name('confirmed-orders.show');
 
-        Route::put('/confirmed-orders/{id}/confirm', [AccountantOrderController::class, 'confirm'])->name('confirmed-orders.invoincing');
+        Route::get('/confirmed-orders/{id}/confirm', [AccountantOrderController::class, 'confirm'])->name('confirmed-orders.confirm');
 
         Route::post('/orders/{id}/invoice/save', [AccountantOrderController::class, 'saveInvoice'])->name('orders.invoice.save');
     });

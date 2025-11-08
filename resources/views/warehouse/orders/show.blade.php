@@ -7,51 +7,77 @@
             <h1 class="h3 mb-0 text-gray-800">Order Details - #{{ $order->id }}</h1>
 
             <div class="d-flex align-items-center gap-2">
-                {{-- Create Invoice Button --}}
-                @if ($order->status === 'Confirmed')
-                    @role('accountant')
-                    <form action="{{ route('accountant.confirmed-orders.invoincing', $order->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="btn btn-success shadow-sm"
-                            onclick="return confirm('Are you sure you want to create an invoice for this order? This action cannot be undone.')">
-                            <i class="fas fa-file-invoice fa-sm text-white-50"></i> Create Invoice
-                        </button>
-                    </form>
-                    @endrole
+                {{-- Check if order is in warehouse_dispatch stage and in_progress --}}
+                @php
+                    $warehouseStage = collect($order->statuses)->firstWhere('stage', 'warehouse_dispatch');
+                    $canDispatch = $warehouseStage && $warehouseStage['status'] === 'in_progress';
+                @endphp
+
+                @if ($canDispatch)
+                    <a href="{{ route('warehouse.orders.edit', $order->id) }}" type="button" class="btn btn-primary shadow-sm" >
+                        <i class="fas fa-truck fa-sm text-white-50"></i> Dispatch Order
+                    </a>
+                @elseif ($warehouseStage && $warehouseStage['status'] === 'completed')
+                    <span class="badge bg-success p-2">
+                        <i class="fas fa-check-circle"></i> Order Dispatched
+                    </span>
                 @endif
 
-                <a href="{{ route('accountant.confirmed-orders.index') }}" class="btn btn-sm btn-secondary shadow-sm">
+                <a href="{{ route('warehouse.orders.index') }}" class="btn btn-sm btn-secondary shadow-sm">
                     <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Orders
                 </a>
-
-                {{-- Dispatch Button --}}
-                @if ($order->status === 'Invoiced')
-                    @role('warehouse')
-                    <a href="{{ route('warehouse.orders.edit', $order->id) }}" type="button" class="btn btn-primary">
-                        <i class="fas fa-truck"></i> Mark as Dispatched
-</a>
-                    @endrole
-                @endif
             </div>
         </div>
 
         {{-- Order Status Alert --}}
         @php
-            $statusClass = match ($order->status) {
-                'Order Placed' => 'info',
-                'Processing', 'Confirmed' => 'warning',
-                'Invoiced', 'Shipped' => 'primary',
-                'Delivered' => 'success',
-                'Cancelled' => 'danger',
+            // Get current stage
+            $currentStage = collect($order->statuses)
+                ->filter(fn($s) => $s['status'] === 'in_progress' || $s['status'] === 'completed')
+                ->sortByDesc('updated_at')
+                ->first();
+            
+            $stageLabels = [
+                'order_placed' => 'Order Placed',
+                'salesman_review' => 'Salesman Review',
+                'accountant_billing' => 'Accountant Billing',
+                'warehouse_dispatch' => 'Warehouse Dispatch',
+                'out_for_delivery' => 'Out for Delivery',
+                'delivered' => 'Delivered'
+            ];
+            
+            $currentStageName = $stageLabels[$currentStage['stage']] ?? ucfirst(str_replace('_', ' ', $currentStage['stage']));
+            
+            $statusClass = match($currentStage['stage']) {
+                'order_placed' => 'info',
+                'salesman_review' => 'info',
+                'accountant_billing' => 'warning',
+                'warehouse_dispatch' => 'primary',
+                'out_for_delivery' => 'warning',
+                'delivered' => 'success',
                 default => 'secondary'
             };
         @endphp
         <div class="alert alert-{{ $statusClass }} shadow-sm mb-4" role="alert">
-            <h4 class="alert-heading">Current Status: {{ $order->status }}</h4>
+            <h4 class="alert-heading">
+                <i class="fas fa-info-circle"></i> Current Stage: {{ $currentStageName }}
+                @if ($currentStage['status'] === 'in_progress')
+                    <span class="badge bg-warning text-dark">In Progress</span>
+                @elseif ($currentStage['status'] === 'completed')
+                    <span class="badge bg-success">Completed</span>
+                @endif
+            </h4>
             <p class="mb-0">
-                Payment Status: <strong>{{ ucwords($order->payment_status) }}</strong> via
-                <strong>{{ strtoupper($order->payment_method) }}</strong>
+                <strong>Payment Status:</strong> {{ ucwords($order->payment_status) }} via {{ strtoupper($order->payment_method) }}
+                <br>
+                <strong>Order Number:</strong> {{ $order->order_number ?? 'N/A' }}
+                @if ($order->invoice)
+                    <br>
+                    <strong>Invoice:</strong> 
+                    <a href="{{ asset('storage/invoices/' . $order->invoice) }}" target="_blank" class="alert-link">
+                        <i class="fas fa-file-pdf"></i> View Invoice
+                    </a>
+                @endif
             </p>
         </div>
 
@@ -95,8 +121,36 @@
 
             {{-- Right Column: Addresses, Timeline, and Dispatch (if applicable) --}}
             <div class="col-xl-8 col-lg-7">
+                {{-- Invoice Information (if created) --}}
+                @if ($order->invoice)
+                    <div class="card shadow mb-4 border-left-info">
+                        <div class="card-header py-3 bg-info text-white">
+                            <h6 class="m-0 font-weight-bold">
+                                <i class="fas fa-file-invoice"></i> Invoice Information
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <p class="mb-1"><strong>Invoice File:</strong> {{ $order->invoice }}</p>
+                                    <p class="mb-0"><strong>Invoice Date:</strong> 
+                                        {{ $order->invoice_date ? \Carbon\Carbon::parse($order->invoice_date)->format('M d, Y h:i A') : 'N/A' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a href="{{ asset('storage/invoices/' . $order->invoice) }}" 
+                                       class="btn btn-info btn-sm" 
+                                       target="_blank">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Dispatch Info (if dispatched) --}}
-                @if ($order->status === 'Dispatched' || $order->dispatched_at)
+                @if ($order->dispatched_at)
                     <div class="card shadow mb-4">
                         <div class="card-header bg-success text-white py-3">
                             <h6 class="m-0 font-weight-bold">Dispatch Information</h6>
@@ -264,53 +318,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    {{-- Dispatch Modal (outside container-fluid, at the end of body content) --}}
-    <div class="modal fade" id="dispatchModal" tabindex="-1" aria-labelledby="dispatchModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form action="{{ route('warehouse.orders.dispatch', $order->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="dispatchModalLabel">
-                            <i class="fas fa-truck me-2"></i> Dispatch Order #{{ $order->id }}
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Courier Name</label>
-                            <input type="text" name="courier_name" class="form-control" placeholder="e.g. TCS, Leopard, DHL"
-                                required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Tracking Number</label>
-                            <input type="text" name="tracking_number" class="form-control"
-                                placeholder="Enter tracking number" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Dispatch Details / Notes</label>
-                            <textarea name="dispatch_details" class="form-control" rows="3"
-                                placeholder="Any extra info (e.g. fragile, COD, etc.)"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Upload Dispatch Video Proof</label>
-                            <input type="file" name="dispatch_video" class="form-control"
-                                accept="video/mp4,video/mov,video/avi" required>
-                            <div class="form-text text-muted">Allowed formats: MP4, MOV, AVI (Max 20MB)</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-paper-plane me-1"></i> Dispatch Now
-                        </button>
-                    </div>
-                </div>
-            </form>
         </div>
     </div>
 @endsection

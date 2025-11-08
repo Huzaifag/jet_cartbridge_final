@@ -14,14 +14,15 @@ class WarehouseOrdersController extends Controller
 {
     public function index()
     {
-        // $this->authorize('viewAny', Order::class);
-
+        // Get orders that are in warehouse_dispatch stage
         $orders = Auth::user()
             ->warehouse
             ->seller
             ->orders()
-            ->whereNotNull('invoice')
-            ->where('status', 'In P')
+            ->whereHas('statuses', function($query) {
+                $query->where('stage', 'warehouse_dispatch')
+                      ->where('status', 'in_progress');
+            })
             ->orderBy('id', 'desc')
             ->paginate(10);
 
@@ -39,12 +40,11 @@ class WarehouseOrdersController extends Controller
     public function edit(int $id)
     {
         $order = Order::findOrFail($id);
-        // $this->authorize('dispatch', $order);
 
-        // Validate current stage
-        $currentStatus = $order->statuses()->where('stage', 'in_production')->first();
+        // Validate current stage - should be in warehouse_dispatch
+        $currentStatus = $order->statuses()->where('stage', 'warehouse_dispatch')->first();
         if (!$currentStatus || $currentStatus->status !== 'in_progress') {
-            return redirect()->back()->with('error', 'Order is not in the correct stage for dispatch.');
+            return redirect()->back()->with('error', 'Order is not in warehouse dispatch stage.');
         }
 
         // Fetch available delivery men for the seller
@@ -63,10 +63,10 @@ class WarehouseOrdersController extends Controller
         $order = Order::findOrFail($id);
         // $this->authorize('dispatch', $order);
 
-        // Validate current stage
-        $currentStatus = $order->statuses()->where('stage', 'in_production')->first();
+        // Validate current stage - should be in warehouse_dispatch
+        $currentStatus = $order->statuses()->where('stage', 'warehouse_dispatch')->first();
         if (!$currentStatus || $currentStatus->status !== 'in_progress') {
-            return redirect()->back()->with('error', 'Order is not in the correct stage for dispatch.');
+            return redirect()->back()->with('error', 'Order is not in warehouse dispatch stage.');
         }
 
         // Validate form inputs
@@ -91,7 +91,7 @@ class WarehouseOrdersController extends Controller
             'dispatch_details' => $validated['dispatch_details'] ?? null,
             'dispatch_video' => $validated['dispatch_video'] ?? null,
             'delivery_person_id' => $validated['delivery_person_id'] ?? null,
-            'status' => 'Dispatched',
+            'status' => 'Out for Delivery',
             'dispatched_at' => Carbon::now(),
         ]);
 
@@ -105,34 +105,17 @@ class WarehouseOrdersController extends Controller
             'timestamp' => now(),
         ]);
 
-        // Fetch all stages in correct order
-        $stageOrder = [
-            'order_placed',
-            'with_accountant',
-            'invoice_stage',
-            'in_production',
-            'delivery',
-        ];
-
-        $currentStage = 'in_production';
-        $currentIndex = array_search($currentStage, $stageOrder);
-
-        if ($currentIndex === false || $currentIndex === count($stageOrder) - 1) {
-            return redirect()->back()->with('error', 'Already in final stage or invalid stage.');
-        }
-
-        // Mark current stage as completed
+        // Mark warehouse_dispatch as completed
         OrderStatus::where('order_id', $order->id)
-            ->where('stage', $currentStage)
+            ->where('stage', 'warehouse_dispatch')
             ->update([
                 'status' => 'completed',
                 'completed_at' => now(),
             ]);
 
-        // Move next stage to in_progress
-        $nextStage = $stageOrder[$currentIndex + 1];
+        // Move to out_for_delivery stage
         OrderStatus::where('order_id', $order->id)
-            ->where('stage', $nextStage)
+            ->where('stage', 'out_for_delivery')
             ->update([
                 'status' => 'in_progress',
                 'started_at' => now(),
@@ -140,6 +123,6 @@ class WarehouseOrdersController extends Controller
 
         return redirect()
             ->route('warehouse.orders.show', $order->id)
-            ->with('success', 'Order has been successfully dispatched!');
+            ->with('success', 'Order has been dispatched and assigned for delivery!');
     }
 }

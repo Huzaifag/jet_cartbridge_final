@@ -81,6 +81,7 @@
     <!-- Premium Theme JavaScript -->
     <script src="{{ asset('js/premium-theme.js') }}"></script>
     <script src="{{ asset('js/theme-toggle.js') }}"></script>
+    <script src="{{ asset('js/hero-slider.js') }}"></script>
 </body>
 
 </html>

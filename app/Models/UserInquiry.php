@@ -13,6 +13,7 @@ class UserInquiry extends Model
         'contact_id',
         'product_id',
         'seller_id',
+        'manufacturer_id',
         'customer_id',
         'quantity',
         'target_price',
@@ -37,7 +38,17 @@ class UserInquiry extends Model
         return $this->belongsTo(Seller::class, 'seller_id');
     }
 
+    public function manufacturer()
+    {
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
+    }
+
     public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function user()
     {
         return $this->belongsTo(User::class, 'customer_id');
     }

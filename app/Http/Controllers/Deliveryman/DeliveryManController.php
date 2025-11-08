@@ -18,16 +18,26 @@ class DeliveryManController extends Controller
     {
         $deliveryman = Auth::user()->deliveryman;
 
-        // Get orders assigned to this deliveryman (assuming orders have delivery_person_id)
+        // Get orders assigned to this deliveryman that are out for delivery
         $assignedOrders = Order::where('delivery_person_id', $deliveryman->id)
+            ->whereHas('statuses', function($query) {
+                $query->where('stage', 'out_for_delivery')
+                      ->where('status', 'in_progress');
+            })
             ->with(['customer', 'orderItems.product'])
             ->latest()
             ->paginate(10);
 
         $stats = [
             'total_assigned' => Order::where('delivery_person_id', $deliveryman->id)->count(),
-            'delivered' => Order::where('delivery_person_id', $deliveryman->id)->where('status', 'Delivered')->count(),
-            'pending' => Order::where('delivery_person_id', $deliveryman->id)->where('status', 'Dispatched')->count(),
+            'delivered' => Order::where('delivery_person_id', $deliveryman->id)
+                ->whereHas('statuses', function($query) {
+                    $query->where('stage', 'delivered')->where('status', 'completed');
+                })->count(),
+            'pending' => Order::where('delivery_person_id', $deliveryman->id)
+                ->whereHas('statuses', function($query) {
+                    $query->where('stage', 'out_for_delivery')->where('status', 'in_progress');
+                })->count(),
         ];
 
         return view('deliveryman.dashboard.index', compact('assignedOrders', 'stats'));
@@ -84,12 +94,10 @@ class DeliveryManController extends Controller
      */
     public function deliver(Request $request, Order $order)
     {
-        // $this->authorize('deliver', $order);
-
-        // Validate current stage
-        $currentStatus = $order->statuses()->where('stage', 'delivery')->first();
+        // Validate current stage - should be out_for_delivery
+        $currentStatus = $order->statuses()->where('stage', 'out_for_delivery')->first();
         if (!$currentStatus || $currentStatus->status !== 'in_progress') {
-            return redirect()->back()->with('error', 'Order is not in the correct stage for delivery.');
+            return redirect()->back()->with('error', 'Order is not out for delivery yet.');
         }
 
         $request->validate([
@@ -125,29 +133,24 @@ class DeliveryManController extends Controller
             'timestamp' => now(),
         ]);
 
-        // Update order status stages
-        $stageOrder = [
-            'order_placed',
-            'with_accountant',
-            'invoice_stage',
-            'in_production',
-            'delivery',
-        ];
+        // Mark out_for_delivery as completed
+        OrderStatus::where('order_id', $order->id)
+            ->where('stage', 'out_for_delivery')
+            ->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
 
-        $currentStage = 'delivery';
-        $currentIndex = array_search($currentStage, $stageOrder);
-
-        if ($currentIndex !== false) {
-            // Mark delivery stage as completed
-            OrderStatus::where('order_id', $order->id)
-                ->where('stage', $currentStage)
-                ->update([
-                    'status' => 'completed',
-                    'completed_at' => now(),
-                ]);
-        }
+        // Mark delivered stage as completed
+        OrderStatus::where('order_id', $order->id)
+            ->where('stage', 'delivered')
+            ->update([
+                'status' => 'completed',
+                'started_at' => now(),
+                'completed_at' => now(),
+            ]);
 
         return redirect()->route('deliveryman.orders.show', $order)
-            ->with('success', 'Order marked as delivered successfully.');
+            ->with('success', 'Order delivered successfully!');
     }
 }

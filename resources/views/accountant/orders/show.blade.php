@@ -7,22 +7,33 @@
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Order Details - #{{ $order['id'] }}</h1>
 
-            <div class="d-flex align-items-center">
-                {{-- ⭐ NEW: Confirm Order Button (Only show if status is 'Order Placed') --}}
-                @if ($order['status'] === 'Confirmed')
-                    <form action="{{ route('accountant.confirmed-orders.invoincing', $order['id']) }}" method="POST" class="mr-2">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="btn btn-success shadow-sm"
-                            onclick="return confirm('Are you sure you want to CONFIRM this order? This action cannot be easily undone.')">
-                            <i class="fas fa-check fa-sm text-white-50"></i> Created invoice
-                        </button>
-                    </form>
+            <div class="d-flex align-items-center gap-2">
+                {{-- Check if order is in accountant_billing stage and in_progress --}}
+                @php
+                    $accountantStage = collect($order['statuses'])->firstWhere('stage', 'accountant_billing');
+                    $canCreateInvoice = $accountantStage && $accountantStage['status'] === 'in_progress';
+                @endphp
+
+                @if ($canCreateInvoice)
+                    <a href="{{ route('accountant.confirmed-orders.confirm', $order['id']) }}" 
+                       class="btn btn-success shadow-sm">
+                        <i class="fas fa-file-invoice fa-sm text-white-50"></i> Create Invoice
+                    </a>
+                @elseif ($accountantStage && $accountantStage['status'] === 'completed')
+                    <span class="badge bg-success p-2">
+                        <i class="fas fa-check-circle"></i> Invoice Created
+                    </span>
+                    @if ($order['invoice'])
+                        <a href="{{ asset('storage/invoices/' . $order['invoice']) }}" 
+                           class="btn btn-info shadow-sm" 
+                           target="_blank">
+                            <i class="fas fa-download fa-sm text-white-50"></i> Download Invoice
+                        </a>
+                    @endif
                 @endif
-                {{-- End NEW Button --}}
 
                 <a href="{{ route('accountant.confirmed-orders.index') }}"
-                    class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+                    class="btn btn-sm btn-secondary shadow-sm">
                     <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Orders
                 </a>
             </div>
@@ -30,19 +41,47 @@
 
         {{-- Alert for Order Status --}}
         @php
-            $statusClass =
-                [
-                    'Order Placed' => 'info',
-                    'Processing' => 'warning',
-                    'Shipped' => 'primary',
-                    'Delivered' => 'success',
-                    'Cancelled' => 'danger',
-                ][$order['status']] ?? 'secondary';
+            // Get current stage
+            $currentStage = collect($order['statuses'])
+                ->filter(fn($s) => $s['status'] === 'in_progress' || $s['status'] === 'completed')
+                ->sortByDesc('updated_at')
+                ->first();
+            
+            $stageLabels = [
+                'order_placed' => 'Order Placed',
+                'salesman_review' => 'Salesman Review',
+                'accountant_billing' => 'Accountant Billing',
+                'warehouse_dispatch' => 'Warehouse Dispatch',
+                'out_for_delivery' => 'Out for Delivery',
+                'delivered' => 'Delivered'
+            ];
+            
+            $currentStageName = $stageLabels[$currentStage['stage']] ?? ucfirst(str_replace('_', ' ', $currentStage['stage']));
+            
+            $statusClass = match($currentStage['stage']) {
+                'order_placed' => 'info',
+                'salesman_review' => 'info',
+                'accountant_billing' => 'warning',
+                'warehouse_dispatch' => 'primary',
+                'out_for_delivery' => 'warning',
+                'delivered' => 'success',
+                default => 'secondary'
+            };
         @endphp
         <div class="alert alert-{{ $statusClass }} shadow-sm" role="alert">
-            <h4 class="alert-heading">Current Status: {{ $order['status'] }}</h4>
-            <p class="mb-0">Payment Status: **{{ ucwords($order['payment_status']) }}** via
-                **{{ strtoupper($order['payment_method']) }}**</p>
+            <h4 class="alert-heading">
+                <i class="fas fa-info-circle"></i> Current Stage: {{ $currentStageName }}
+                @if ($currentStage['status'] === 'in_progress')
+                    <span class="badge bg-warning text-dark">In Progress</span>
+                @elseif ($currentStage['status'] === 'completed')
+                    <span class="badge bg-success">Completed</span>
+                @endif
+            </h4>
+            <p class="mb-0">
+                <strong>Payment Status:</strong> {{ ucwords($order['payment_status']) }} via {{ strtoupper($order['payment_method']) }}
+                <br>
+                <strong>Order Number:</strong> {{ $order['order_number'] ?? 'N/A' }}
+            </p>
         </div>
 
         <div class="row">
@@ -84,6 +123,39 @@
 
             {{-- Shipping, Billing, and Timeline --}}
             <div class="col-xl-8 col-lg-7">
+                {{-- Invoice Information (if created) --}}
+                @if ($order['invoice'])
+                    <div class="card shadow mb-4 border-left-success">
+                        <div class="card-header py-3 bg-success text-white">
+                            <h6 class="m-0 font-weight-bold">
+                                <i class="fas fa-file-invoice"></i> Invoice Information
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Invoice File:</strong> {{ $order['invoice'] }}</p>
+                                    <p><strong>Invoice Date:</strong> 
+                                        {{ $order['invoice_date'] ? \Carbon\Carbon::parse($order['invoice_date'])->format('M d, Y h:i A') : 'N/A' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <a href="{{ asset('storage/invoices/' . $order['invoice']) }}" 
+                                       class="btn btn-success" 
+                                       target="_blank">
+                                        <i class="fas fa-download"></i> Download Invoice
+                                    </a>
+                                    <a href="{{ asset('storage/invoices/' . $order['invoice']) }}" 
+                                       class="btn btn-outline-success" 
+                                       target="_blank">
+                                        <i class="fas fa-eye"></i> View Invoice
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Addresses Card --}}
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">

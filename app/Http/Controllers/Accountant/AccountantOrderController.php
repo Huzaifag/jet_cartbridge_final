@@ -16,13 +16,15 @@ class AccountantOrderController extends Controller
 {
     public function index()
     {
-        // $this->authorize('viewAny', Order::class);
-
+        // Get orders that are in accountant_billing stage
         $orders = Auth::user()
             ->accountant
             ->seller
             ->orders()
-            ->where('status', 'Confirmed')
+            ->whereHas('statuses', function($query) {
+                $query->where('stage', 'accountant_billing')
+                      ->where('status', 'in_progress');
+            })
             ->orderBy('id', 'desc')
             ->paginate(10);
 
@@ -40,12 +42,11 @@ class AccountantOrderController extends Controller
     public function confirm($id)
     {
         $order = Order::with('orderItems.product')->findOrFail($id);
-        // $this->authorize('confirmAsAccountant', $order);
 
-        // Validate current stage
-        $currentStatus = $order->statuses()->where('stage', 'with_accountant')->first();
+        // Validate current stage - should be in accountant_billing
+        $currentStatus = $order->statuses()->where('stage', 'accountant_billing')->first();
         if (!$currentStatus || $currentStatus->status !== 'in_progress') {
-            return redirect()->back()->with('error', 'Order is not in the correct stage for invoicing.');
+            return redirect()->back()->with('error', 'Order is not in accountant billing stage.');
         }
 
         return view('accountant.orders.invoicing', compact('order'));
@@ -54,12 +55,11 @@ class AccountantOrderController extends Controller
     public function saveInvoice($id)
     {
         $order = Order::with('orderItems.product')->findOrFail($id);
-        // $this->authorize('confirmAsAccountant', $order);
 
-        // Validate current stage
-        $currentStatus = $order->statuses()->where('stage', 'with_accountant')->first();
+        // Validate current stage - should be in accountant_billing
+        $currentStatus = $order->statuses()->where('stage', 'accountant_billing')->first();
         if (!$currentStatus || $currentStatus->status !== 'in_progress') {
-            return redirect()->back()->with('error', 'Order is not in the correct stage for invoicing.');
+            return redirect()->back()->with('error', 'Order is not in accountant billing stage.');
         }
 
         // Calculate total if not present
@@ -80,7 +80,7 @@ class AccountantOrderController extends Controller
 
         $order->invoice = $filename;
         $order->invoice_date = Carbon::now()->toDateTimeString();
-        $order->status = 'Invoiced';
+        $order->status = 'Invoiced - Ready for Dispatch';
         $order->save();
 
         // Audit logging
@@ -91,49 +91,21 @@ class AccountantOrderController extends Controller
             'timestamp' => now(),
         ]);
 
-        // Order stage updates
-        $stageOrder = [
-            'order_placed',
-            'with_accountant',
-            'invoice_stage',
-            'in_production',
-            'delivery',
-        ];
-
-        $currentStage = 'with_accountant';
-        $currentIndex = array_search($currentStage, $stageOrder);
-
-        if ($currentIndex === false || $currentIndex >= count($stageOrder) - 1) {
-            return redirect()->back()->with('error', 'Already in final stage or invalid stage.');
-        }
-
-        // Mark current stage as completed
+        // Mark accountant_billing as completed
         OrderStatus::where('order_id', $order->id)
-            ->where('stage', $currentStage)
+            ->where('stage', 'accountant_billing')
             ->update([
                 'status' => 'completed',
                 'completed_at' => now(),
             ]);
 
-        // Next stage becomes "completed"
-        $nextStage = $stageOrder[$currentIndex + 1];
+        // Move to warehouse_dispatch stage
         OrderStatus::where('order_id', $order->id)
-            ->where('stage', $nextStage)
+            ->where('stage', 'warehouse_dispatch')
             ->update([
-                'status' => 'completed',
-                'completed_at' => now(),
+                'status' => 'in_progress',
+                'started_at' => now(),
             ]);
-
-        // Next-to-next stage becomes "in_progress" (if exists)
-        if (isset($stageOrder[$currentIndex + 2])) {
-            $nextInProgress = $stageOrder[$currentIndex + 2];
-            OrderStatus::where('order_id', $order->id)
-                ->where('stage', $nextInProgress)
-                ->update([
-                    'status' => 'in_progress',
-                    'started_at' => now(),
-                ]);
-        }
 
         // Save the PDF to storage
         Storage::put('public/invoices/' . $filename, $pdf->output());
