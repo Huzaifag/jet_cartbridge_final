@@ -444,7 +444,7 @@ class FrontendController extends Controller
 
     public function categories()
     {
-        $categories = Category::withCount('products')->get();
+        $categories = Category::withCount('products')->paginate(12);
         return view('frontend.pages.categories', compact('categories'));
     }
 

@@ -988,7 +988,9 @@
    ======================================== */
 
 [data-theme="light"] .hero-slide-overlay {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 249, 250, 0.88) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(248, 249, 250, 0.55) 100%);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
 
 [data-theme="light"] .hero-slider-nav {
@@ -1033,4 +1035,80 @@
 
 [data-theme="light"] .hero-search-btn:hover {
     box-shadow: 0 8px 25px rgba(58, 119, 255, 0.4);
+}
+
+
+/* ========================================
+   HERO STATS - LIGHT THEME
+   ======================================== */
+
+[data-theme="light"] .hero-stat-item {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(58, 119, 255, 0.3);
+}
+
+[data-theme="light"] .hero-stat-number {
+    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .hero-stat-label {
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .hero-slide-title,
+[data-theme="light"] .hero-slide-subtitle {
+    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
+}
+
+
+/* ========================================
+   CART CHECKOUT BUTTON - LIGHT THEME
+   ======================================== */
+
+[data-theme="light"] .btn-checkout {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(58, 119, 255, 0.3);
+}
+
+[data-theme="light"] .btn-checkout:hover {
+    background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%) !important;
+    box-shadow: 0 6px 16px rgba(58, 119, 255, 0.4);
+    color: #ffffff !important;
+}
+
+
+/* ========================================
+   PLACE ORDER BUTTON - LIGHT THEME
+   ======================================== */
+
+[data-theme="light"] .btn-place-order {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(58, 119, 255, 0.3);
+}
+
+[data-theme="light"] .btn-place-order:hover {
+    background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%) !important;
+    box-shadow: 0 6px 16px rgba(58, 119, 255, 0.4);
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .btn-back {
+    display: block;
+    background: transparent !important;
+    border: 2px solid var(--color-accent) !important;
+    color: var(--color-accent) !important;
+    text-align: center;
+    text-decoration: none;
+}
+
+[data-theme="light"] .btn-back:hover {
+    background: var(--color-accent) !important;
+    color: #ffffff !important;
+    text-decoration: none;
 }
