@@ -7,33 +7,31 @@
     $showTrendingBadge = $showTrendingBadge ?? false;
 @endphp
 
-<div class="card h-100 shadow-sm premium-product-card">
+<div class="premium-product-card h-100 premium-transition">
     @if($showTrendingBadge)
-    <div class="trending-badge">
-        <i class="fas fa-fire"></i> TRENDING
+    <div class="position-absolute top-0 end-0 m-3" style="z-index: 10;">
+        <span class="premium-badge" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white;">
+            <i class="fas fa-fire me-1"></i> TRENDING
+        </span>
     </div>
     @endif
     
-    <a href="{{ route('product.show', $product->slug) }}" class="text-decoration-none">
-        <div class="product-img-container">
-            <img src="{{ asset($firstImage) }}" alt="{{ $firstImage }}" class="card-img-top modern-product-img">
-        </div>
+    <a href="{{ route('product.show', $product->slug) }}" class="text-decoration-none d-block">
+        <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="premium-product-image">
     </a>
 
-    <div class="card-body d-flex flex-column">
+    <div class="premium-product-content">
         <div class="d-flex justify-content-between align-items-start mb-2">
-            <a href="{{ route('product.show', $product->slug) }}"
-                class="text-decoration-none text-dark">
-                <h5 class="card-title fw-semibold mb-0">{{ $product->name }}</h5>
+            <a href="{{ route('product.show', $product->slug) }}" class="text-decoration-none flex-grow-1 me-2">
+                <h5 class="premium-product-title product-title-multiline">{{ $product->name }}</h5>
             </a>
-            <span
-                class="user-type-badge badge rounded-pill {{ $stock == 'In Stock' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} ms-2">
+            <span class="premium-badge-outline flex-shrink-0">
                 {{ $stock }}
             </span>
         </div>
 
-        <div class="modern-rating mb-2">
-            <span class="text-warning">
+        <div class="mb-2">
+            <span class="text-accent">
                 @for($i = 1; $i <= 5; $i++)
                     @if($i <= floor($product->rating ?? 4.5))
                         <i class="fas fa-star"></i>
@@ -44,10 +42,10 @@
                     @endif
                 @endfor
             </span>
-            <small class="text-muted ms-1">({{ $product->reviews_count ?? 128 }})</small>
+            <small class="text-dim ms-1">({{ $product->reviews_count ?? 128 }})</small>
         </div>
 
-        <p class="card-text text-muted mb-3 small">
+        <p class="text-dim mb-3 small">
             {{ Str::limit($product->description, 70) }}
         </p>
 
@@ -56,28 +54,28 @@
             @auth
                 @if (Auth::user()->role === 'b2c')
                     @if ($product->activePromotion && $product->activePromotion->type == 'buy_get')
-                        <span class="badge bg-warning text-dark mb-2 d-inline-block">
+                        <span class="premium-badge mb-2 d-inline-block">
                             Buy {{ $product->activePromotion->rules->first()->buy_quantity }}
                             Get {{ $product->activePromotion->rules->first()->get_quantity }} Free
                         </span>
                     @endif
-                    <div class="price-section mb-3">
-                        <p class="product-price fs-5 fw-bold text-dark mb-0">
+                    <div class="mb-3">
+                        <p class="premium-product-price mb-0">
                             ${{ number_format($product->b2c_price, 2) }}
                             @if ($product->b2c_compare_price)
-                                <span class="text-muted text-decoration-line-through small ms-2">
+                                <span class="text-dim text-decoration-line-through small ms-2">
                                     ${{ number_format($product->b2c_compare_price, 2) }}
                                 </span>
                             @endif
                         </p>
-                        <p class="text-secondary small mb-0">Min. order: 1 piece</p>
+                        <p class="text-dim small mb-0">Min. order: 1 piece</p>
                     </div>
                 @elseif (Auth::user()->role === 'b2b')
-                    <div class="price-section mb-3">
-                        <p class="product-price fs-5 fw-bold text-dark mb-0">
+                    <div class="mb-3">
+                        <p class="premium-product-price mb-0">
                             ${{ number_format($product->b2b_price, 2) }}
                         </p>
-                        <p class="text-secondary small mb-0">
+                        <p class="text-dim small mb-0">
                             Min. order: {{ $product->b2b_moq }} pieces
                         </p>
                     </div>
@@ -88,32 +86,27 @@
         {{-- Action Buttons --}}
         @auth
             @if (Auth::user()->role === 'b2c')
-                <div class="action-group d-flex gap-2">
-                    <form action="{{ route('addToCart', $product) }}" method="POST"
-                        class="flex-grow-1">
+                <div class="d-flex gap-2">
+                    <form action="{{ route('addToCart', $product) }}" method="POST" class="flex-grow-1">
                         @csrf
-                        <button type="submit" class="btn btn-outline-dark w-100 btn-sm">
-                            <i class="fas fa-shopping-cart"></i> Add
+                        <button type="submit" class="btn-premium btn-premium-secondary w-100" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            <i class="fas fa-shopping-cart me-1"></i> Add
                         </button>
                     </form>
-                    <button class="btn btn-primary w-100 btn-sm">
-                        <i class="fas fa-bolt"></i> Buy Now
+                    <button class="btn-premium btn-premium-primary w-100" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                        <i class="fas fa-bolt me-1"></i> Buy Now
                     </button>
                 </div>
             @elseif (Auth::user()->role === 'b2b')
-                <div class="action-group">
-                    <a href="{{ route('inquiry.form', $product->slug) }}"
-                        class="btn btn-primary w-100">
-                        <i class="fas fa-envelope me-1"></i> Send Inquiry
-                    </a>
-                </div>
+                <a href="{{ route('inquiry.form', $product->slug) }}" class="btn-premium btn-premium-primary w-100" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                    <i class="fas fa-envelope me-1"></i> Send Inquiry
+                </a>
             @endif
         @else
-            <div class="action-group text-center border-top pt-3">
-                <a href="{{ route('login') }}" class="btn btn-outline-secondary w-100">
-                    <i class="fas fa-lock me-1"></i> Sign In to See Price
-                </a>
-            </div>
+            <a href="{{ route('login') }}" class="btn-premium btn-premium-secondary w-100" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                <i class="fas fa-lock me-1"></i> Sign In to See Price
+            </a>
         @endauth
     </div>
 </div>
+

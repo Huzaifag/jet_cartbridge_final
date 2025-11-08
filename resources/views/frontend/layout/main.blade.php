@@ -21,6 +21,8 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/premium-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/light-theme.css') }}">
 </head>
 
 <body>
@@ -38,32 +40,10 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate-fade-in-up');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-
-            // Observe product and category cards safely
-            const productCards = document.querySelectorAll('.modern-product-card');
-            const categoryCards = document.querySelectorAll('.category-card');
-
-            [...productCards, ...categoryCards].forEach(card => {
-                observer.observe(card);
-            });
-        });
-    </script>
+    
+    <!-- Premium Theme JavaScript -->
+    <script src="{{ asset('js/premium-theme.js') }}"></script>
+    <script src="{{ asset('js/theme-toggle.js') }}"></script>
 </body>
 
 </html>

@@ -1,11 +1,12 @@
-<div class="top-bar bg-dark text-white">
-    <div class="container">
+<!-- Premium Top Bar -->
+<div class="premium-top-bar">
+    <div class="premium-container">
         <div class="d-flex justify-content-between align-items-center">
             <!-- Left Side: Ship To -->
             <div class="d-flex align-items-center py-2">
-                <i class="bi bi-globe me-2"></i>
-                <span class="d-none d-sm-inline me-1">Ship to:</span>
-                <img src="https://placehold.co/20x15/f03a47/ffffff?text=US" alt="Country Flag" style="border-radius: 2px;">
+                <i class="fas fa-globe text-accent me-2"></i>
+                <span class="d-none d-sm-inline me-2 text-dim">Ship to:</span>
+                <img src="https://placehold.co/20x15/f03a47/ffffff?text=US" alt="Country Flag" class="rounded-1">
             </div>
 
             <!-- Right Side: Links -->
@@ -13,49 +14,43 @@
                 @if (auth()->check())
                     @switch(true)
                         @case(auth()->user()->hasRole('seller'))
-                            <a href="{{ route('seller.dashboard') }}"
-                                class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
-                                <i class="bi bi-briefcase me-1"></i>
+                            <a href="{{ route('seller.dashboard') }}" class="premium-top-link">
+                                <i class="fas fa-briefcase me-1"></i>
                                 <span>Seller Dashboard</span>
                             </a>
                         @break
 
                         @case(auth()->user()->hasRole('accountant'))
-                            <a href="{{ route('accountant.dashboard.index') }}"
-                                class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
-                                <i class="bi bi-briefcase me-1"></i>
+                            <a href="{{ route('accountant.dashboard.index') }}" class="premium-top-link">
+                                <i class="fas fa-calculator me-1"></i>
                                 <span>Accountant Dashboard</span>
                             </a>
                         @break
 
                         @case(auth()->user()->hasRole('salesman'))
-                            <a href="{{ route('salesman.dashboard.index') }}"
-                                class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
-                                <i class="bi bi-briefcase me-1"></i>
+                            <a href="{{ route('salesman.dashboard.index') }}" class="premium-top-link">
+                                <i class="fas fa-chart-line me-1"></i>
                                 <span>Salesman Dashboard</span>
                             </a>
                         @break
 
                         @case(auth()->user()->hasRole('warehouse'))
-                            <a href="{{ route('warehouse.dashboard.index') }}"
-                                class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
-                                <i class="bi bi-briefcase me-1"></i>
+                            <a href="{{ route('warehouse.dashboard.index') }}" class="premium-top-link">
+                                <i class="fas fa-warehouse me-1"></i>
                                 <span>Warehouse Dashboard</span>
                             </a>
                         @break
 
                         @case(auth()->user()->hasRole('deliveryman'))
-                            <a href="{{ route('deliveryman.dashboard') }}"
-                                class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
-                                <i class="bi bi-briefcase me-1"></i>
+                            <a href="{{ route('deliveryman.dashboard') }}" class="premium-top-link">
+                                <i class="fas fa-truck me-1"></i>
                                 <span>Deliveryman Dashboard</span>
                             </a>
                         @break
 
                         @default
-                            <a href="/"
-                                class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center hover-bg-secondary">
-                                <i class="bi bi-briefcase me-1"></i>
+                            <a href="/" class="premium-top-link">
+                                <i class="fas fa-home me-1"></i>
                                 <span>Home</span>
                             </a>
                         @break
@@ -63,134 +58,209 @@
                 @endif
 
                 @guest
-                    <a href="{{ route('login') }}"
-                        class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center border-start border-secondary">
-                        <i class="bi bi-box-arrow-in-right me-1"></i>
+                    <a href="{{ route('login') }}" class="premium-top-link">
+                        <i class="fas fa-sign-in-alt me-1"></i>
                         <span>User Login</span>
                     </a>
-                    <a href="{{ route('register') }}"
-                        class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center border-start border-secondary">
-                        <i class="bi bi-box-arrow-in-right me-1"></i>
+                    <a href="{{ route('register') }}" class="premium-top-link">
+                        <i class="fas fa-user-plus me-1"></i>
                         <span>Sign Up</span>
                     </a>
-                    <!-- New links -->
-                    <a href="{{ route('seller.register') }}"
-                        class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center border-start border-secondary">
-                        <i class="bi bi-person-plus-fill me-1"></i>
+                    <a href="{{ route('seller.register') }}" class="premium-top-link premium-highlight">
+                        <i class="fas fa-store me-1"></i>
                         <span>Join as Seller</span>
                     </a>
-                    <a href="{{ route('manufacturer.register') }}"
-                        class="px-3 py-2 text-white-50 text-decoration-none d-none d-md-flex align-items-center border-start border-secondary">
-                        <i class="bi bi-person-plus-fill me-1"></i>
+                    <a href="{{ route('manufacturer.register') }}" class="premium-top-link premium-highlight">
+                        <i class="fas fa-industry me-1"></i>
                         <span>Join as Manufacturer</span>
                     </a>
                 @endguest
 
-                <a href="#"
-                    class="ps-3 py-2 text-white-50 text-decoration-none d-flex align-items-center border-start border-secondary">
-                    <i class="bi bi-question-circle"></i>
+                <a href="#" class="premium-top-link">
+                    <i class="fas fa-question-circle"></i>
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Main Navigation Bar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white">
-    <div class="container">
-        <!-- Logo -->
-        <a class="navbar-brand d-flex align-items-center fs-4 fw-bold" href="#">
+<!-- Premium Main Navigation Bar -->
+<nav class="premium-navbar">
+    <div class="premium-container">
+        <!-- Premium Logo -->
+        <a class="premium-nav-brand" href="{{ url('/') }}">
             <div class="logo-container">
-                <img src="{{ asset('images/logo/logo.png') }}" alt="Site Logo">
+                <img src="{{ asset('images/logo/logo.png') }}" alt="Site Logo" style="height: 40px;">
             </div>
+            <!-- <span class="ms-2">Jet<span class="accent">Cartridge</span></span> -->
         </a>
 
-        <!-- Mobile Menu Toggler -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+        <!-- Mobile/Tablet Menu Toggler (Hidden on Desktop) -->
+        <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
             aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+            <i class="fas fa-bars text-white"></i>
         </button>
 
-        <!-- Navbar Links -->
-        <div class="collapse navbar-collapse" id="mainNavbar">
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+        <!-- Desktop Navigation (Always Visible on Large Screens) -->
+        <div class="d-none d-lg-flex align-items-center mx-auto">
+            <ul class="navbar-nav d-flex flex-row mb-0">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ url('/') }}">Home</a>
+                    <a class="premium-nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ url('/') }}">
+                        <i class="fas fa-home me-1"></i>Home
+                    </a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Products
+                    <a class="premium-nav-link dropdown-toggle {{ request()->routeIs(['categories', 'sellers', 'manufacturers', 'resources']) ? 'active' : '' }}" 
+                       href="#" id="browseDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-compass me-1"></i>Browse
                     </a>
-                    <ul class="dropdown-menu" aria-labelledby="productsDropdown">
-                        @foreach(\App\Models\Category::take(5)->get() as $category)
-                        <li><a class="dropdown-item" href="{{ route('home', ['category' => $category->id]) }}">{{ $category->name }}</a></li>
-                        @endforeach
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="{{ route('categories') }}">All Categories</a></li>
-                        <li><a class="dropdown-item" href="{{ route('sellers') }}">Browse Sellers</a></li>
-                        <li><a class="dropdown-item" href="{{ route('manufacturers') }}">Browse Manufacturers</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="solutionsDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Solutions
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="solutionsDropdown">
-                        <li><a class="dropdown-item" href="#">For Enterprise</a></li>
-                        <li><a class="dropdown-item" href="#">For Small Business</a></li>
-                        <li><a class="dropdown-item" href="#">Supply Chain Solutions</a></li>
-                        <li><a class="dropdown-item" href="#">Bulk Purchasing</a></li>
+                    <ul class="dropdown-menu premium-dropdown-menu" aria-labelledby="browseDropdown">
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('categories') }}">
+                            <i class="fas fa-th-large me-2"></i>Categories
+                        </a></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('sellers') }}">
+                            <i class="fas fa-store me-2"></i>Sellers
+                        </a></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('manufacturers') }}">
+                            <i class="fas fa-industry me-2"></i>Manufacturers
+                        </a></li>
+                        <li><hr class="dropdown-divider premium-dropdown-divider"></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('resources') }}">
+                            <i class="fas fa-book me-2"></i>Resources
+                        </a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('resources') }}">Resources</a>
+                    <a class="premium-nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">
+                        <i class="fas fa-info-circle me-1"></i>About Us
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('about') }}">About Us</a>
+                    <a class="premium-nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">
+                        <i class="fas fa-envelope me-1"></i>Contact
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="premium-nav-link {{ request()->routeIs('faq') ? 'active' : '' }}" href="{{ route('faq') }}">
+                        <i class="fas fa-question-circle me-1"></i>FAQ
+                    </a>
                 </li>
             </ul>
+        </div>
 
-            <!-- Right Icons -->
-            <div class="d-flex align-items-center">
-                <a href="#" class="icon-link"><i class="bi bi-search fs-5"></i></a>
-                @if (auth()->check() && auth()->user()->role == 'b2c')
-                    <a href="{{ route('cart') }}" class="icon-link position-relative cart-icon ms-2">
-                        <i class="bi bi-cart fs-5"></i>
-                        <span
-                            class="position-absolute translate-middle p-1 bg-danger border border-light rounded-circle badge">{{ auth()->check() && auth()->user()->cart ? auth()->user()->cart->items->count() : 0 }}</span>
+        <!-- Mobile/Tablet Collapsible Navigation -->
+        <div class="collapse navbar-collapse d-lg-none" id="mainNavbar">
+            <ul class="navbar-nav w-100 mb-2">
+                <li class="nav-item">
+                    <a class="premium-nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ url('/') }}">
+                        <i class="fas fa-home me-2"></i>Home
                     </a>
-                    <a href="{{ route('track-order.form') }}" class="icon-link"><i class="bi bi-truck fs-5"></i></a>
-                @endif
-                <a href="#" class="icon-link d-none d-sm-inline-flex ms-2"><i
-                        class="bi bi-receipt fs-5"></i></a>
-                @if (auth()->check())
-                    <div class="vr mx-2 d-none d-sm-block"></div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="premium-nav-link dropdown-toggle {{ request()->routeIs(['categories', 'sellers', 'manufacturers', 'resources']) ? 'active' : '' }}" 
+                       href="#" id="browseMobileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-compass me-2"></i>Browse
+                    </a>
+                    <ul class="dropdown-menu premium-mobile-dropdown" aria-labelledby="browseMobileDropdown">
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('categories') }}">
+                            <i class="fas fa-th-large me-2"></i>Categories
+                        </a></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('sellers') }}">
+                            <i class="fas fa-store me-2"></i>Sellers
+                        </a></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('manufacturers') }}">
+                            <i class="fas fa-industry me-2"></i>Manufacturers
+                        </a></li>
+                        <li><hr class="dropdown-divider premium-dropdown-divider"></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('resources') }}">
+                            <i class="fas fa-book me-2"></i>Resources
+                        </a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="premium-nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">
+                        <i class="fas fa-info-circle me-2"></i>About Us
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="premium-nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">
+                        <i class="fas fa-envelope me-2"></i>Contact
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="premium-nav-link {{ request()->routeIs('faq') ? 'active' : '' }}" href="{{ route('faq') }}">
+                        <i class="fas fa-question-circle me-2"></i>FAQ
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-                    <div class="dropdown">
-                        <a href="#" class="icon-link" id="userDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle fs-5"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{ route('user.profile') }}">My Account</a></li>
-                            <li><a class="dropdown-item" href="{{ route('contributor.dashboard') }}">Contributor Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{{ route('user.contacts.index') }}">My Contacts</a>
-                            </li>
-                            <li><a class="dropdown-item" href="#">Order History</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item text-danger" href="{{ route('logout') }}">Logout</a></li>
-                        </ul>
+        <!-- Premium Right Icons (Always Visible) -->
+        <div class="d-flex align-items-center">
+            <!-- Theme Toggle Button -->
+            <div class="theme-toggle-container">
+                <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle between light and dark theme (Ctrl+Shift+T)">
+                    <div class="theme-toggle-track">
+                        <div class="theme-toggle-thumb">
+                            <i class="theme-icon-sun fas fa-sun"></i>
+                            <i class="theme-icon-moon fas fa-moon"></i>
+                        </div>
                     </div>
-                @endif
+                </button>
             </div>
+            
+            <a href="#" class="premium-icon-link ms-3">
+                <i class="fas fa-search"></i>
+            </a>
+            @if (auth()->check() && auth()->user()->role == 'b2c')
+                <a href="{{ route('cart') }}" class="premium-icon-link position-relative ms-3">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="premium-badge position-absolute">
+                        {{ auth()->check() && auth()->user()->cart ? auth()->user()->cart->items->count() : 0 }}
+                    </span>
+                </a>
+                <a href="{{ route('track-order.form') }}" class="premium-icon-link ms-3">
+                    <i class="fas fa-truck"></i>
+                </a>
+            @endif
+            <a href="#" class="premium-icon-link d-none d-sm-inline-flex ms-3">
+                <i class="fas fa-receipt"></i>
+            </a>
+            @if (auth()->check())
+                <div class="premium-divider mx-3 d-none d-sm-block"></div>
+
+                <div class="dropdown">
+                    <a href="#" class="premium-icon-link dropdown-toggle" id="userDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="true">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end premium-user-dropdown" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('user.profile') }}">
+                            <i class="fas fa-user me-2"></i>My Account
+                        </a></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('contributor.dashboard') }}">
+                            <i class="fas fa-chart-bar me-2"></i>Contributor Dashboard
+                        </a></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="{{ route('user.contacts.index') }}">
+                            <i class="fas fa-address-book me-2"></i>My Contacts
+                        </a></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="#">
+                            <i class="fas fa-history me-2"></i>Order History
+                        </a></li>
+                        <li><a class="dropdown-item premium-dropdown-item" href="#">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a></li>
+                        <li><hr class="dropdown-divider premium-dropdown-divider"></li>
+                        <li><a class="dropdown-item premium-dropdown-item text-danger" href="{{ route('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            @else
+                <a href="{{ route('login') }}" class="btn-premium btn-premium-secondary ms-3">
+                    <i class="fas fa-sign-in-alt me-1"></i>Login
+                </a>
+            @endif
         </div>
     </div>
 </nav>
-</header>

@@ -1,118 +1,83 @@
 @extends('frontend.layout.main')
 
 @section('content')
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="text-center mb-5">
-                <h1 class="display-4 fw-bold text-primary mb-3">Product Categories</h1>
-                <p class="lead text-muted">Explore our comprehensive range of product categories</p>
-            </div>
+<!-- Premium Hero Section -->
+<section class="premium-hero">
+    <div class="premium-container">
+        <div class="premium-hero-content">
+            <h1 class="premium-hero-title">Product <span class="accent-text">Categories</span></h1>
+            <p class="premium-hero-subtitle">Explore our comprehensive range of product categories</p>
         </div>
     </div>
+</section>
 
-    <div class="row g-4">
-        @forelse($categories as $category)
-        <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow-sm border-0 category-card">
-                <div class="card-body p-4 text-center">
-                    <div class="category-icon mb-3">
-                        <i class="bi bi-grid-3x3-gap-fill fs-1 text-primary"></i>
-                    </div>
-                    <h5 class="card-title mb-3">{{ $category->name }}</h5>
-                    <p class="card-text text-muted mb-3">
-                        {{ $category->products_count }} products available
-                    </p>
-                    <a href="{{ route('home', ['category' => $category->id]) }}" class="btn btn-primary">
-                        Browse Category
-                    </a>
+<!-- Premium Categories Grid -->
+<section class="premium-section">
+    <div class="premium-container">
+        <div class="premium-grid premium-grid-3">
+            @forelse($categories as $category)
+            <div class="premium-card premium-fade-in text-center">
+                <div class="premium-category-icon mb-3">
+                    <i class="fas fa-th-large"></i>
+                </div>
+                <h3 class="premium-card-title mb-3">{{ $category->name }}</h3>
+                <p class="premium-card-text mb-3">
+                    <i class="fas fa-box me-1"></i>{{ $category->products_count }} products available
+                </p>
+                <a href="{{ route('home', ['category' => $category->id]) }}" class="btn-premium btn-premium-primary">
+                    <i class="fas fa-arrow-right me-1"></i>Browse Category
+                </a>
+            </div>
+            @empty
+            <div class="col-12">
+                <div class="premium-card text-center">
+                    <i class="fas fa-th-large premium-card-icon mb-3"></i>
+                    <h3 class="premium-card-title">No categories available</h3>
+                    <p class="premium-card-text">Check back later for new product categories.</p>
                 </div>
             </div>
+            @endforelse
         </div>
-        @empty
-        <div class="col-12">
-            <div class="text-center py-5">
-                <i class="bi bi-grid-3x3-gap-fill fs-1 text-muted mb-3"></i>
-                <h3 class="text-muted">No categories available</h3>
-                <p class="text-muted">Check back later for new product categories.</p>
+    </div>
+</section>
+
+@if($categories->hasPages())
+<!-- Premium Pagination -->
+<section class="premium-section py-4">
+    <div class="premium-container">
+        <div class="d-flex justify-content-center">
+            {{ $categories->links() }}
+        </div>
+    </div>
+</section>
+@endif
+
+<!-- Premium Statistics Section -->
+<section class="premium-section">
+    <div class="premium-container">
+        <div class="premium-header">
+            <h2 class="premium-title">Category <span class="accent-text">Statistics</span></h2>
+            <p class="premium-subtitle">Overview of our marketplace categories</p>
+        </div>
+        
+        <div class="premium-grid premium-grid-4">
+            <div class="premium-card premium-scale-in text-center">
+                <div class="text-accent mb-2" style="font-size: 2.5rem; font-weight: 800;">{{ $categories->total() }}</div>
+                <h3 class="premium-card-title">Total Categories</h3>
             </div>
-        </div>
-        @endforelse
-    </div>
-
-    @if($categories->hasPages())
-    <div class="row mt-5">
-        <div class="col-12">
-            <nav aria-label="Category pagination">
-                <ul class="pagination justify-content-center">
-                    {{ $categories->links() }}
-                </ul>
-            </nav>
-        </div>
-    </div>
-    @endif
-
-    <!-- Category Statistics -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card shadow-sm border-0 bg-light">
-                <div class="card-body p-4">
-                    <div class="row text-center">
-                        <div class="col-md-3">
-                            <div class="stat-item">
-                                <h3 class="h2 text-primary mb-1">{{ $categories->total() }}</h3>
-                                <p class="text-muted mb-0">Total Categories</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-item">
-                                <h3 class="h2 text-success mb-1">{{ $categories->sum('products_count') }}</h3>
-                                <p class="text-muted mb-0">Total Products</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-item">
-                                <h3 class="h2 text-info mb-1">{{ $categories->where('products_count', '>', 0)->count() }}</h3>
-                                <p class="text-muted mb-0">Active Categories</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-item">
-                                <h3 class="h2 text-warning mb-1">{{ round($categories->avg('products_count'), 1) }}</h3>
-                                <p class="text-muted mb-0">Avg Products/Category</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="premium-card premium-scale-in text-center">
+                <div class="text-accent mb-2" style="font-size: 2.5rem; font-weight: 800;">{{ $categories->sum('products_count') }}</div>
+                <h3 class="premium-card-title">Total Products</h3>
+            </div>
+            <div class="premium-card premium-scale-in text-center">
+                <div class="text-accent mb-2" style="font-size: 2.5rem; font-weight: 800;">{{ $categories->where('products_count', '>', 0)->count() }}</div>
+                <h3 class="premium-card-title">Active Categories</h3>
+            </div>
+            <div class="premium-card premium-scale-in text-center">
+                <div class="text-accent mb-2" style="font-size: 2.5rem; font-weight: 800;">{{ round($categories->avg('products_count'), 1) }}</div>
+                <h3 class="premium-card-title">Avg Products/Category</h3>
             </div>
         </div>
     </div>
-</div>
-
-<style>
-.category-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.category-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-}
-
-.category-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    color: white;
-}
-
-.stat-item {
-    padding: 20px 0;
-}
-</style>
+</section>
 @endsection

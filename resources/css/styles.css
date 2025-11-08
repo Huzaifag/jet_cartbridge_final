@@ -649,3 +649,123 @@ html {
         transform: translateX(100%);
     }
 }
+
+/* ========================================
+   PRODUCT CARD TITLE FIX
+   ======================================== */
+
+/* Enhanced Product Card Title Display */
+.card-title-premium {
+    font-size: 1.1rem !important;
+    color: #212529 !important;
+    line-height: 1.3 !important;
+    min-height: 2.6rem !important; /* Ensures consistent height for 2 lines */
+    word-wrap: break-word !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}
+
+/* Product Card Premium Enhancements */
+.product-card-premium {
+    background-color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease-in-out;
+}
+
+.product-card-premium:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.image-wrapper-premium {
+    overflow: hidden;
+    height: 250px;
+    background-color: #f8f9fa;
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+}
+
+.modern-product-img-premium {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card-premium:hover .modern-product-img-premium {
+    transform: scale(1.05);
+}
+
+.product-price-premium {
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.badge-stock-premium {
+    min-width: 85px;
+    text-align: center;
+    border: 1px solid;
+    font-size: 0.75rem;
+}
+
+.bg-success-light {
+    background-color: #d1e7dd !important;
+    border-color: #a3cfb4 !important;
+}
+
+.bg-danger-light {
+    background-color: #f8d7da !important;
+    border-color: #ebacb2 !important;
+}
+
+.badge-premium-trending {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #ff4500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+}
+
+.transition-button {
+    transition: all 0.2s ease;
+}
+
+.hover-grow:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
+   PRODUCT TITLE MULTILINE FIX
+   ======================================== */
+
+/* Product Title - Allow 2 lines with proper wrapping */
+.product-title-multiline {
+    font-size: 1.1rem !important;
+    line-height: 1.3 !important;
+    min-height: 2.6rem !important; /* Space for 2 lines */
+    max-height: 2.6rem !important; /* Limit to 2 lines */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    word-wrap: break-word !important;
+    hyphens: auto !important;
+}
+
+/* Ensure the title container has proper flex behavior */
+.card-title {
+    flex-grow: 1;
+}
+
+/* Stock badge should not shrink */
+.user-type-badge {
+    flex-shrink: 0;
+    min-width: 70px;
+    text-align: center;
+    font-size: 0.75rem;
+}
