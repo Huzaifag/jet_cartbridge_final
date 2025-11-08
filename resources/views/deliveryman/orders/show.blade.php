@@ -17,9 +17,9 @@
                 @endphp
 
                 @if ($canDeliver)
-                    <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#deliverModal">
+                    <a href="{{ route('deliveryman.orders.edit', $order->id) }}" class="btn btn-success shadow-sm">
                         <i class="fas fa-check fa-sm text-white-50"></i> Mark as Delivered
-                    </button>
+                    </a>
                 @elseif ($isDelivered)
                     <span class="badge bg-success p-2">
                         <i class="fas fa-check-circle"></i> Order Delivered
@@ -121,6 +121,49 @@
 
             {{-- Right Column: Addresses, Timeline, and Dispatch (if applicable) --}}
             <div class="col-xl-8 col-lg-7">
+                {{-- Delivery Information (if delivered) --}}
+                @php
+                    $delivery = $order->delivery ?? null;
+                @endphp
+                @if ($delivery)
+                    <div class="card shadow mb-4 border-left-success">
+                        <div class="card-header py-3 bg-success text-white">
+                            <h6 class="m-0 font-weight-bold">
+                                <i class="fas fa-check-circle"></i> Delivery Information
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p><strong>Delivery Date:</strong> {{ $delivery->delivery_date }}</p>
+                                    <p><strong>Delivery Time:</strong> {{ $delivery->delivery_time }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Delivered By:</strong> {{ Auth::user()->name }}</p>
+                                    <p><strong>Completed At:</strong> 
+                                        {{ $delivery->created_at ? $delivery->created_at->format('M d, Y h:i A') : 'N/A' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if ($delivery->delivery_notes)
+                                <p><strong>Delivery Notes:</strong></p>
+                                <div class="bg-light p-3 rounded mb-3">
+                                    {{ $delivery->delivery_notes }}
+                                </div>
+                            @endif
+
+                            @if ($delivery->proof_of_delivery)
+                                <p><strong>Proof of Delivery:</strong></p>
+                                <img src="{{ asset('storage/' . $delivery->proof_of_delivery) }}" 
+                                     alt="Proof of Delivery" 
+                                     class="img-fluid rounded shadow-sm"
+                                     style="max-height: 400px; object-fit: contain;">
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Dispatch Info (if dispatched) --}}
                 @if ($order->dispatched_at)
                     <div class="card shadow mb-4">
@@ -290,48 +333,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    {{-- Delivery Modal --}}
-    <div class="modal fade" id="deliverModal" tabindex="-1" aria-labelledby="deliverModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form action="{{ route('deliveryman.orders.deliver', $order->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title" id="deliverModalLabel">
-                            <i class="fas fa-check me-2"></i> Mark Order #{{ $order->id }} as Delivered
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Delivery Date</label>
-                            <input type="date" name="delivery_date" class="form-control" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Delivery Time</label>
-                            <input type="time" name="delivery_time" class="form-control" value="{{ date('H:i') }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Upload Proof of Delivery</label>
-                            <input type="file" name="proof_of_delivery" class="form-control" accept="image/*" required>
-                            <div class="form-text text-muted">Upload a photo showing successful delivery (JPG, PNG, Max 2MB)</div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Delivery Notes</label>
-                            <textarea name="delivery_notes" class="form-control" rows="3" placeholder="Any additional notes about the delivery"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-check me-1"></i> Confirm Delivery
-                        </button>
-                    </div>
-                </div>
-            </form>
         </div>
     </div>
 @endsection
