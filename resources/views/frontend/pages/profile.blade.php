@@ -1,69 +1,74 @@
 @extends('frontend.layout.main')
 @section('content')
-<div class="container my-5">
-    <div class="row">
+<div class="premium-section" style="padding: 3rem 0;">
+    <div class="premium-container">
         <!-- Profile Header -->
-        <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
+        <div class="mb-4">
+            <div class="premium-card" style="padding: 2.5rem;">
+                <div class="text-center">
                     <div class="avatar-wrapper mb-3">
                         @if(auth()->user()->avatar)
-                            <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Profile Avatar" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                            <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Profile Avatar" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid var(--color-accent); box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);">
                         @else
-                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px; font-size: 2rem;">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px; font-size: 2.5rem; background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%); color: var(--color-dark-navy); box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                             </div>
                         @endif
                     </div>
-                    <h2 class="card-title mb-1">{{ auth()->user()->name }}</h2>
-                    <p class="text-muted mb-3">{{ auth()->user()->email }}</p>
-                    <div class="row text-center">
-                        <div class="col-md-3">
-                            <h4 class="text-primary">{{ $purchasedProducts->count() }}</h4>
-                            <small class="text-muted">Products Purchased</small>
+                    <h2 class="premium-card-title mb-2" style="font-size: 2rem;">{{ auth()->user()->name }}</h2>
+                    <p class="text-dim mb-4">{{ auth()->user()->email }}</p>
+                    <div class="row text-center g-4">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-box">
+                                <h4 class="text-accent mb-1" style="font-size: 2rem; font-weight: 800;">{{ $purchasedProducts->count() }}</h4>
+                                <small class="text-dim">Products Purchased</small>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <h4 class="text-success">{{ $followedSellers->count() + $followedManufacturers->count() }}</h4>
-                            <small class="text-muted">Following</small>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-box">
+                                <h4 class="text-accent mb-1" style="font-size: 2rem; font-weight: 800;">{{ $followedSellers->count() + $followedManufacturers->count() }}</h4>
+                                <small class="text-dim">Following</small>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <h4 class="text-info">{{ $userReviews->count() }}</h4>
-                            <small class="text-muted">Reviews</small>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-box">
+                                <h4 class="text-accent mb-1" style="font-size: 2rem; font-weight: 800;">{{ $userReviews->count() }}</h4>
+                                <small class="text-dim">Reviews</small>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <h4 class="text-warning">{{ number_format($coinsBalance) }}</h4>
-                            <small class="text-muted">Coins Balance</small>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-box">
+                                <h4 class="text-accent mb-1" style="font-size: 2rem; font-weight: 800;">{{ number_format($coinsBalance) }}</h4>
+                                <small class="text-dim">Coins Balance</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Profile Sections -->
-    <div class="row">
-        <!-- Products Purchased -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-shopping-bag me-2"></i>Products Purchased
-                    </h5>
+        <!-- Profile Sections -->
+        <div class="premium-grid premium-grid-2">
+            <!-- Products Purchased -->
+            <div class="premium-card">
+                <div class="d-flex align-items-center mb-3 pb-3" style="border-bottom: 2px solid var(--color-accent);">
+                    <i class="fas fa-shopping-bag text-accent me-2" style="font-size: 1.5rem;"></i>
+                    <h5 class="premium-card-title mb-0">Products Purchased</h5>
                 </div>
-                <div class="card-body">
+                <div>
                     @if($purchasedProducts->count() > 0)
                         <div class="row g-3">
                             @foreach($purchasedProducts->take(6) as $product)
                                 <div class="col-6">
-                                    <div class="card border-0 shadow-sm">
+                                    <div class="premium-product-card" style="max-height: none;">
                                         @php
                                             $images = is_array($product->images) ? $product->images : json_decode($product->images, true);
                                             $firstImage = str_replace('\/', '/', $images[0] ?? 'default.png');
                                         @endphp
-                                        <img src="{{ asset($firstImage) }}" class="card-img-top" alt="{{ $product->name }}" style="height: 120px; object-fit: cover;">
-                                        <div class="card-body p-2">
-                                            <h6 class="card-title mb-1" style="font-size: 0.9rem;">{{ Str::limit($product->name, 30) }}</h6>
-                                            <small class="text-muted">${{ number_format($product->b2c_price, 2) }}</small>
+                                        <img src="{{ asset($firstImage) }}" class="premium-product-image" alt="{{ $product->name }}" style="height: 120px;">
+                                        <div class="premium-product-content" style="padding: 0.75rem;">
+                                            <h6 class="premium-product-title mb-1" style="font-size: 0.85rem;">{{ Str::limit($product->name, 30) }}</h6>
+                                            <small class="text-accent" style="font-weight: 600;">${{ number_format($product->b2c_price, 2) }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -75,25 +80,22 @@
                             </div>
                         @endif
                     @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No products purchased yet</p>
-                            <a href="{{ route('home') }}" class="btn btn-primary btn-sm">Start Shopping</a>
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart text-dim mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                            <p class="text-dim mb-3">No products purchased yet</p>
+                            <a href="{{ route('home') }}" class="btn-premium btn-premium-primary">Start Shopping</a>
                         </div>
                     @endif
                 </div>
             </div>
-        </div>
 
-        <!-- Followed Sellers/Manufacturers -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-success text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-users me-2"></i>Following
-                    </h5>
+            <!-- Followed Sellers/Manufacturers -->
+            <div class="premium-card">
+                <div class="d-flex align-items-center mb-3 pb-3" style="border-bottom: 2px solid var(--color-accent);">
+                    <i class="fas fa-users text-accent me-2" style="font-size: 1.5rem;"></i>
+                    <h5 class="premium-card-title mb-0">Following</h5>
                 </div>
-                <div class="card-body">
+                <div>
                     @if(($followedSellers->count() + $followedManufacturers->count()) > 0)
                         <div class="list-group list-group-flush">
                             @foreach($followedSellers as $seller)
@@ -138,33 +140,27 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Not following anyone yet</p>
-                            <a href="{{ route('home') }}" class="btn btn-success btn-sm">Discover Sellers</a>
+                        <div class="text-center py-5">
+                            <i class="fas fa-users text-dim mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                            <p class="text-dim mb-3">Not following anyone yet</p>
+                            <a href="{{ route('home') }}" class="btn-premium btn-premium-primary">Discover Sellers</a>
                         </div>
                     @endif
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Reviews & Videos Section -->
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-comments me-2"></i>My Reviews & Videos
-                    </h5>
-                </div>
-                <div class="card-body">
+        <!-- Reviews & Videos Section -->
+        <div class="premium-card">
+            <div class="d-flex align-items-center mb-3 pb-3" style="border-bottom: 2px solid var(--color-accent);">
+                <i class="fas fa-comments text-accent me-2" style="font-size: 1.5rem;"></i>
+                <h5 class="premium-card-title mb-0">My Reviews & Videos</h5>
+            </div>
+            <div>
                     @if($userReviews->count() > 0)
-                        <div class="row g-4">
+                        <div class="premium-grid premium-grid-3">
                             @foreach($userReviews as $review)
-                                <div class="col-md-6 col-lg-4">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-body">
+                                <div class="premium-card" style="padding: 1.5rem;">
                                             <div class="d-flex align-items-center mb-2">
                                                 <div class="rating me-2">
                                                     @for($i = 1; $i <= 5; $i++)
@@ -177,9 +173,9 @@
                                                 </div>
                                                 <small class="text-muted">{{ $review->created_at->diffForHumans() }}</small>
                                             </div>
-                                            <h6 class="card-title mb-2">{{ $review->product->name }}</h6>
+                                            <h6 class="premium-card-title mb-2">{{ $review->product->name }}</h6>
                                             @if($review->review_text)
-                                                <p class="card-text small mb-3">{{ Str::limit($review->review_text, 100) }}</p>
+                                                <p class="premium-card-text small mb-3">{{ Str::limit($review->review_text, 100) }}</p>
                                             @endif
                                             @if($review->media_urls)
                                                 @php
@@ -187,47 +183,40 @@
                                                 @endphp
                                                 <div class="media-preview mb-2">
                                                     @if(count($mediaUrls) > 0)
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-{{ $review->review_type == 'video' ? 'video' : 'images' }} me-1"></i>
+                                                        <small class="text-dim">
+                                                            <i class="fas fa-{{ $review->review_type == 'video' ? 'video' : 'images' }} me-1 text-accent"></i>
                                                             {{ count($mediaUrls) }} {{ $review->review_type == 'video' ? 'video' : 'image' }}{{ count($mediaUrls) > 1 ? 's' : '' }}
                                                         </small>
                                                     @endif
                                                 </div>
                                             @endif
                                         </div>
-                                    </div>
-                                </div>
                             @endforeach
                         </div>
                     @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No reviews yet</p>
-                            <a href="{{ route('home') }}" class="btn btn-info btn-sm">Write Your First Review</a>
+                        <div class="text-center py-5">
+                            <i class="fas fa-comments text-dim mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                            <p class="text-dim mb-3">No reviews yet</p>
+                            <a href="{{ route('home') }}" class="btn-premium btn-premium-primary">Write Your First Review</a>
                         </div>
                     @endif
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Coins Balance Section -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm bg-warning text-white">
-                <div class="card-body text-center">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h3 class="mb-2">
-                                <i class="fas fa-coins me-2"></i>{{ number_format($coinsBalance) }} Coins
-                            </h3>
-                            <p class="mb-0">Your current referral coin balance</p>
-                        </div>
-                        <div class="col-md-4">
-                            <a href="{{ route('seller.coins.index') }}" class="btn btn-light btn-lg">
-                                <i class="fas fa-exchange-alt me-2"></i>Redeem Coins
-                            </a>
-                        </div>
+        <!-- Coins Balance Section -->
+        <div class="premium-card" style="background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%); border: none;">
+            <div class="text-center">
+                <div class="row align-items-center">
+                    <div class="col-md-8 text-md-start">
+                        <h3 class="mb-2" style="color: var(--color-dark-navy); font-weight: 800;">
+                            <i class="fas fa-coins me-2"></i>{{ number_format($coinsBalance) }} Coins
+                        </h3>
+                        <p class="mb-0" style="color: rgba(13, 13, 30, 0.8);">Your current referral coin balance</p>
+                    </div>
+                    <div class="col-md-4 mt-3 mt-md-0">
+                        <a href="{{ route('seller.coins.index') }}" class="btn-premium btn-premium-secondary" style="background: var(--color-dark-navy); color: var(--color-accent); border-color: var(--color-dark-navy);">
+                            <i class="fas fa-exchange-alt me-2"></i>Redeem Coins
+                        </a>
                     </div>
                 </div>
             </div>

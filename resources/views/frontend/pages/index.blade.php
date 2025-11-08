@@ -24,12 +24,31 @@
                             </div>
                         </form>
 
-                        <div class="popular-searches mt-4">
-                            <span class="text-dim me-3">Popular Searches:</span>
-                            <a href="{{ route('home', ['search' => 'Electronics']) }}" class="premium-badge me-2 mb-2">Electronics</a>
-                            <a href="{{ route('home', ['search' => 'Machinery']) }}" class="premium-badge me-2 mb-2">Machinery</a>
-                            <a href="{{ route('home', ['search' => 'Textiles']) }}" class="premium-badge me-2 mb-2">Textiles</a>
-                            <a href="{{ route('home', ['search' => 'Raw Materials']) }}" class="premium-badge me-2 mb-2">Raw Materials</a>
+                        <div class="popular-searches-wrapper mt-4">
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                <div class="popular-label">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Popular Searches</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('home', ['search' => 'Electronics']) }}" class="popular-search-badge">
+                                        <i class="fas fa-microchip"></i>
+                                        <span>Electronics</span>
+                                    </a>
+                                    <a href="{{ route('home', ['search' => 'Machinery']) }}" class="popular-search-badge">
+                                        <i class="fas fa-cogs"></i>
+                                        <span>Machinery</span>
+                                    </a>
+                                    <a href="{{ route('home', ['search' => 'Textiles']) }}" class="popular-search-badge">
+                                        <i class="fas fa-tshirt"></i>
+                                        <span>Textiles</span>
+                                    </a>
+                                    <a href="{{ route('home', ['search' => 'Raw Materials']) }}" class="popular-search-badge">
+                                        <i class="fas fa-cubes"></i>
+                                        <span>Raw Materials</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row mt-5">

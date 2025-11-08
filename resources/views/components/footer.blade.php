@@ -52,13 +52,170 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <div class="premium-footer-badges">
-                        <span class="premium-badge me-2"><i class="fas fa-shield-alt me-1"></i>Secure</span>
-                        <span class="premium-badge me-2"><i class="fas fa-certificate me-1"></i>Verified</span>
-                        <span class="premium-badge"><i class="fas fa-globe me-1"></i>Global</span>
+                        <span class="footer-trust-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure</span>
+                        </span>
+                        <span class="footer-trust-badge">
+                            <i class="fas fa-certificate"></i>
+                            <span>Verified</span>
+                        </span>
+                        <span class="footer-trust-badge">
+                            <i class="fas fa-globe"></i>
+                            <span>Global</span>
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </footer>
+
+<!-- Support Chat Button -->
+<div class="support-chat-button" id="chatButton">
+    <i class="fas fa-comments"></i>
+    <span class="chat-badge">1</span>
+</div>
+
+<!-- Support Chat Popup -->
+<div class="support-chat-popup" id="chatPopup">
+    <div class="chat-header">
+        <div class="chat-header-info">
+            <div class="chat-avatar">
+                <i class="fas fa-headset"></i>
+            </div>
+            <div>
+                <h5 class="chat-title">Customer Support</h5>
+                <p class="chat-status"><span class="status-dot"></span>Online</p>
+            </div>
+        </div>
+        <button class="chat-close" id="chatClose">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="chat-body">
+        <div class="chat-message chat-message-received">
+            <div class="message-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="message-content">
+                <p>Hello! 👋 How can we help you today?</p>
+                <span class="message-time">Just now</span>
+            </div>
+        </div>
+        
+        <div class="chat-quick-actions">
+            <p class="quick-actions-title">Quick Actions:</p>
+            <button class="quick-action-btn" onclick="sendQuickMessage('Track my order')">
+                <i class="fas fa-shipping-fast"></i> Track Order
+            </button>
+            <button class="quick-action-btn" onclick="sendQuickMessage('Product inquiry')">
+                <i class="fas fa-box"></i> Product Inquiry
+            </button>
+            <button class="quick-action-btn" onclick="sendQuickMessage('Bulk pricing')">
+                <i class="fas fa-tags"></i> Bulk Pricing
+            </button>
+            <button class="quick-action-btn" onclick="sendQuickMessage('Technical support')">
+                <i class="fas fa-tools"></i> Technical Support
+            </button>
+        </div>
+    </div>
+    
+    <div class="chat-footer">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
+        <button class="chat-send-btn" id="chatSend">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Support Chat Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const chatButton = document.getElementById('chatButton');
+    const chatPopup = document.getElementById('chatPopup');
+    const chatClose = document.getElementById('chatClose');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+    const chatBody = chatPopup.querySelector('.chat-body');
+    
+    // Toggle chat popup
+    chatButton.addEventListener('click', function() {
+        chatPopup.classList.toggle('active');
+        chatButton.classList.toggle('active');
+        if (chatPopup.classList.contains('active')) {
+            chatInput.focus();
+            // Remove badge when opened
+            const badge = chatButton.querySelector('.chat-badge');
+            if (badge) badge.style.display = 'none';
+        }
+    });
+    
+    // Close chat
+    chatClose.addEventListener('click', function() {
+        chatPopup.classList.remove('active');
+        chatButton.classList.remove('active');
+    });
+    
+    // Send message
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        if (message) {
+            addMessage(message, 'sent');
+            chatInput.value = '';
+            
+            // Simulate response
+            setTimeout(() => {
+                addMessage('Thank you for your message! Our team will respond shortly.', 'received');
+            }, 1000);
+        }
+    }
+    
+    chatSend.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Add message to chat
+    function addMessage(text, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message chat-message-${type}`;
+        
+        const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        
+        if (type === 'received') {
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="message-content">
+                    <p>${text}</p>
+                    <span class="message-time">${time}</span>
+                </div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <p>${text}</p>
+                    <span class="message-time">${time}</span>
+                </div>
+            `;
+        }
+        
+        chatBody.appendChild(messageDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    
+    // Quick message function
+    window.sendQuickMessage = function(message) {
+        addMessage(message, 'sent');
+        setTimeout(() => {
+            addMessage('Thank you! A support agent will assist you with "' + message + '" shortly.', 'received');
+        }, 1000);
+    };
+});
+</script>

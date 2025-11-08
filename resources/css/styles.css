@@ -743,9 +743,9 @@ html {
    PRODUCT TITLE MULTILINE FIX
    ======================================== */
 
-/* Product Title - Allow 2 lines with proper wrapping */
+/* Product Title - Compact with word limit */
 .product-title-multiline {
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
     line-height: 1.3 !important;
     min-height: 2.6rem !important; /* Space for 2 lines */
     max-height: 2.6rem !important; /* Limit to 2 lines */
@@ -755,6 +755,15 @@ html {
     overflow: hidden !important;
     word-wrap: break-word !important;
     hyphens: auto !important;
+    text-overflow: ellipsis !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Expand title slightly on card hover */
+.premium-product-card:hover .product-title-multiline {
+    font-size: 1.05rem !important;
+    max-height: 3.9rem !important;
+    -webkit-line-clamp: 3 !important;
 }
 
 /* Ensure the title container has proper flex behavior */

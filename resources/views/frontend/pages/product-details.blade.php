@@ -1,51 +1,9 @@
 @extends('frontend.layout.main')
 @section('content')
     <style>
-        :root {
-            /* Define a subtle, professional color palette */
-            --primary-color: #004d40;
-            /* Deep Teal/Dark Green for authority */
-            --secondary-color: #388e3c;
-            /* Evergreen secondary for accents */
-            --accent-color: #ffb300;
-            /* Amber for pricing/alerts */
-            --background-color: #f8f9fa;
-            /* Light grey/off-white background */
-            --card-bg: #ffffff;
-            --text-color: #212529;
-        }
-
-        body {
-            background-color: var(--background-color);
-        }
-
-        /* --- General Card & Layout Styling --- */
-        .detail-card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            /* Stronger, softer shadow */
-            margin-bottom: 2.5rem;
-            background-color: var(--card-bg);
-            transition: box-shadow 0.3s ease;
-        }
-
-        .detail-card:hover {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-        }
-
-        .card-title-pro {
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        /* --- Product Header (Above Fold Focus) --- */
+        /* Product Details Page Custom Styles */
         .product-header-pro {
-            padding: 3rem 0 1rem;
+            padding: 2rem 0 1rem;
             margin-bottom: 1.5rem;
         }
 
