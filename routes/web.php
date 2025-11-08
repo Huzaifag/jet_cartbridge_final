@@ -41,7 +41,7 @@ use App\Http\Controllers\manufacturer\ManufacturerCategoryController;
 use App\Http\Controllers\manufacturer\ManufacturerInquiryController;
 use App\Http\Controllers\manufacturer\ManufacturerSettingController;
 use App\Http\Controllers\manufacturer\ManufacturerAccountantController;
-
+use Illuminate\Support\Facades\File;
 
 use App\Http\Controllers\Seller\ChatController as SellerChatController;
 
@@ -54,16 +54,33 @@ Route::get('/link-storage', function () {
     }
 });
 
+
+
+
 Route::get('/run-storage-setup', function () {
-    // Run commands one by one
+    // Run Laravel artisan commands
     Artisan::call('storage:link');
     Artisan::call('config:clear');
+    Artisan::call('cache:clear');
 
-    // Run chmod using shell command (careful with permissions)
-    exec('chmod -R 775 storage');
+    // Safely update permissions without exec()
+    $storagePath = storage_path();
 
-    return 'Storage linked, permissions updated, and config cleared successfully!';
-})->middleware('auth'); // ✅ optional but highly recommended
+    if (File::exists($storagePath)) {
+        $files = File::allFiles($storagePath);
+        foreach ($files as $file) {
+            @chmod($file->getRealPath(), 0775);
+        }
+
+        $directories = File::directories($storagePath);
+        foreach ($directories as $dir) {
+            @chmod($dir, 0775);
+        }
+    }
+
+    return '✅ Storage linked, cache cleared, and permissions updated successfully!';
+})->middleware('auth'); // Optional but highly recommended
+
 
 Route::get('/optimize-clear', function () {
     if (!app()->environment('local')) {
