@@ -7,6 +7,22 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Jet Cartridge - {{ $title ?? 'Premium B2B Marketplace' }}</title>
 
+    <!-- Inline Theme Script - Prevents Flash of Unstyled Content -->
+    <script>
+        (function() {
+            // Get stored theme or system preference immediately
+            const storedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = storedTheme || systemTheme;
+            
+            // Apply theme immediately before page renders
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            // Prevent flash by hiding body until theme is applied
+            document.documentElement.style.visibility = 'visible';
+        })();
+    </script>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -23,9 +39,30 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <link rel="stylesheet" href="{{ asset('css/premium-theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/light-theme.css') }}">
+    
+    <style>
+        /* Prevent flash of unstyled content */
+        html:not([data-theme]) {
+            visibility: hidden;
+        }
+        
+        html[data-theme] {
+            visibility: visible;
+        }
+        
+        /* Smooth theme transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        /* Disable transitions on page load */
+        .preload * {
+            transition: none !important;
+        }
+    </style>
 </head>
 
-<body>
+<body class="preload">
 
     @include('components.header')
     @include('components.toast')

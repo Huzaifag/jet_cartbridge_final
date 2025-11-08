@@ -163,6 +163,11 @@ class ThemeToggle {
 // Initialize theme toggle when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.themeToggle = new ThemeToggle();
+    
+    // Remove preload class to enable transitions after page load
+    setTimeout(() => {
+        document.body.classList.remove('preload');
+    }, 100);
 });
 
 // Add CSS for theme toggle
