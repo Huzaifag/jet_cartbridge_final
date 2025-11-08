@@ -42,6 +42,10 @@ use App\Http\Controllers\manufacturer\ManufacturerInquiryController;
 use App\Http\Controllers\manufacturer\ManufacturerSettingController;
 use App\Http\Controllers\manufacturer\ManufacturerAccountantController;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Response;
+
+
 
 use App\Http\Controllers\Seller\ChatController as SellerChatController;
 
@@ -53,6 +57,41 @@ Route::get('/link-storage', function () {
         return '<h3 style="color:red;">❌ Failed to create storage link:</h3><pre>' . $e->getMessage() . '</pre>';
     }
 });
+
+
+Route::get('/run-migrations', function () {
+    try {
+        // Run migrations and capture output
+        Artisan::call('migrate', ['--force' => true]);
+        $output = Artisan::output();
+
+        // Check if there was any error-like output
+        if (stripos($output, 'error') !== false || stripos($output, 'failed') !== false) {
+            Log::error('Migration error detected: ' . $output);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Migration completed with errors.',
+                'output' => $output,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'All migrations executed successfully!',
+            'output' => $output,
+        ]);
+
+    } catch (Throwable $e) {
+        // Catch any PHP/Laravel-level errors
+        Log::error('Migration exception: ' . $e->getMessage());
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+})->middleware('auth'); // optional but strongly recommended
+
 
 
 

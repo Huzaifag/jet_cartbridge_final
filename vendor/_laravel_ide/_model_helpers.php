@@ -16,6 +16,7 @@ namespace App\Models {
      * @property string $email
      * @property string|null $avatar
      * @property string $name
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property int $id
      * @property-read \App\Models\Seller $seller
@@ -26,6 +27,7 @@ namespace App\Models {
      * @property-read int|null $permissions_count
      * @method static \Illuminate\Database\Eloquent\Builder<Accountant>|Accountant whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Accountant>|Accountant whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Accountant>|Accountant whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Accountant>|Accountant whereName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Accountant>|Accountant whereAvatar($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Accountant>|Accountant whereEmail($value)
@@ -2293,6 +2295,7 @@ namespace App\Models {
      * @property string $email
      * @property string|null $avatar
      * @property string $name
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property int $id
      * @property-read \App\Models\User $user
@@ -2302,6 +2305,7 @@ namespace App\Models {
      * @property-read int|null $permissions_count
      * @method static \Illuminate\Database\Eloquent\Builder<DeliveryMan>|DeliveryMan whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<DeliveryMan>|DeliveryMan whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<DeliveryMan>|DeliveryMan whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<DeliveryMan>|DeliveryMan whereName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<DeliveryMan>|DeliveryMan whereAvatar($value)
      * @method static \Illuminate\Database\Eloquent\Builder<DeliveryMan>|DeliveryMan whereEmail($value)
@@ -3626,6 +3630,16 @@ namespace App\Models {
      * @property-read \App\Models\User $user
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
      * @property-read int|null $products_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Order> $orders
+     * @property-read int|null $orders_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Accountant> $accountants
+     * @property-read int|null $accountants_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Salesman> $salesmen
+     * @property-read int|null $salesmen_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WareHouse> $warehouses
+     * @property-read int|null $warehouses_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DeliveryMan> $deliveryMen
+     * @property-read int|null $deliveryMen_count
      * @method static \Illuminate\Database\Eloquent\Builder<Manufacturer>|Manufacturer whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Manufacturer>|Manufacturer whereCompanyName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Manufacturer>|Manufacturer whereCompanyRegistrationNumber($value)
@@ -4625,11 +4639,13 @@ namespace App\Models {
      * @property bool $order_push
      * @property bool $order_sms
      * @property bool $order_email
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property int $id
      * @property-read \App\Models\Seller $seller
      * @method static \Illuminate\Database\Eloquent\Builder<NotificationPreference>|NotificationPreference whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<NotificationPreference>|NotificationPreference whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<NotificationPreference>|NotificationPreference whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<NotificationPreference>|NotificationPreference whereOrderEmail($value)
      * @method static \Illuminate\Database\Eloquent\Builder<NotificationPreference>|NotificationPreference whereOrderSms($value)
      * @method static \Illuminate\Database\Eloquent\Builder<NotificationPreference>|NotificationPreference whereOrderPush($value)
@@ -4963,14 +4979,17 @@ namespace App\Models {
      * @property float $total
      * @property string|null $referral_code
      * @property mixed $customer_id
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property string|null $invoice_date
      * @property string|null $invoice
-     * @property mixed $status
      * @property string|null $invoice_column
      * @property mixed $delivery_person_id
+     * @property string $status
+     * @property string $order_number
      * @property int $id
      * @property-read \App\Models\Seller $seller
+     * @property-read \App\Models\Manufacturer $manufacturer
      * @property-read \App\Models\User $customer
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
      * @property-read int|null $products_count
@@ -4983,12 +5002,14 @@ namespace App\Models {
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\OrderStatus> $statuses
      * @property-read int|null $statuses_count
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereOrderNumber($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereStatus($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereDeliveryPersonId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereInvoiceColumn($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereStatus($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereInvoice($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereInvoiceDate($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereCustomerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereReferralCode($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Order>|Order whereTotal($value)
@@ -6891,11 +6912,13 @@ namespace App\Models {
      * @property string|null $bank_name
      * @property string|null $account_holder_name
      * @property string|null $default_payout_method
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property int $id
      * @property-read \App\Models\Seller $seller
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentSetting>|PaymentSetting whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentSetting>|PaymentSetting whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentSetting>|PaymentSetting whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentSetting>|PaymentSetting whereDefaultPayoutMethod($value)
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentSetting>|PaymentSetting whereAccountHolderName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentSetting>|PaymentSetting whereBankName($value)
@@ -8555,6 +8578,7 @@ namespace App\Models {
      * @property string $email
      * @property string|null $avatar
      * @property string $name
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property int $id
      * @property-read \App\Models\Seller $seller
@@ -8565,6 +8589,7 @@ namespace App\Models {
      * @property-read int|null $permissions_count
      * @method static \Illuminate\Database\Eloquent\Builder<Salesman>|Salesman whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Salesman>|Salesman whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Salesman>|Salesman whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Salesman>|Salesman whereName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Salesman>|Salesman whereAvatar($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Salesman>|Salesman whereEmail($value)
@@ -9285,11 +9310,13 @@ namespace App\Models {
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property mixed $method
      * @property bool $is_enabled
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property int $id
      * @property-read \App\Models\Seller $seller
      * @method static \Illuminate\Database\Eloquent\Builder<TwoFactorSetting>|TwoFactorSetting whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<TwoFactorSetting>|TwoFactorSetting whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<TwoFactorSetting>|TwoFactorSetting whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<TwoFactorSetting>|TwoFactorSetting whereIsEnabled($value)
      * @method static \Illuminate\Database\Eloquent\Builder<TwoFactorSetting>|TwoFactorSetting whereMethod($value)
      * @method static \Illuminate\Database\Eloquent\Builder<TwoFactorSetting>|TwoFactorSetting whereCreatedAt($value)
@@ -10294,6 +10321,7 @@ namespace App\Models {
      * @property float|null $target_price
      * @property mixed $quantity
      * @property mixed $customer_id
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property mixed $product_id
      * @property mixed $contact_id
@@ -10301,11 +10329,14 @@ namespace App\Models {
      * @property-read \App\Models\UserContact $contact
      * @property-read \App\Models\Product $product
      * @property-read \App\Models\Seller $seller
+     * @property-read \App\Models\Manufacturer $manufacturer
      * @property-read \App\Models\User $customer
+     * @property-read \App\Models\User $user
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereContactId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereProductId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereCustomerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereQuantity($value)
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereTargetPrice($value)
@@ -10628,6 +10659,7 @@ namespace App\Models {
      * @property string $email
      * @property string|null $avatar
      * @property string $name
+     * @property mixed $manufacturer_id
      * @property mixed $seller_id
      * @property int $id
      * @property-read \App\Models\Seller $seller
@@ -10638,6 +10670,7 @@ namespace App\Models {
      * @property-read int|null $permissions_count
      * @method static \Illuminate\Database\Eloquent\Builder<WareHouse>|WareHouse whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<WareHouse>|WareHouse whereSellerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<WareHouse>|WareHouse whereManufacturerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<WareHouse>|WareHouse whereName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<WareHouse>|WareHouse whereAvatar($value)
      * @method static \Illuminate\Database\Eloquent\Builder<WareHouse>|WareHouse whereEmail($value)
