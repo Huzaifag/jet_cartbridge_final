@@ -183,7 +183,8 @@
             right: 20px;
             width: 350px;
             max-height: 500px;
-            background: var(--card-bg);
+            background: #ffffff;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             overflow: hidden;
@@ -198,7 +199,7 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
             padding: 1rem 1.5rem;
             display: flex;
@@ -232,7 +233,8 @@
             flex: 1;
             padding: 1rem;
             overflow-y: auto;
-            background: var(--background-color);
+            background: #f8f9fa;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
             max-height: 350px;
             scroll-behavior: smooth;
         }
@@ -246,7 +248,7 @@
         }
 
         .chat-messages::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
+            background: #007bff;
             border-radius: 2px;
         }
 
@@ -287,14 +289,15 @@
         }
 
         .message-bubble.customer .message-content {
-            background: var(--primary-color);
+            background: #007bff;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
             color: white;
             border-bottom-right-radius: 4px;
         }
 
         .message-bubble.seller .message-content {
             background: white;
-            color: var(--text-color);
+            color: #212529;
             border: 1px solid #e9ecef;
             border-bottom-left-radius: 4px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -328,7 +331,7 @@
         .chat-input-container {
             padding: 1rem;
             border-top: 1px solid #e9ecef;
-            background: var(--card-bg);
+            background: #ffffff;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -344,13 +347,14 @@
         }
 
         .chat-input-container input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(0, 77, 64, 0.1);
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
             outline: none;
         }
 
         .chat-input-container button {
-            background: var(--primary-color);
+            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
             border: none;
             border-radius: 50%;
             width: 42px;
@@ -928,33 +932,83 @@
         let currentChannel = null;
         let currentConversationId = null;
 
-        // 🔹 Initialize Pusher
+        let pollingInterval = null;
+        let usePusher = true;
+        let lastMessageId = 0;
+
+        // 🔹 Initialize Pusher with fallback
         function initializePusher() {
-            // Enable pusher logging for development (disable in production)
-            Pusher.logToConsole = true;
-            
-            pusher = new Pusher('1631bf206e381798697b', {
-                cluster: 'ap2',
-                encrypted: true,
-                authEndpoint: '/broadcasting/auth',
-                auth: {
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            try {
+                Pusher.logToConsole = false;
+                
+                pusher = new Pusher('1631bf206e381798697b', {
+                    cluster: 'ap2',
+                    encrypted: true,
+                    authEndpoint: '/broadcasting/auth',
+                    auth: {
+                        headers: {
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                        }
+                    }
+                });
+
+                pusher.connection.bind('connected', function() {
+                    console.log('✅ Real-time chat connected');
+                    usePusher = true;
+                    stopPolling();
+                });
+
+                pusher.connection.bind('error', function(err) {
+                    console.warn('⚠️ Real-time connection failed, using polling');
+                    usePusher = false;
+                    startPolling();
+                });
+
+                pusher.connection.bind('unavailable', function() {
+                    console.warn('⚠️ Real-time unavailable, using polling');
+                    usePusher = false;
+                    startPolling();
+                });
+            } catch (error) {
+                console.warn('⚠️ Pusher failed, using polling');
+                usePusher = false;
+                startPolling();
+            }
+        }
+
+        function startPolling() {
+            if (pollingInterval || !currentConversationId) return;
+            pollingInterval = setInterval(function() {
+                if (currentConversationId) {
+                    fetchMessagesQuietly(currentConversationId);
+                }
+            }, 3000);
+        }
+
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
+        function fetchMessagesQuietly(conversationId) {
+            $.ajax({
+                url: `/customer/chat/messages/${conversationId}`,
+                method: 'GET',
+                success: function(res) {
+                    let hasNew = false;
+                    res.messages.forEach(msg => {
+                        if (msg.id > lastMessageId) {
+                            appendMessage(msg);
+                            lastMessageId = msg.id;
+                            hasNew = true;
+                        }
+                    });
+                    if (hasNew) {
+                        $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
                     }
                 }
-            });
-
-            // Connection state monitoring
-            pusher.connection.bind('connected', function() {
-                console.log('Pusher connected successfully');
-            });
-
-            pusher.connection.bind('error', function(err) {
-                console.error('Pusher connection error:', err);
-            });
-
-            pusher.connection.bind('disconnected', function() {
-                console.log('Pusher disconnected');
             });
         }
 
@@ -1146,7 +1200,7 @@
             // Handle subscription errors
             currentChannel.bind('pusher:subscription_error', function(status) {
                 console.error('Pusher subscription error:', status);
-                alert('Unable to connect to real-time chat. Messages may be delayed.');
+                //alert('Unable to connect to real-time chat. Messages may be delayed.');
             });
         }
 

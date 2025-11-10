@@ -64,18 +64,17 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Category <span class="text-danger">*</span></label>
-                                        <select class="form-select" name="category" required>
+                                        <select class="form-select" name="category_id" required>
                                             <option value="">Select Category</option>
-                                            <option value="electronics">Electronics</option>
-                                            <option value="clothing">Clothing</option>
-                                            <option value="furniture">Furniture</option>
-                                            <option value="books">Books</option>
-                                            <option value="home_appliances">Home Appliances</option>
-                                            <option value="sports">Sports & Outdoors</option>
-                                            <option value="beauty">Beauty & Personal Care</option>
-                                            <option value="toys">Toys & Games</option>
-                                            <option value="food">Food & Beverages</option>
+                                            @foreach(\App\Models\Category::where('is_active', true)->get() as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
                                         </select>
+                                        <div class="form-text">
+                                            <a href="{{ route('manufacturer.categories.create') }}" target="_blank" class="text-primary">
+                                                <i class="fas fa-plus-circle me-1"></i>Add New Category
+                                            </a>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Brand</label>
@@ -519,7 +518,7 @@
                     // Basic validation for each step
                     if (step === 1) {
                         const name = $('input[name="name"]').val();
-                        const category = $('select[name="category"]').val();
+                        const category = $('select[name="category_id"]').val();
 
                         if (!name) {
                             showFieldError('input[name="name"]', 'Product name is required');
@@ -527,7 +526,7 @@
                         }
 
                         if (!category) {
-                            showFieldError('select[name="category"]', 'Category is required');
+                            showFieldError('select[name="category_id"]', 'Category is required');
                             isValid = false;
                         }
                     } else if (step === 2) {

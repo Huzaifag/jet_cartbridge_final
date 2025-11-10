@@ -283,11 +283,28 @@ class FrontendController extends Controller
             return redirect()->back()->with('error', 'You cannot send an inquiry to your own product.');
         }
         $seller = $product->seller;
+        $contact = \App\Models\UserContact::findOrFail($validated['contact_id']);
 
         $inquiry = UserInquiry::create(array_merge($validated, [
             'seller_id' => $seller->id,
             'customer_id' => auth()->id(),
         ]));
+
+        // Automatically create a Lead for salesmen
+        \App\Models\Lead::create([
+            'inquiry_id' => $inquiry->id,
+            'seller_id' => $seller->id,
+            'buyer_id' => auth()->id(),
+            'buyer_name' => $contact->name,
+            'buyer_phone' => $contact->phone,
+            'email' => $contact->email ?? auth()->user()->email,
+            'product_id' => $validated['product_id'],
+            'message' => $validated['message'] ?? 'B2B Inquiry for ' . $product->name,
+            'quantity' => $validated['quantity'],
+            'target_price' => $validated['target_price'],
+            'status' => 'pending',
+            'priority' => 'medium',
+        ]);
 
         return redirect()
             ->back()

@@ -78,6 +78,14 @@
                 <i class="fas fa-address-book"></i> Contact Book
             </a>
         </li>
+
+        <li class="nav-item">
+            <a href="{{ route('seller.analytics.index') }}"
+                class="nav-link {{ request()->routeIs('seller.analytics.*') ? 'active' : '' }}">
+                <i class="fas fa-chart-line"></i> Analytics
+            </a>
+        </li>
+
         <li class="nav-item">
             <a href="{{ route('seller.orders.index') }}"
                 class="nav-link {{ request()->routeIs('seller.orders.*') ? 'active' : '' }}">

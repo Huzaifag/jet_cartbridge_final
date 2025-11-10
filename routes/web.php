@@ -31,6 +31,7 @@ use App\Http\Controllers\Warehouse\WarehouseDashboardController;
 use App\Http\Controllers\Warehouse\WarehouseOrdersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Salesman\OrderController as SalesmanOrderController;
+use App\Http\Controllers\Salesman\LeadController as SalesmanLeadController;
 use App\Http\Controllers\Accountant\DashboardController as AccountantDashboardController;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\manufacturer\ManufacturerAuthController;
@@ -323,6 +324,9 @@ Route::prefix('seller')
 
         Route::get('/contact-book', [ContactBookController::class, 'index'])->name('contact-book.index');
 
+        // Analytics Routes
+        Route::get('/analytics', [\App\Http\Controllers\Seller\AnalyticsController::class, 'index'])->name('analytics.index');
+
         // Inquiries Routes
         Route::get('/inquiries', [InquiryController::class, 'index'])->name('inquiries.index');
 
@@ -331,7 +335,9 @@ Route::prefix('seller')
         Route::post('/inquiries/bulk-order/store', [InquiryController::class, 'storeBulkOrder'])->name('inquiries.bulk-order.store');
 
         Route::get('/inquiries/{inquiry}/response', [InquiryController::class, 'createResponse'])->name('inquiries.response.create');
-
+        
+        Route::get('/inquiries/{inquiry}/assign', [InquiryController::class, 'showAssignForm'])->name('inquiries.assign');
+        Route::post('/inquiries/{inquiry}/assign-salesman', [InquiryController::class, 'assignToSalesman'])->name('inquiries.assign-salesman');
 
         Route::get('/bulk-orders', [InquiryController::class, 'bulkIndex'])->name('bulk-orders.index');
 
@@ -507,6 +513,14 @@ Route::prefix('salesman')
         Route::get('/placed-orders/{id}', [SalesmanOrderController::class, 'show'])->name('placed-orders.show');
 
         Route::put('/placed-orders/{id}/confirm', [SalesmanOrderController::class, 'confirm'])->name('placed-orders.confirm');
+
+        // Lead Management Routes
+        Route::get('/leads', [SalesmanLeadController::class, 'index'])->name('leads.index');
+        Route::get('/leads/{id}', [SalesmanLeadController::class, 'show'])->name('leads.show');
+        Route::put('/leads/{id}/status', [SalesmanLeadController::class, 'updateStatus'])->name('leads.update-status');
+        Route::put('/leads/{id}/priority', [SalesmanLeadController::class, 'updatePriority'])->name('leads.update-priority');
+        Route::post('/leads/{id}/split', [SalesmanLeadController::class, 'split'])->name('leads.split');
+        Route::post('/leads/{id}/follow-up', [SalesmanLeadController::class, 'markFollowedUp'])->name('leads.follow-up');
     });
 
 

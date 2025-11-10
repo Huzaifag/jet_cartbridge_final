@@ -12,6 +12,7 @@ class Product extends Model
 
     protected $fillable = [
         'seller_id',
+        'manufacturer_id',
         'name',
         'slug',
         'description',
@@ -30,7 +31,6 @@ class Product extends Model
         'rating',
         'verification_status',
         'category_id',
-
     ];
 
     protected $casts = [
@@ -61,14 +61,16 @@ class Product extends Model
 
     public function activePromotion()
     {
-        return $this->hasOneThrough(
-            Promotion::class,
-            PromotionRule::class,
-            'applicable_product_id',
-            'id',
-            'id',
-            'promotion_id'
-        )->where('is_active', true)
+        return $this
+            ->hasOneThrough(
+                Promotion::class,
+                PromotionRule::class,
+                'applicable_product_id',
+                'id',
+                'id',
+                'promotion_id'
+            )
+            ->where('is_active', true)
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now());
     }
@@ -76,6 +78,11 @@ class Product extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 
     public function manufacturer()
@@ -90,7 +97,7 @@ class Product extends Model
 
     public function getCategory()
     {
-        return Category::find( $this->category_id ) ?? 'No Category';
+        return Category::find($this->category_id) ?? 'No Category';
     }
 
     // public function promotions()

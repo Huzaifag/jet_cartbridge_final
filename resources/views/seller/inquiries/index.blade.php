@@ -66,6 +66,8 @@
             border-radius: 8px;
             font-size: 0.9rem;
         }
+
+
     </style>
 @endsection
 
@@ -188,6 +190,9 @@
 
                             <!-- FOOTER -->
                             <div class="card-footer d-flex justify-content-end gap-2">
+                                <a href="{{ route('seller.inquiries.assign', $inquiry['id']) }}" class="btn btn-primary btn-action">
+                                    <i class="fas fa-user-plus me-1"></i> Assign to Salesman
+                                </a>
                                 <a href="{{ route('seller.inquiries.response.create', $inquiry['id']) }}"
                                     class="btn btn-success btn-action">
                                     <i class="fas fa-file-invoice-dollar me-1"></i> Quote
@@ -199,24 +204,16 @@
                                     class="btn btn-outline-secondary btn-action">
                                     <i class="fas fa-box-open me-2"></i> Generate Bulk Order
                                 </a>
-
                             </div>
                         </div>
                     </div>
                 @endforeach
             </div>
+            
+
         @endif
     </div>
 
 @endsection
 
-@section('scripts')
-    <script>
-        function markAsProcessed(inquiryId) {
-            if (confirm('Mark Inquiry #' + inquiryId + ' as processed?')) {
-                console.log('Marked ' + inquiryId);
-                // AJAX call here
-            }
-        }
-    </script>
-@endsection
+

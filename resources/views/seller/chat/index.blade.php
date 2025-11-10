@@ -153,30 +153,67 @@ $(document).ready(function() {
     let pusher = null;
     let currentChannel = null;
 
+    let pollingInterval = null;
+    let usePusher = true;
+
     // 🔹 Initialize Pusher
     function initializePusher() {
-        // Enable pusher logging for development (disable in production)
-        Pusher.logToConsole = true;
-        
-        pusher = new Pusher('1631bf206e381798697b', {
-            cluster: 'ap2',
-            encrypted: true,
-            authEndpoint: '/broadcasting/auth', // Laravel broadcasting auth endpoint
-            auth: {
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        try {
+            // Enable pusher logging for development (disable in production)
+            Pusher.logToConsole = false;
+            
+            pusher = new Pusher('1631bf206e381798697b', {
+                cluster: 'ap2',
+                encrypted: true,
+                authEndpoint: '/broadcasting/auth',
+                auth: {
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    }
                 }
+            });
+
+            // Connection state monitoring
+            pusher.connection.bind('connected', function() {
+                console.log('✅ Real-time chat connected');
+                usePusher = true;
+                stopPolling();
+            });
+
+            pusher.connection.bind('error', function(err) {
+                console.warn('⚠️ Real-time connection failed, using polling fallback');
+                usePusher = false;
+                startPolling();
+            });
+
+            pusher.connection.bind('unavailable', function() {
+                console.warn('⚠️ Real-time unavailable, using polling fallback');
+                usePusher = false;
+                startPolling();
+            });
+        } catch (error) {
+            console.warn('⚠️ Pusher initialization failed, using polling fallback');
+            usePusher = false;
+            startPolling();
+        }
+    }
+
+    // Polling fallback for when Pusher fails
+    function startPolling() {
+        if (pollingInterval) return;
+        
+        pollingInterval = setInterval(function() {
+            if (currentConversationId) {
+                fetchMessagesQuietly(currentConversationId);
             }
-        });
+        }, 3000); // Poll every 3 seconds
+    }
 
-        // Connection state monitoring
-        pusher.connection.bind('connected', function() {
-            console.log('Pusher connected successfully');
-        });
-
-        pusher.connection.bind('error', function(err) {
-            console.error('Pusher connection error:', err);
-        });
+    function stopPolling() {
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+        }
     }
 
     // Initialize Pusher on page load
@@ -228,6 +265,8 @@ $(document).ready(function() {
         subscribeToChat(currentConversationId);
     });
 
+    let lastMessageId = 0;
+
     // 🔹 Fetch messages for the selected conversation
     function fetchMessages(conversationId) {
         $('#chatMessages').html('<div class="text-center text-primary mt-5"><i class="fas fa-circle-notch fa-spin fa-2x"></i><p class="mt-2">Loading messages...</p></div>');
@@ -242,12 +281,34 @@ $(document).ready(function() {
                 } else {
                     response.messages.forEach(function(msg) {
                         appendMessage(msg);
+                        lastMessageId = Math.max(lastMessageId, msg.id);
                     });
                     scrollToBottom();
                 }
             },
             error: function() {
                 $('#chatMessages').html('<div class="text-center text-danger mt-5">Failed to load messages.</div>');
+            }
+        });
+    }
+
+    // 🔹 Fetch messages quietly (for polling, no loading indicator)
+    function fetchMessagesQuietly(conversationId) {
+        $.ajax({
+            url: `/seller/chat/messages/${conversationId}`,
+            method: 'GET',
+            success: function(response) {
+                let hasNewMessages = false;
+                response.messages.forEach(function(msg) {
+                    if (msg.id > lastMessageId) {
+                        appendMessage(msg);
+                        lastMessageId = msg.id;
+                        hasNewMessages = true;
+                    }
+                });
+                if (hasNewMessages) {
+                    scrollToBottom();
+                }
             }
         });
     }
@@ -300,43 +361,59 @@ $(document).ready(function() {
 
     // 🔹 Subscribe to real-time chat updates using Pusher
     function subscribeToChat(conversationId) {
-        // Unsubscribe from previous channel if exists
-        if (currentChannel) {
-            pusher.unsubscribe(currentChannel.name);
+        // If Pusher is not available, use polling
+        if (!usePusher || !pusher) {
+            console.log('Using polling for conversation:', conversationId);
+            startPolling();
+            return;
         }
 
-        // Subscribe to the conversation channel
-        const channelName = `private-conversation.${conversationId}`;
-        currentChannel = pusher.subscribe(channelName);
-
-        // Listen for new messages
-        currentChannel.bind('message.sent', function(data) {
-            console.log('New message received:', data);
-            
-            // Only append if message is from customer (not seller)
-            if (data.message && data.message.sender_type !== 'seller') {
-                appendMessage(data.message);
-                
-                // Update conversation list
-                fetchConversations();
+        try {
+            // Unsubscribe from previous channel if exists
+            if (currentChannel) {
+                pusher.unsubscribe(currentChannel.name);
             }
-        });
 
-        // Listen for typing indicator (optional)
-        currentChannel.bind('user.typing', function(data) {
-            console.log('User typing:', data);
-            showTypingIndicator();
-        });
+            // Subscribe to the conversation channel
+            const channelName = `private-conversation.${conversationId}`;
+            currentChannel = pusher.subscribe(channelName);
 
-        // Handle subscription errors
-        currentChannel.bind('pusher:subscription_error', function(status) {
-            console.error('Pusher subscription error:', status);
-            alert('Unable to connect to real-time chat. Please refresh the page.');
-        });
+            // Listen for new messages
+            currentChannel.bind('message.sent', function(data) {
+                console.log('New message received:', data);
+                
+                // Only append if message is from customer (not seller)
+                if (data.message && data.message.sender_type !== 'seller') {
+                    appendMessage(data.message);
+                    lastMessageId = Math.max(lastMessageId, data.message.id);
+                    
+                    // Update conversation list
+                    fetchConversations();
+                }
+            });
 
-        currentChannel.bind('pusher:subscription_succeeded', function() {
-            console.log('Successfully subscribed to channel:', channelName);
-        });
+            // Listen for typing indicator (optional)
+            currentChannel.bind('user.typing', function(data) {
+                console.log('User typing:', data);
+                showTypingIndicator();
+            });
+
+            // Handle subscription errors - fallback to polling
+            currentChannel.bind('pusher:subscription_error', function(status) {
+                console.warn('Pusher subscription error, switching to polling:', status);
+                usePusher = false;
+                startPolling();
+            });
+
+            currentChannel.bind('pusher:subscription_succeeded', function() {
+                console.log('✅ Subscribed to real-time channel:', channelName);
+                stopPolling(); // Stop polling if Pusher works
+            });
+        } catch (error) {
+            console.warn('Pusher subscription failed, using polling:', error);
+            usePusher = false;
+            startPolling();
+        }
     }
 
     // 🔹 Show typing indicator

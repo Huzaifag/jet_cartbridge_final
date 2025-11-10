@@ -52,4 +52,9 @@ class UserInquiry extends Model
     {
         return $this->belongsTo(User::class, 'customer_id');
     }
+
+    public function lead()
+    {
+        return $this->hasOne(Lead::class, 'inquiry_id');
+    }
 }

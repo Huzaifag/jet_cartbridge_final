@@ -94,40 +94,70 @@
         </button>
     </div>
     
-    <div class="chat-body">
-        <div class="chat-message chat-message-received">
-            <div class="message-avatar">
-                <i class="fas fa-user-circle"></i>
+    <div class="chat-body" id="supportChatBody">
+        @auth
+            <div class="chat-message chat-message-received">
+                <div class="message-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="message-content">
+                    <p>Hello {{ auth()->user()->name }}! 👋 How can we help you today?</p>
+                    <span class="message-time">Just now</span>
+                </div>
             </div>
-            <div class="message-content">
-                <p>Hello! 👋 How can we help you today?</p>
-                <span class="message-time">Just now</span>
+            
+            <div class="chat-quick-actions">
+                <p class="quick-actions-title">Quick Actions:</p>
+                <a href="{{ route('track-order.form') }}" class="quick-action-btn">
+                    <i class="fas fa-shipping-fast"></i> Track Order
+                </a>
+                <a href="{{ route('home') }}" class="quick-action-btn">
+                    <i class="fas fa-box"></i> Browse Products
+                </a>
+                <a href="{{ route('contact') }}" class="quick-action-btn">
+                    <i class="fas fa-envelope"></i> Contact Us
+                </a>
+                <a href="{{ route('faq') }}" class="quick-action-btn">
+                    <i class="fas fa-question-circle"></i> FAQ
+                </a>
             </div>
-        </div>
-        
-        <div class="chat-quick-actions">
-            <p class="quick-actions-title">Quick Actions:</p>
-            <button class="quick-action-btn" onclick="sendQuickMessage('Track my order')">
-                <i class="fas fa-shipping-fast"></i> Track Order
-            </button>
-            <button class="quick-action-btn" onclick="sendQuickMessage('Product inquiry')">
-                <i class="fas fa-box"></i> Product Inquiry
-            </button>
-            <button class="quick-action-btn" onclick="sendQuickMessage('Bulk pricing')">
-                <i class="fas fa-tags"></i> Bulk Pricing
-            </button>
-            <button class="quick-action-btn" onclick="sendQuickMessage('Technical support')">
-                <i class="fas fa-tools"></i> Technical Support
-            </button>
-        </div>
+        @else
+            <div class="chat-message chat-message-received">
+                <div class="message-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="message-content">
+                    <p>Hello! 👋 Please login to chat with sellers or get support.</p>
+                    <span class="message-time">Just now</span>
+                </div>
+            </div>
+            
+            <div class="chat-quick-actions">
+                <p class="quick-actions-title">Quick Actions:</p>
+                <a href="{{ route('login') }}" class="quick-action-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="{{ route('register') }}" class="quick-action-btn">
+                    <i class="fas fa-user-plus"></i> Register
+                </a>
+                <a href="{{ route('contact') }}" class="quick-action-btn">
+                    <i class="fas fa-envelope"></i> Contact Us
+                </a>
+                <a href="{{ route('faq') }}" class="quick-action-btn">
+                    <i class="fas fa-question-circle"></i> FAQ
+                </a>
+            </div>
+        @endauth
     </div>
     
+    @auth
     <div class="chat-footer">
         <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
         <button class="chat-send-btn" id="chatSend">
             <i class="fas fa-paper-plane"></i>
         </button>
     </div>
+    @endauth
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -166,22 +196,50 @@ document.addEventListener('DOMContentLoaded', function() {
             addMessage(message, 'sent');
             chatInput.value = '';
             
-            // Simulate response
+            @auth
+            // Send to support system (you can create a support conversation endpoint)
+            $.ajax({
+                url: '/support/message',
+                method: 'POST',
+                data: {
+                    message: message,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        addMessage('Thank you for your message! Our support team will respond shortly.', 'received');
+                    }
+                },
+                error: function() {
+                    addMessage('Message sent! Our team will get back to you soon.', 'received');
+                }
+            });
+            @else
+            // For guests, show login prompt
             setTimeout(() => {
-                addMessage('Thank you for your message! Our team will respond shortly.', 'received');
-            }, 1000);
+                addMessage('Please login to send messages to our support team.', 'received');
+            }, 500);
+            @endauth
         }
     }
     
-    chatSend.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    if (chatSend) {
+        chatSend.addEventListener('click', sendMessage);
+    }
+    
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
     
     // Add message to chat
     function addMessage(text, type) {
+        const chatBodyEl = document.getElementById('supportChatBody');
+        if (!chatBodyEl) return;
+        
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message chat-message-${type}`;
         
@@ -206,16 +264,8 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
         
-        chatBody.appendChild(messageDiv);
-        chatBody.scrollTop = chatBody.scrollHeight;
+        chatBodyEl.appendChild(messageDiv);
+        chatBodyEl.scrollTop = chatBodyEl.scrollHeight;
     }
-    
-    // Quick message function
-    window.sendQuickMessage = function(message) {
-        addMessage(message, 'sent');
-        setTimeout(() => {
-            addMessage('Thank you! A support agent will assist you with "' + message + '" shortly.', 'received');
-        }, 1000);
-    };
 });
 </script>

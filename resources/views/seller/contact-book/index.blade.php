@@ -1,510 +1,391 @@
-
 @extends('seller.layouts.app')
 
 @section('content')
-    <style>
-        .contact-book-header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 10px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        }
-        
-        .nav-tabs .nav-link {
-            border: none;
-            padding: 1rem 1.5rem;
-            font-weight: 600;
-            color: var(--dark);
-            border-radius: 0;
-        }
-        
-        .nav-tabs .nav-link.active {
-            color: var(--primary);
-            border-bottom: 3px solid var(--primary);
-            background: transparent;
-        }
-        
-        .contact-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            transition: transform 0.2s;
-            margin-bottom: 1.5rem;
-        }
-        
-        .contact-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .customer-avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #fff;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        }
-        
-        .company-logo {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
-            border-radius: 8px;
-            background: var(--light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-        
-        .stats-card {
-            background: #fff;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .stats-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        
-        .stats-label {
-            color: var(--dark);
-            font-weight: 600;
-        }
-        
-        .contact-action-btn {
-            border-radius: 0.35rem;
-            font-weight: 600;
-            padding: 0.5rem 1rem;
-        }
-        
-        .bulk-action-panel {
-            background: #fff;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            margin-bottom: 1.5rem;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .search-box {
-            position: relative;
-        }
-        
-        .search-box input {
-            border-radius: 20px;
-            padding-left: 40px;
-        }
-        
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 12px;
-            color: #b7b9cc;
-        }
-        
-        .filter-dropdown {
-            margin-right: 10px;
-        }
-        
-        .notification-modal .modal-header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-        }
-        
-        .tag {
-            display: inline-block;
-            padding: 0.25rem 0.6rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .tag-premium {
-            background-color: rgba(246, 194, 62, 0.2);
-            color: var(--warning);
-        }
-        
-        .tag-new {
-            background-color: rgba(28, 200, 138, 0.2);
-            color: var(--success);
-        }
-        
-        .tag-business {
-            background-color: rgba(78, 115, 223, 0.2);
-            color: var(--primary);
-        }
-    </style>
-    <div class="container">
-        <!-- Header -->
-        <div class="contact-book-header">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="h3 mb-1"><i class="fas fa-address-book me-2"></i> Seller Contact Book</h1>
-                    <p class="mb-0">Manage your customer and company contacts for marketing and communication</p>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <button class="btn btn-light contact-action-btn">
-                        <i class="fas fa-download me-1"></i> Export Contacts
-                    </button>
-                </div>
-            </div>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-address-book me-2"></i>Contact Book</h2>
+            <p class="text-muted mb-0">Manage your buyers and team members</p>
         </div>
-
-        <!-- Stats Overview -->
-        <div class="row">
-            <div class="col-xl-3 col-md-6">
-                <div class="stats-card">
-                    <div class="stats-number">128</div>
-                    <div class="stats-label">Total Contacts</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stats-card">
-                    <div class="stats-number">94</div>
-                    <div class="stats-label">Customers</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stats-card">
-                    <div class="stats-number">34</div>
-                    <div class="stats-label">Companies</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stats-card">
-                    <div class="stats-number">78%</div>
-                    <div class="stats-label">Active Reach</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bulk Action Panel -->
-        <div class="bulk-action-panel">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h5 class="mb-0"><i class="fas fa-bullhorn me-2 text-primary"></i> Bulk Notification</h5>
-                    <p class="mb-0 text-muted">Send promotions, new products, or offers to selected contacts</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <button class="btn btn-primary contact-action-btn" data-bs-toggle="modal" data-bs-target="#notificationModal">
-                        <i class="fas fa-paper-plane me-1"></i> Send Notification
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabs and Controls -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab">
-                        <i class="fas fa-users me-1"></i> Customers
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="companies-tab" data-bs-toggle="tab" data-bs-target="#companies" type="button" role="tab">
-                        <i class="fas fa-building me-1"></i> Companies
-                    </button>
-                </li>
-            </ul>
-            
-            <div class="d-flex">
-                <div class="filter-dropdown">
-                    <select class="form-select">
-                        <option>All Contacts</option>
-                        <option>Recent</option>
-                        <option>Premium</option>
-                        <option>Inactive</option>
-                    </select>
-                </div>
-                <div class="search-box">
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex">
+                <input type="text" name="search" class="form-control" placeholder="Search contacts..." value="{{ request('search') }}">
+                <button type="submit" class="btn btn-primary ms-2">
                     <i class="fas fa-search"></i>
-                    <input type="text" class="form-control" placeholder="Search contacts...">
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Buyers</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $buyers->count() }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Tab Content -->
-        <div class="tab-content" id="myTabContent">
-            <!-- Customers Tab -->
-            <div class="tab-pane fade show active" id="customers" role="tabpanel">
-                <div class="row">
-                    <!-- Customer Card -->
-                    <div class="col-xl-4 col-md-6">
-                        <div class="contact-card card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <img src="https://via.placeholder.com/200x200.png/0055bb?text=Customer1" alt="Customer" class="customer-avatar">
-                                    <div>
-                                        <span class="tag tag-premium">Premium</span>
-                                        <span class="tag tag-new">New</span>
-                                    </div>
-                                </div>
-                                <h5 class="card-title">Marisa Boyer MD</h5>
-                                <p class="card-text text-muted">dejuan67@example.net</p>
-                                <div class="mb-3">
-                                    <small class="text-muted"><i class="fas fa-shopping-bag me-1"></i> 5 orders</small>
-                                    <small class="text-muted ms-3"><i class="fas fa-dollar-sign me-1"></i> $3,301.00 spent</small>
-                                </div>
-                                <p class="card-text">Quam quos quibusdam reprehenderit quis autem voluptatem dolorem.</p>
-                                <div class="d-flex justify-content-between">
-                                    <button class="btn btn-outline-primary btn-sm contact-action-btn">
-                                        <i class="fas fa-envelope me-1"></i> Message
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm contact-action-btn">
-                                        <i class="fas fa-eye me-1"></i> View
-                                    </button>
-                                </div>
-                            </div>
+        <div class="col-md-3">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Salesmen</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $salesmen->count() }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-tie fa-2x text-gray-300"></i>
                         </div>
                     </div>
-                    
-                    <!-- Customer Card -->
-                    <div class="col-xl-4 col-md-6">
-                        <div class="contact-card card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <img src="https://via.placeholder.com/200x200.png/0044ff?text=Customer2" alt="Customer" class="customer-avatar">
-                                    <div>
-                                        <span class="tag tag-premium">Premium</span>
-                                    </div>
-                                </div>
-                                <h5 class="card-title">John Smith</h5>
-                                <p class="card-text text-muted">john.smith@example.com</p>
-                                <div class="mb-3">
-                                    <small class="text-muted"><i class="fas fa-shopping-bag me-1"></i> 12 orders</small>
-                                    <small class="text-muted ms-3"><i class="fas fa-dollar-sign me-1"></i> $8,450.00 spent</small>
-                                </div>
-                                <p class="card-text">Regular customer with high satisfaction rate. Prefers email communication.</p>
-                                <div class="d-flex justify-content-between">
-                                    <button class="btn btn-outline-primary btn-sm contact-action-btn">
-                                        <i class="fas fa-envelope me-1"></i> Message
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm contact-action-btn">
-                                        <i class="fas fa-eye me-1"></i> View
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Customer Card -->
-                    <div class="col-xl-4 col-md-6">
-                        <div class="contact-card card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <img src="https://via.placeholder.com/200x200.png/0066ff?text=Customer3" alt="Customer" class="customer-avatar">
-                                    <div>
-                                        <span class="tag tag-new">New</span>
-                                    </div>
-                                </div>
-                                <h5 class="card-title">Sarah Johnson</h5>
-                                <p class="card-text text-muted">sarahj@example.net</p>
-                                <div class="mb-3">
-                                    <small class="text-muted"><i class="fas fa-shopping-bag me-1"></i> 2 orders</small>
-                                    <small class="text-muted ms-3"><i class="fas fa-dollar-sign me-1"></i> $520.00 spent</small>
-                                </div>
-                                <p class="card-text">Interested in new product lines. Responds well to discounts.</p>
-                                <div class="d-flex justify-content-between">
-                                    <button class="btn btn-outline-primary btn-sm contact-action-btn">
-                                        <i class="fas fa-envelope me-1"></i> Message
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm contact-action-btn">
-                                        <i class="fas fa-eye me-1"></i> View
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="d-flex justify-content-center mt-4">
-                    <button class="btn btn-outline-primary">
-                        <i class="fas fa-plus me-2"></i> Load More Customers
-                    </button>
                 </div>
             </div>
-            
-            <!-- Companies Tab -->
-            <div class="tab-pane fade" id="companies" role="tabpanel">
-                <div class="row">
-                    <!-- Company Card -->
-                    <div class="col-xl-4 col-md-6">
-                        <div class="contact-card card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="company-logo">
-                                        <i class="fas fa-building"></i>
-                                    </div>
-                                    <div>
-                                        <span class="tag tag-business">Partner</span>
-                                    </div>
-                                </div>
-                                <h5 class="card-title">FastShip Logistics</h5>
-                                <p class="card-text text-muted">contact@fastship.example.com</p>
-                                <div class="mb-3">
-                                    <small class="text-muted"><i class="fas fa-phone me-1"></i> (555) 123-4567</small>
-                                    <small class="text-muted ms-3"><i class="fas fa-map-marker-alt me-1"></i> New York, USA</small>
-                                </div>
-                                <p class="card-text">Logistics partner with 2-day shipping options. Reliable for bulk orders.</p>
-                                <div class="d-flex justify-content-between">
-                                    <button class="btn btn-outline-primary btn-sm contact-action-btn">
-                                        <i class="fas fa-envelope me-1"></i> Message
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm contact-action-btn">
-                                        <i class="fas fa-eye me-1"></i> View
-                                    </button>
-                                </div>
-                            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Accountants</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $accountants->count() }}</div>
                         </div>
-                    </div>
-                    
-                    <!-- Company Card -->
-                    <div class="col-xl-4 col-md-6">
-                        <div class="contact-card card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="company-logo">
-                                        <i class="fas fa-warehouse"></i>
-                                    </div>
-                                    <div>
-                                        <span class="tag tag-business">Supplier</span>
-                                    </div>
-                                </div>
-                                <h5 class="card-title">Global Delivery Inc.</h5>
-                                <p class="card-text text-muted">orders@globaldelivery.example.com</p>
-                                <div class="mb-3">
-                                    <small class="text-muted"><i class="fas fa-phone me-1"></i> (555) 987-6543</small>
-                                    <small class="text-muted ms-3"><i class="fas fa-map-marker-alt me-1"></i> Chicago, USA</small>
-                                </div>
-                                <p class="card-text">International shipping specialist. Competitive rates for large volumes.</p>
-                                <div class="d-flex justify-content-between">
-                                    <button class="btn btn-outline-primary btn-sm contact-action-btn">
-                                        <i class="fas fa-envelope me-1"></i> Message
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm contact-action-btn">
-                                        <i class="fas fa-eye me-1"></i> View
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Company Card -->
-                    <div class="col-xl-4 col-md-6">
-                        <div class="contact-card card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="company-logo">
-                                        <i class="fas fa-shipping-fast"></i>
-                                    </div>
-                                    <div>
-                                        <span class="tag tag-business">Carrier</span>
-                                    </div>
-                                </div>
-                                <h5 class="card-title">QuickShip Partners</h5>
-                                <p class="card-text text-muted">info@quickship.example.com</p>
-                                <div class="mb-3">
-                                    <small class="text-muted"><i class="fas fa-phone me-1"></i> (555) 456-7890</small>
-                                    <small class="text-muted ms-3"><i class="fas fa-map-marker-alt me-1"></i> Los Angeles, USA</small>
-                                </div>
-                                <p class="card-text">Regional delivery experts. Best for West Coast destinations.</p>
-                                <div class="d-flex justify-content-between">
-                                    <button class="btn btn-outline-primary btn-sm contact-action-btn">
-                                        <i class="fas fa-envelope me-1"></i> Message
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm contact-action-btn">
-                                        <i class="fas fa-eye me-1"></i> View
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calculator fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
-                
-                <div class="d-flex justify-content-center mt-4">
-                    <button class="btn btn-outline-primary">
-                        <i class="fas fa-plus me-2"></i> Load More Companies
-                    </button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Warehouse</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $warehouse->count() }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-warehouse fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notification Modal -->
-    <div class="modal fade notification-modal" id="notificationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i> Send Bulk Notification</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {{ $activeTab == 'buyers' ? 'active' : '' }}" href="?tab=buyers">
+                <i class="fas fa-shopping-cart me-1"></i> Buyers ({{ $buyers->count() }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ $activeTab == 'team' ? 'active' : '' }}" href="?tab=team">
+                <i class="fas fa-users me-1"></i> Team Members
+            </a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Buyers Tab -->
+        @if($activeTab == 'buyers')
+        <div class="row">
+            @forelse($buyers as $buyer)
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-circle bg-primary text-white me-3">
+                                {{ strtoupper(substr($buyer->name, 0, 2)) }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-0">{{ $buyer->name }}</h5>
+                                <small class="text-muted">{{ $buyer->email }}</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Customer Contact Details -->
+                        @if($buyer->contacts && $buyer->contacts->count() > 0)
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2"><i class="fas fa-address-card me-1"></i>Contact Persons:</h6>
+                                @foreach($buyer->contacts->take(2) as $contact)
+                                <div class="mb-2 p-2 bg-light rounded">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <strong class="text-primary">{{ $contact->name }}</strong>
+                                            @if($contact->location_type)
+                                                <span class="badge badge-sm bg-secondary ms-1">{{ $contact->location_type }}</span>
+                                            @endif
+                                            <br>
+                                            @if($contact->mobile)
+                                                <small><i class="fas fa-phone text-muted me-1"></i>{{ $contact->mobile }}</small><br>
+                                            @endif
+                                            @if($contact->email)
+                                                <small><i class="fas fa-envelope text-muted me-1"></i>{{ $contact->email }}</small><br>
+                                            @endif
+                                            @if($contact->address)
+                                                <small><i class="fas fa-map-marker-alt text-muted me-1"></i>{{ $contact->city }}, {{ $contact->state }}</small>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                                @if($buyer->contacts->count() > 2)
+                                    <small class="text-muted">+{{ $buyer->contacts->count() - 2 }} more contacts</small>
+                                @endif
+                            </div>
+                        @else
+                            @if($buyer->phone)
+                            <p class="mb-2"><i class="fas fa-phone text-muted me-2"></i>{{ $buyer->phone }}</p>
+                            @endif
+                        @endif
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-info">{{ $buyer->orders->count() }} Orders</span>
+                            @if($buyer->contacts && $buyer->contacts->count() > 0)
+                                <span class="badge bg-secondary">{{ $buyer->contacts->count() }} Contacts</span>
+                            @endif
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="d-flex gap-2">
+                            @php
+                                $primaryContact = $buyer->contacts->first();
+                                $phoneNumber = $primaryContact->mobile ?? $buyer->phone;
+                            @endphp
+                            @if($phoneNumber)
+                            <a href="tel:{{ $phoneNumber }}" class="btn btn-sm btn-outline-success flex-fill" title="Call {{ $primaryContact->name ?? 'Customer' }}">
+                                <i class="fas fa-phone"></i> Call
+                            </a>
+                            @else
+                            <button class="btn btn-sm btn-outline-secondary flex-fill" disabled title="No phone">
+                                <i class="fas fa-phone"></i> Call
+                            </button>
+                            @endif
+                            <a href="{{ route('seller.meetings.index') }}" class="btn btn-sm btn-outline-primary flex-fill" title="Video Meeting">
+                                <i class="fas fa-video"></i> Meet
+                            </a>
+                            <a href="{{ route('seller.chat.index') }}" class="btn btn-sm btn-outline-info flex-fill" title="Chat">
+                                <i class="fas fa-comments"></i> Chat
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Recipients</label>
-                        <select class="form-select">
-                            <option>All Contacts</option>
-                            <option>Customers Only</option>
-                            <option>Companies Only</option>
-                            <option>Selected Contacts</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Notification Type</label>
-                        <select class="form-select">
-                            <option>New Product Announcement</option>
-                            <option>Special Discount</option>
-                            <option>Seasonal Offer</option>
-                            <option>Shipping Update</option>
-                            <option>Custom Message</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Subject</label>
-                        <input type="text" class="form-control" placeholder="Enter message subject">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Message</label>
-                        <textarea class="form-control" rows="5" placeholder="Type your message here..."></textarea>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="includePromo">
-                        <label class="form-check-label" for="includePromo">
-                            Include promotional code
-                        </label>
-                    </div>
+            </div>
+            @empty
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i>No buyers found. Buyers will appear here when they place orders or send inquiries.
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary">Send Notification</button>
+            </div>
+            @endforelse
+        </div>
+        @endif
+
+        <!-- Team Members Tab -->
+        @if($activeTab == 'team')
+        <div class="row">
+            <!-- Salesmen -->
+            <div class="col-12 mb-4">
+                <h4 class="mb-3"><i class="fas fa-user-tie me-2"></i>Salesmen</h4>
+                <div class="row">
+                    @forelse($salesmen as $salesman)
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar-circle bg-success text-white me-3">
+                                        {{ strtoupper(substr($salesman->user->name, 0, 2)) }}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">{{ $salesman->user->name }}</h6>
+                                        <small class="text-muted">{{ $salesman->email }}</small>
+                                    </div>
+                                </div>
+                                <p class="mb-2"><i class="fas fa-phone text-muted me-2"></i>{{ $salesman->phone }}</p>
+                                <div class="d-flex gap-2">
+                                    <a href="tel:{{ $salesman->phone }}" class="btn btn-sm btn-outline-success flex-fill">
+                                        <i class="fas fa-phone"></i> Call
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="fas fa-video"></i> Meet
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-info flex-fill">
+                                        <i class="fas fa-comments"></i> Chat
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-12">
+                        <p class="text-muted">No salesmen added yet.</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Accountants -->
+            <div class="col-12 mb-4">
+                <h4 class="mb-3"><i class="fas fa-calculator me-2"></i>Accountants</h4>
+                <div class="row">
+                    @forelse($accountants as $accountant)
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar-circle bg-info text-white me-3">
+                                        {{ strtoupper(substr($accountant->user->name, 0, 2)) }}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">{{ $accountant->user->name }}</h6>
+                                        <small class="text-muted">{{ $accountant->email }}</small>
+                                    </div>
+                                </div>
+                                <p class="mb-2"><i class="fas fa-phone text-muted me-2"></i>{{ $accountant->phone }}</p>
+                                <div class="d-flex gap-2">
+                                    <a href="tel:{{ $accountant->phone }}" class="btn btn-sm btn-outline-success flex-fill">
+                                        <i class="fas fa-phone"></i> Call
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="fas fa-video"></i> Meet
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-info flex-fill">
+                                        <i class="fas fa-comments"></i> Chat
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-12">
+                        <p class="text-muted">No accountants added yet.</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Warehouse Staff -->
+            <div class="col-12 mb-4">
+                <h4 class="mb-3"><i class="fas fa-warehouse me-2"></i>Warehouse Staff</h4>
+                <div class="row">
+                    @forelse($warehouse as $staff)
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar-circle bg-warning text-white me-3">
+                                        {{ strtoupper(substr($staff->user->name, 0, 2)) }}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">{{ $staff->user->name }}</h6>
+                                        <small class="text-muted">{{ $staff->email }}</small>
+                                    </div>
+                                </div>
+                                <p class="mb-2"><i class="fas fa-phone text-muted me-2"></i>{{ $staff->phone }}</p>
+                                <div class="d-flex gap-2">
+                                    <a href="tel:{{ $staff->phone }}" class="btn btn-sm btn-outline-success flex-fill">
+                                        <i class="fas fa-phone"></i> Call
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="fas fa-video"></i> Meet
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-info flex-fill">
+                                        <i class="fas fa-comments"></i> Chat
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-12">
+                        <p class="text-muted">No warehouse staff added yet.</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Delivery Personnel -->
+            <div class="col-12 mb-4">
+                <h4 class="mb-3"><i class="fas fa-truck me-2"></i>Delivery Personnel</h4>
+                <div class="row">
+                    @forelse($delivery as $person)
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar-circle bg-danger text-white me-3">
+                                        {{ strtoupper(substr($person->user->name, 0, 2)) }}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">{{ $person->user->name }}</h6>
+                                        <small class="text-muted">{{ $person->email }}</small>
+                                    </div>
+                                </div>
+                                <p class="mb-2"><i class="fas fa-phone text-muted me-2"></i>{{ $person->phone }}</p>
+                                <div class="d-flex gap-2">
+                                    <a href="tel:{{ $person->phone }}" class="btn btn-sm btn-outline-success flex-fill">
+                                        <i class="fas fa-phone"></i> Call
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="fas fa-video"></i> Meet
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-info flex-fill">
+                                        <i class="fas fa-comments"></i> Chat
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-12">
+                        <p class="text-muted">No delivery personnel added yet.</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>
+        @endif
     </div>
-    <script>
-        // Simple tab persistence
-        document.addEventListener('DOMContentLoaded', function() {
-            const triggerTabList = document.querySelectorAll('#myTab button');
-            triggerTabList.forEach(triggerEl => {
-                triggerEl.addEventListener('click', event => {
-                    event.preventDefault();
-                    const tab = new bootstrap.Tab(triggerEl);
-                    tab.show();
-                });
-            });
-        });
-    </script>
+</div>
 
+<style>
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.border-left-primary {
+    border-left: 4px solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 4px solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 4px solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 4px solid #f6c23e !important;
+}
+</style>
 @endsection
-

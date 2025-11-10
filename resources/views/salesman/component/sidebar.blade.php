@@ -26,5 +26,12 @@
                 Placed Orders
             </a>
         </li>
+        <li class="nav-item">
+            <a href="{{ route('salesman.leads.index') }}"
+                class="nav-link {{ request()->routeIs('salesman.leads.*') ? 'active' : '' }}">
+                <i class="fas fa-users"></i>
+                Leads
+            </a>
+        </li>
     </ul>
 </nav>
