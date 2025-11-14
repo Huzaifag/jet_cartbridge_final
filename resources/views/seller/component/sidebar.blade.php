@@ -87,6 +87,13 @@
         </li>
 
         <li class="nav-item">
+            <a href="{{ route('seller.business-history.index') }}"
+                class="nav-link {{ request()->routeIs('seller.business-history.*') ? 'active' : '' }}">
+                <i class="fas fa-history"></i> Business History
+            </a>
+        </li>
+
+        <li class="nav-item">
             <a href="{{ route('seller.orders.index') }}"
                 class="nav-link {{ request()->routeIs('seller.orders.*') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart"></i>
@@ -100,20 +107,20 @@
                 Bulk Orders
             </a>
         </li>
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a href="{{ route('seller.orders.track.index') }}"
                 class="nav-link {{ request()->routeIs('seller.orders.track') ? 'active' : '' }}">
                 <i class="fas fa-map-marker-alt"></i>
                 Orders Track
             </a>
-        </li>
-        <li class="nav-item">
+        </li> --}}
+        {{-- <li class="nav-item">
             <a href="{{ route('seller.leads') }}"
                 class="nav-link {{ request()->routeIs('seller.leads') ? 'active' : '' }}">
                 <i class="fas fa-chart-bar"></i>
                 Leads
             </a>
-        </li>
+        </li> --}}
 
         <li class="nav-item">
             <a href="{{ route('seller.chat.index') }}"
@@ -130,17 +137,10 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="{{ route('seller.coins.index') }}"
+            <a href="#"
                 class="nav-link {{ request()->routeIs('seller.coins.*') ? 'active' : '' }}">
                 <i class="fas fa-coins"></i>
                 Coins & Rewards
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ route('seller.communication') }}"
-                class="nav-link {{ request()->routeIs('seller.communication') ? 'active' : '' }}">
-                <i class="fas fa-comments"></i>
-                Communication
             </a>
         </li>
         <li class="nav-item">

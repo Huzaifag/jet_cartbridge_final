@@ -138,6 +138,10 @@ Route::middleware(['auth'])->prefix('customer')->group(function () {
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('/chat/messages/{conversationId}', [ChatController::class, 'fetchMessages'])->name('chat.fetchMessages');
     Route::get('/chat/conversations', [ChatController::class, 'fetchConversations'])->name('chat.fetchConversations');
+    
+    // Business History Routes
+    Route::get('/business-history', [\App\Http\Controllers\Buyer\BusinessHistoryController::class, 'index'])->name('business-history.index');
+    Route::get('/business-history/{seller}', [\App\Http\Controllers\Buyer\BusinessHistoryController::class, 'show'])->name('business-history.show');
 });
 
 Route::post('/meeting/request', [MeetingController::class, 'customerRequest'])
@@ -326,6 +330,10 @@ Route::prefix('seller')
 
         // Analytics Routes
         Route::get('/analytics', [\App\Http\Controllers\Seller\AnalyticsController::class, 'index'])->name('analytics.index');
+
+        // Business History Routes
+        Route::get('/business-history', [\App\Http\Controllers\Seller\BusinessHistoryController::class, 'index'])->name('business-history.index');
+        Route::get('/business-history/{customer}', [\App\Http\Controllers\Seller\BusinessHistoryController::class, 'show'])->name('business-history.show');
 
         // Inquiries Routes
         Route::get('/inquiries', [InquiryController::class, 'index'])->name('inquiries.index');

@@ -34,20 +34,42 @@
         }
     </style>
 
-    <div class="py-5 bg-white border-bottom">
-        <div class="container">
-            <h1 class="fw-bold" style="color: var(--primary-color);">Send Bulk Inquiry</h1>
-            <p class="lead text-muted">Submit your requirements to the seller for a tailored quotation on
-                <strong>{{ $product->name }}</strong>.</p>
+    @php
+        // Check if logged-in user is the seller of this product
+        $isOwnProduct = auth()->check() && 
+                       auth()->user()->seller && 
+                       auth()->user()->seller->id === $product->seller_id;
+    @endphp
+
+    @if ($isOwnProduct)
+        <div class="container py-5">
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                <h4>Cannot Send Inquiry</h4>
+                <p class="mb-3">You cannot send an inquiry for your own product.</p>
+                <a href="{{ route('product.show', $product->slug) }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Product
+                </a>
+                <a href="{{ route('seller.products.index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-box me-2"></i>View Your Products
+                </a>
+            </div>
         </div>
-    </div>
+    @else
+        <div class="py-5 bg-white border-bottom">
+            <div class="container">
+                <h1 class="fw-bold" style="color: var(--primary-color);">Send Bulk Inquiry</h1>
+                <p class="lead text-muted">Submit your requirements to the seller for a tailored quotation on
+                    <strong>{{ $product->name }}</strong>.</p>
+            </div>
+        </div>
 
 
-    <div class="container py-5">
-        <div class="row g-5">
+        <div class="container py-5">
+            <div class="row g-5">
 
-            <div class="col-lg-8">
-                <div class="inquiry-form-card">
+                <div class="col-lg-8">
+                    <div class="inquiry-form-card">
                     <h4 class="mb-4 fw-bold">Your Bulk Order Details</h4>
 
                     <form action="{{ route('inquiry.submit', $product->id) }}" method="POST" id="bulkInquiryForm">

@@ -670,7 +670,34 @@
 
             <div class="col-lg-5">
                 <div class="sticky-sidebar">
-                    @if (auth()->check() && auth()->user()->role === 'b2b')
+                    @php
+                        // Check if logged-in user is the seller of this product
+                        $isOwnProduct = auth()->check() && 
+                                       auth()->user()->seller && 
+                                       auth()->user()->seller->id === $product->seller_id;
+                    @endphp
+
+                    @if ($isOwnProduct)
+                        {{-- Seller viewing their own product --}}
+                        <div class="detail-card price-actions-card text-center">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>This is your product</strong>
+                            </div>
+                            <div class="price-tag-pro">
+                                ${{ $product->b2b_price ?? '45,000 - 55,000' }}
+                            </div>
+                            <div class="moq-pro">
+                                Minimum Order Quantity (MOQ): <strong>{{ $product->moq ?? 1 }} unit</strong>
+                            </div>
+                            <a href="{{ route('seller.products.edit', $product->id) }}" class="btn action-btn-pro btn-primary-custom mb-2">
+                                <i class="fas fa-edit me-2"></i>Edit Product
+                            </a>
+                            <a href="{{ route('seller.products.index') }}" class="btn action-btn-pro btn-outline-primary-custom">
+                                <i class="fas fa-box me-2"></i>View All Products
+                            </a>
+                        </div>
+                    @elseif (auth()->check() && auth()->user()->role === 'b2b')
                         {{-- B2B User View --}}
                         <div class="detail-card price-actions-card text-center">
                             <div class="price-tag-pro">

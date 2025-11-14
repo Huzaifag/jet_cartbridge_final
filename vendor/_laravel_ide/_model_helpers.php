@@ -2627,27 +2627,56 @@ namespace App\Models {
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property mixed $status
+     * @property float|null $target_price
+     * @property mixed $quantity
      * @property string $message
      * @property mixed $product_id
      * @property string $email
+     * @property \Illuminate\Support\Carbon|null $followed_up_at
+     * @property mixed $priority
+     * @property string|null $split_notes
+     * @property \Illuminate\Support\Carbon|null $assigned_at
+     * @property mixed $split_from_salesman_id
+     * @property mixed $assigned_to_salesman_id
      * @property mixed $salesman_id
      * @property mixed $seller_id
+     * @property string|null $buyer_phone
+     * @property string|null $buyer_name
      * @property mixed $buyer_id
+     * @property mixed $inquiry_id
      * @property int $id
+     * @property-read \App\Models\UserInquiry $inquiry
      * @property-read \App\Models\Seller $seller
      * @property-read \App\Models\User $buyer
      * @property-read \App\Models\Product $product
      * @property-read \App\Models\Salesman $salesman
+     * @property-read \App\Models\Salesman $assignedToSalesman
+     * @property-read \App\Models\Salesman $splitFromSalesman
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereInquiryId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereBuyerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereBuyerName($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereBuyerPhone($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereSellerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereSalesmanId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereAssignedToSalesmanId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereSplitFromSalesmanId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereAssignedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereSplitNotes($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead wherePriority($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereFollowedUpAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereEmail($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereProductId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereMessage($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereQuantity($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereTargetPrice($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereStatus($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead whereUpdatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead myLeads()
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead pending()
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead inProgress()
+     * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead byPriority()
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Lead>|Lead query()
@@ -7259,6 +7288,8 @@ namespace App\Models {
      * @property-read \App\Models\Promotion $activePromotion
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
      * @property-read int|null $reviews_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\OrderItem> $orderItems
+     * @property-read int|null $orderItems_count
      * @property-read \App\Models\Manufacturer $manufacturer
      * @property-read \App\Models\Category $category
      * @method static \Illuminate\Database\Eloquent\Builder<Product>|Product whereId($value)
@@ -10332,6 +10363,7 @@ namespace App\Models {
      * @property-read \App\Models\Manufacturer $manufacturer
      * @property-read \App\Models\User $customer
      * @property-read \App\Models\User $user
+     * @property-read \App\Models\Lead $lead
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereContactId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<UserInquiry>|UserInquiry whereProductId($value)

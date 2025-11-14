@@ -107,7 +107,7 @@
                                                 @php
                                                     $firstImage = $inquiry['product']['images'][0] ?? 'default.png';
                                                 @endphp
-                                                <img src="{{ asset('storage/' . $firstImage) }}"
+                                                <img src="{{ asset( $firstImage) }}"
                                                     class="img-fluid rounded product-thumb"
                                                     alt="{{ $inquiry['product']['name'] }}">
                                             </div>
