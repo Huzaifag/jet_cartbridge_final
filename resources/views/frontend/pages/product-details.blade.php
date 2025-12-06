@@ -1,5 +1,8 @@
 @extends('frontend.layout.main')
 @section('content')
+@php
+$videoReviews = $reviews->where('review_type', 'video');
+@endphp
     <style>
         /* Product Details Page Custom Styles */
         .product-header-pro {
@@ -521,7 +524,7 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-reviews"
                                 type="button" role="tab" aria-selected="false">
-                                <i class="fas fa-video me-2"></i>Video Reviews (7)
+                                <i class="fas fa-video me-2"></i>Video Reviews {{ $videoReviews->count() ?? 0 }}
                                 <span class="badge bg-danger ms-1">HOT 🔥</span>
                             </button>
                         </li>
@@ -600,7 +603,7 @@
 
                         <!-- 🔵 VIDEO REVIEWS TAB -->
                         <div class="tab-pane fade" id="video-reviews" role="tabpanel">
-                            <div class="alert alert-warning small d-flex align-items-center rounded-3 shadow-sm"
+                            <div class="alert alert-warning small d-flex align-items-center rounded-3 shadow-sm mb-3"
                                 role="alert">
                                 <i class="fas fa-coins me-2 fa-lg"></i>
                                 <div class="fw-bold">
@@ -609,9 +612,19 @@
                                 </div>
                             </div>
 
-                            @php
-                                $videoReviews = $reviews->where('review_type', 'video');
-                            @endphp
+                            
+
+                            @if($videoReviews->count() > 0)
+                                <div class="text-center mb-4">
+                                    <a href="{{ route('video.reviews', $product->slug) }}" class="btn btn-lg btn-primary" style="border-radius: 50px; padding: 0.75rem 2rem;">
+                                        <i class="fas fa-play-circle me-2"></i>Watch as Reels
+                                        <span class="badge bg-danger ms-2">{{ $videoReviews->count() }}</span>
+                                    </a>
+                                    <p class="text-muted small mt-2">
+                                        <i class="fas fa-mobile-alt me-1"></i>Swipe up/down to browse • Like • Comment • Share
+                                    </p>
+                                </div>
+                            @endif
 
                             <div class="row row-cols-2 g-3">
                                 @forelse ($videoReviews as $review)
@@ -772,7 +785,9 @@
                             </div>
                             <div class="seller-details">
                                 <h5 class="mb-0 seller-name-pro">
-                                    {{ $product->seller->company_name ?? 'Precision Manufacturing Co.' }}
+                                    <a href="{{ route('seller.profile', $product->seller->slug) }}" class="text-decoration-none text-dark">
+                                        {{ $product->seller->company_name ?? 'Precision Manufacturing Co.' }}
+                                    </a>
                                 </h5>
                                 <small class="verified-badge"><i class="fas fa-check-circle me-1"></i> Verified
                                     Supplier</small>

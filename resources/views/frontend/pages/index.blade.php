@@ -4,7 +4,8 @@
     <section class="premium-hero-slider">
         <div class="hero-slider-container">
             <!-- Slide 1 -->
-            <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+            <div class="hero-slide active"
+                style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
                 <div class="hero-slide-overlay"></div>
                 <div class="premium-container">
                     <div class="hero-slide-content">
@@ -14,7 +15,7 @@
                         <p class="hero-slide-subtitle" data-animation="fadeInUp" data-delay="200">
                             Connect with verified suppliers and buyers worldwide
                         </p>
-                        
+
                         <!-- Search Bar Inside Hero -->
                         <div class="hero-search-inline" data-animation="fadeInUp" data-delay="300">
                             <form method="GET" action="{{ route('home') }}">
@@ -29,7 +30,7 @@
                                 </div>
                             </form>
                         </div>
-                        
+
                         <div class="hero-stats" data-animation="fadeInUp" data-delay="500">
                             <div class="hero-stat-item">
                                 <div class="hero-stat-number">50K+</div>
@@ -49,7 +50,8 @@
             </div>
 
             <!-- Slide 2 -->
-            <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+            <div class="hero-slide"
+                style="background-image: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
                 <div class="hero-slide-overlay"></div>
                 <div class="premium-container">
                     <div class="hero-slide-content">
@@ -59,7 +61,7 @@
                         <p class="hero-slide-subtitle" data-animation="fadeInUp" data-delay="200">
                             Bulk orders with exclusive pricing and dedicated support
                         </p>
-                        
+
                         <!-- Search Bar Inside Hero -->
                         <div class="hero-search-inline" data-animation="fadeInUp" data-delay="300">
                             <form method="GET" action="{{ route('home') }}">
@@ -74,7 +76,7 @@
                                 </div>
                             </form>
                         </div>
-                        
+
                         <div class="hero-stats" data-animation="fadeInUp" data-delay="500">
                             <div class="hero-stat-item">
                                 <div class="hero-stat-number">24/7</div>
@@ -94,7 +96,8 @@
             </div>
 
             <!-- Slide 3 -->
-            <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+            <div class="hero-slide"
+                style="background-image: url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
                 <div class="hero-slide-overlay"></div>
                 <div class="premium-container">
                     <div class="hero-slide-content">
@@ -104,7 +107,7 @@
                         <p class="hero-slide-subtitle" data-animation="fadeInUp" data-delay="200">
                             Join the leading B2B marketplace for quality products
                         </p>
-                        
+
                         <!-- Search Bar Inside Hero -->
                         <div class="hero-search-inline" data-animation="fadeInUp" data-delay="300">
                             <form method="GET" action="{{ route('home') }}">
@@ -119,7 +122,7 @@
                                 </div>
                             </form>
                         </div>
-                        
+
                         <div class="hero-stats" data-animation="fadeInUp" data-delay="500">
                             <div class="hero-stat-item">
                                 <div class="hero-stat-number">4.9/5</div>
@@ -155,9 +158,131 @@
         </div>
 
 
-            </div>
+        </div>
         </div>
     </section>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <form method="GET" action="{{ route('home') }}" id="filter-form">
+                    <div class="filter-section mb-4">
+                        <h5 class="filter-title">Filters</h5>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Price</label>
+                            <select name="price" class="form-select" onchange="this.form.submit()">
+                                <option value="" {{ !request('price') ? 'selected' : '' }}>All Prices</option>
+                                <option value="low_to_high" {{ request('price') == 'low_to_high' ? 'selected' : '' }}>Low to
+                                    High</option>
+                                <option value="high_to_low" {{ request('price') == 'high_to_low' ? 'selected' : '' }}>High to
+                                    Low</option>
+                                <option value="under_100" {{ request('price') == 'under_100' ? 'selected' : '' }}>Under $100
+                                </option>
+                                <option value="100_500" {{ request('price') == '100_500' ? 'selected' : '' }}>$100 - $500
+                                </option>
+                                <option value="over_500" {{ request('price') == 'over_500' ? 'selected' : '' }}>Over $500
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Product Rating</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rating" value="4" id="rating4" {{ request('rating') == '4' ? 'checked' : '' }} onchange="this.form.submit()">
+                                <label class="form-check-label" for="rating4">
+                                    <span class="rating">★★★★</span> & Up
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rating" value="3" id="rating3" {{ request('rating') == '3' ? 'checked' : '' }} onchange="this.form.submit()">
+                                <label class="form-check-label" for="rating3">
+                                    <span class="rating">★★★</span> & Up
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Seller Type</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="seller_type[]" value="verified_manuf"
+                                    id="verifiedManuf" {{ in_array('verified_manuf', request('seller_type', [])) ? 'checked' : '' }} onchange="this.form.submit()">
+                                <label class="form-check-label" for="verifiedManuf">
+                                    Verified Manufacturers
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="seller_type[]" value="bulk_orders"
+                                    id="bulkOrders" {{ in_array('bulk_orders', request('seller_type', [])) ? 'checked' : '' }} onchange="this.form.submit()">
+                                <label class="form-check-label" for="bulkOrders">
+                                    Bulk Order Available
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Location</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="location[]" value="nearest"
+                                    id="nearest" {{ in_array('nearest', request('location', [])) ? 'checked' : '' }}
+                                    onchange="this.form.submit()">
+                                <label class="form-check-label" for="nearest">
+                                    Nearest Sellers
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <a href="{{ route('home') }}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                    </div>
+                </form>
+
+                <div class="filter-section">
+                    <h5 class="filter-title">Categories</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach($categories as $category)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{{ route('home', array_merge(request()->query(), ['category' => $category->id])) }}"
+                                    class="text-decoration-none text-dark">{{ $category->name }}</a>
+                                <span class="badge bg-primary rounded-pill">{{ $category->products_count }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="section-header mb-4">
+                    <h3 class="mb-1">All Products</h3>
+                    <p class="text-primary">Discover quality products from verified sellers</p>
+                </div>
+
+                @if($featuredProducts->count() > 0)
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                        @foreach ($featuredProducts as $product)
+                            <div class="col">
+                                @include('frontend.pages.partials.product-card', ['product' => $product])
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="d-flex justify-content-center mt-5">
+                        {{ $featuredProducts->links() }}
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                        <h4 class="text-primary">No products found</h4>
+                        <p class="text-primary">Try adjusting your search or filters.</p>
+                        <a href="{{ route('home') }}" class="btn btn-primary">Clear Filters</a>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
 
     <!-- Premium Trust Badges Section -->
     <section class="premium-section" style="padding-top: 4rem; padding-bottom: 3rem;">
@@ -196,47 +321,47 @@
     </section>
 
     @auth
-    <!-- Products from Followed Sellers/Manufacturers -->
-    @if($followedProducts->count() > 0)
-    <section class="premium-section">
-        <div class="premium-container">
-            <div class="premium-header">
-                <h2 class="premium-title">
-                    <i class="fas fa-heart text-accent me-3"></i>From Your <span class="accent-text">Followed Sellers</span>
-                </h2>
-                <p class="premium-subtitle">Exclusive products from sellers and manufacturers you trust</p>
-            </div>
-            <div class="premium-grid premium-grid-4">
-                @foreach($followedProducts as $product)
-                <div class="premium-slide-up">
-                    @include('frontend.pages.partials.product-card', ['product' => $product])
+        <!-- Products from Followed Sellers/Manufacturers -->
+        @if($followedProducts->count() > 0)
+            <section class="premium-section">
+                <div class="premium-container">
+                    <div class="premium-header">
+                        <h2 class="premium-title">
+                            <i class="fas fa-heart text-accent me-3"></i>From Your <span class="accent-text">Followed Sellers</span>
+                        </h2>
+                        <p class="premium-subtitle">Exclusive products from sellers and manufacturers you trust</p>
+                    </div>
+                    <div class="premium-grid premium-grid-4">
+                        @foreach($followedProducts as $product)
+                            <div class="premium-slide-up">
+                                @include('frontend.pages.partials.product-card', ['product' => $product])
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
+            </section>
+        @endif
     @endauth
 
     <!-- Trending Products Section -->
     @if($trendingProducts->count() > 0)
-    <section class="premium-section">
-        <div class="premium-container">
-            <div class="premium-header">
-                <h2 class="premium-title">
-                    <i class="fas fa-fire text-accent me-3"></i><span class="accent-text">Trending</span> Now
-                </h2>
-                <p class="premium-subtitle">Most popular products loved by our community</p>
-            </div>
-            <div class="premium-grid premium-grid-4">
-                @foreach($trendingProducts as $product)
-                <div class="premium-scale-in">
-                    @include('frontend.pages.partials.product-card', ['product' => $product, 'showTrendingBadge' => true])
+        <section class="premium-section">
+            <div class="premium-container">
+                <div class="premium-header">
+                    <h2 class="premium-title">
+                        <i class="fas fa-fire text-accent me-3"></i><span class="accent-text">Trending</span> Now
+                    </h2>
+                    <p class="premium-subtitle">Most popular products loved by our community</p>
                 </div>
-                @endforeach
+                <div class="premium-grid premium-grid-4">
+                    @foreach($trendingProducts as $product)
+                        <div class="premium-scale-in">
+                            @include('frontend.pages.partials.product-card', ['product' => $product, 'showTrendingBadge' => true])
+                        </div>
+                    @endforeach
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
     @endif
 
     <!-- Categories Section -->
@@ -248,26 +373,26 @@
             </div>
             <div class="premium-grid premium-grid-4">
                 <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/electronic-devices_144627-41317.jpg" 
-                         alt="Electronics" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                    <img src="https://img.freepik.com/free-photo/electronic-devices_144627-41317.jpg" alt="Electronics"
+                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
                     <h3 class="premium-card-title">Electronics</h3>
                     <p class="premium-card-text">20,000+ products</p>
                 </div>
                 <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/industrial-machines_1127-3426.jpg" 
-                         alt="Machinery" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                    <img src="https://img.freepik.com/free-photo/industrial-machines_1127-3426.jpg" alt="Machinery"
+                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
                     <h3 class="premium-card-title">Machinery</h3>
                     <p class="premium-card-text">15,000+ products</p>
                 </div>
                 <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/fabric-samples-textile-swatches_93675-130843.jpg" 
-                         alt="Textiles" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                    <img src="https://img.freepik.com/free-photo/fabric-samples-textile-swatches_93675-130843.jpg"
+                        alt="Textiles" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
                     <h3 class="premium-card-title">Textiles</h3>
                     <p class="premium-card-text">25,000+ products</p>
                 </div>
                 <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/construction-equipment_1127-3294.jpg" 
-                         alt="Construction" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                    <img src="https://img.freepik.com/free-photo/construction-equipment_1127-3294.jpg" alt="Construction"
+                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
                     <h3 class="premium-card-title">Construction</h3>
                     <p class="premium-card-text">18,000+ products</p>
                 </div>
@@ -277,48 +402,49 @@
 
     <!-- Premium Sellers Spotlight -->
     @if($premiumSellers->count() > 0)
-    <section class="premium-section">
-        <div class="premium-container">
-            <div class="premium-header">
-                <h2 class="premium-title">
-                    <i class="fas fa-crown text-accent me-3"></i><span class="accent-text">Premium</span> Sellers
-                </h2>
-                <p class="premium-subtitle">Verified premium sellers with exceptional ratings</p>
-            </div>
-            <div class="premium-grid premium-grid-3">
-                @foreach($premiumSellers as $seller)
-                <div class="premium-card premium-scale-in text-center">
-                    <div class="position-absolute top-0 end-0 m-3">
-                        <span class="premium-badge">
-                            <i class="fas fa-crown me-1"></i> PREMIUM
-                        </span>
-                    </div>
-                    @if($seller->logo)
-                        <img src="{{ asset('storage/' . $seller->logo) }}" alt="{{ $seller->company_name }}" 
-                             class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid var(--color-accent);">
-                    @else
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-accent" 
-                             style="width: 80px; height: 80px; background: rgba(245, 158, 11, 0.1); border: 3px solid var(--color-accent);">
-                            <i class="fas fa-store fa-2x"></i>
-                        </div>
-                    @endif
-                    <h3 class="premium-card-title">{{ $seller->company_name }}</h3>
-                    <div class="mb-2">
-                        <span class="text-accent">★★★★★</span>
-                        <small class="text-dim">(4.9)</small>
-                    </div>
-                    <p class="premium-card-text mb-3">
-                        <i class="fas fa-box me-1"></i>{{ $seller->products->count() }} Products
-                    </p>
-                    <a href="#" class="btn-premium btn-premium-secondary">View Store</a>
+        <section class="premium-section">
+            <div class="premium-container">
+                <div class="premium-header">
+                    <h2 class="premium-title">
+                        <i class="fas fa-crown text-accent me-3"></i><span class="accent-text">Premium</span> Sellers
+                    </h2>
+                    <p class="premium-subtitle">Verified premium sellers with exceptional ratings</p>
                 </div>
-                @endforeach
+                <div class="premium-grid premium-grid-3">
+                    @foreach($premiumSellers as $seller)
+                        <div class="premium-card premium-scale-in text-center">
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="premium-badge">
+                                    <i class="fas fa-crown me-1"></i> PREMIUM
+                                </span>
+                            </div>
+                            @if($seller->logo)
+                                <img src="{{ asset('storage/' . $seller->logo) }}" alt="{{ $seller->company_name }}"
+                                    class="rounded-circle mb-3"
+                                    style="width: 80px; height: 80px; object-fit: cover; border: 3px solid var(--color-accent);">
+                            @else
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-accent"
+                                    style="width: 80px; height: 80px; background: rgba(245, 158, 11, 0.1); border: 3px solid var(--color-accent);">
+                                    <i class="fas fa-store fa-2x"></i>
+                                </div>
+                            @endif
+                            <h3 class="premium-card-title">{{ $seller->company_name }}</h3>
+                            <div class="mb-2">
+                                <span class="text-accent">★★★★★</span>
+                                <small class="text-dim">(4.9)</small>
+                            </div>
+                            <p class="premium-card-text mb-3">
+                                <i class="fas fa-box me-1"></i>{{ $seller->products->count() }} Products
+                            </p>
+                            <a href="#" class="btn-premium btn-premium-secondary">View Store</a>
+                        </div>
+                    @endforeach
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
     @endif
 
-     <!-- The Premium B2B Focus Section -->
+    <!-- The Premium B2B Focus Section -->
     <section class="b2b-exclusive-focus">
         <div class="b2b-content-wrapper">
 
@@ -329,7 +455,8 @@
                     <span style="color: var(--color-white);">For Businesses & Retailers</span>
                 </h2>
                 <p class="b2b-subtitle">
-                    Unlock institutional value, dedicated support, and specialized service programs designed for scalability and success.
+                    Unlock institutional value, dedicated support, and specialized service programs designed for scalability
+                    and success.
                 </p>
             </header>
 
@@ -393,7 +520,8 @@
                 <h2 class="premium-title">
                     <span class="accent-text">Perfect</span> for Retail Customers
                 </h2>
-                <p class="premium-subtitle">Experience seamless shopping with quality products, fast delivery, and exceptional service</p>
+                <p class="premium-subtitle">Experience seamless shopping with quality products, fast delivery, and
+                    exceptional service</p>
             </div>
 
             <div class="row align-items-center">
@@ -408,7 +536,7 @@
                                 <p>Get your orders delivered within 24-48 hours with our express shipping network</p>
                             </div>
                         </div>
-                        
+
                         <div class="b2c-feature-item premium-fade-in">
                             <div class="b2c-feature-icon">
                                 <i class="fas fa-undo-alt"></i>
@@ -418,7 +546,7 @@
                                 <p>30-day hassle-free returns with free pickup from your doorstep</p>
                             </div>
                         </div>
-                        
+
                         <div class="b2c-feature-item premium-fade-in">
                             <div class="b2c-feature-icon">
                                 <i class="fas fa-award"></i>
@@ -428,7 +556,7 @@
                                 <p>Every product is thoroughly tested and comes with manufacturer warranty</p>
                             </div>
                         </div>
-                        
+
                         <div class="b2c-feature-item premium-fade-in">
                             <div class="b2c-feature-icon">
                                 <i class="fas fa-lock"></i>
@@ -440,17 +568,19 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-6">
                     <div class="b2c-lifestyle-content premium-scale-in">
                         <div class="lifestyle-image-wrapper">
-                            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                                 alt="Happy customer shopping" class="lifestyle-image">
+                            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                                alt="Happy customer shopping" class="lifestyle-image">
                             <div class="lifestyle-overlay">
                                 <div class="customer-testimonial">
                                     <div class="testimonial-content">
                                         <div class="testimonial-stars">
-                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                                class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                                class="fas fa-star"></i>
                                         </div>
                                         <p>"Amazing quality and super fast delivery! Will definitely order again."</p>
                                         <div class="testimonial-author">
@@ -552,12 +682,15 @@
                         <!-- First set of testimonials -->
                         <div class="testimonial-card premium-card">
                             <div class="testimonial-rating">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                            <p class="testimonial-text">"Exceptional service and quality products. The delivery was incredibly fast and the customer support team was very helpful."</p>
+                            <p class="testimonial-text">"Exceptional service and quality products. The delivery was
+                                incredibly fast and the customer support team was very helpful."</p>
                             <div class="testimonial-author">
                                 <div class="author-avatar">
-                                    <img src="https://img.freepik.com/free-photo/beautiful-girl-stands-park_8353-5084.jpg?semt=ais_hybrid&w=740&q=80" alt="Customer">
+                                    <img src="https://img.freepik.com/free-photo/beautiful-girl-stands-park_8353-5084.jpg?semt=ais_hybrid&w=740&q=80"
+                                        alt="Customer">
                                 </div>
                                 <div class="author-info">
                                     <strong>Emily Chen</strong>
@@ -565,15 +698,18 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="testimonial-card premium-card">
                             <div class="testimonial-rating">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                            <p class="testimonial-text">"I've been ordering from JetCartridge for over a year now. Their consistency in quality and service is unmatched."</p>
+                            <p class="testimonial-text">"I've been ordering from JetCartridge for over a year now. Their
+                                consistency in quality and service is unmatched."</p>
                             <div class="testimonial-author">
                                 <div class="author-avatar">
-                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+                                        alt="Customer">
                                 </div>
                                 <div class="author-info">
                                     <strong>Michael Rodriguez</strong>
@@ -581,15 +717,18 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="testimonial-card premium-card">
                             <div class="testimonial-rating">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                            <p class="testimonial-text">"The return process was so smooth when I needed to exchange a product. Great customer experience overall!"</p>
+                            <p class="testimonial-text">"The return process was so smooth when I needed to exchange a
+                                product. Great customer experience overall!"</p>
                             <div class="testimonial-author">
                                 <div class="author-avatar">
-                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+                                        alt="Customer">
                                 </div>
                                 <div class="author-info">
                                     <strong>Lisa Thompson</strong>
@@ -597,16 +736,19 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Duplicate set for seamless loop -->
                         <div class="testimonial-card premium-card">
                             <div class="testimonial-rating">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                            <p class="testimonial-text">"Exceptional service and quality products. The delivery was incredibly fast and the customer support team was very helpful."</p>
+                            <p class="testimonial-text">"Exceptional service and quality products. The delivery was
+                                incredibly fast and the customer support team was very helpful."</p>
                             <div class="testimonial-author">
                                 <div class="author-avatar">
-                                    <img src="https://img.freepik.com/free-photo/beautiful-girl-stands-park_8353-5084.jpg?semt=ais_hybrid&w=740&q=80" alt="Customer">
+                                    <img src="https://img.freepik.com/free-photo/beautiful-girl-stands-park_8353-5084.jpg?semt=ais_hybrid&w=740&q=80"
+                                        alt="Customer">
                                 </div>
                                 <div class="author-info">
                                     <strong>Emily Chen</strong>
@@ -614,15 +756,18 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="testimonial-card premium-card">
                             <div class="testimonial-rating">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                            <p class="testimonial-text">"I've been ordering from JetCartridge for over a year now. Their consistency in quality and service is unmatched."</p>
+                            <p class="testimonial-text">"I've been ordering from JetCartridge for over a year now. Their
+                                consistency in quality and service is unmatched."</p>
                             <div class="testimonial-author">
                                 <div class="author-avatar">
-                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+                                        alt="Customer">
                                 </div>
                                 <div class="author-info">
                                     <strong>Michael Rodriguez</strong>
@@ -630,15 +775,18 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="testimonial-card premium-card">
                             <div class="testimonial-rating">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                            <p class="testimonial-text">"The return process was so smooth when I needed to exchange a product. Great customer experience overall!"</p>
+                            <p class="testimonial-text">"The return process was so smooth when I needed to exchange a
+                                product. Great customer experience overall!"</p>
                             <div class="testimonial-author">
                                 <div class="author-avatar">
-                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Customer">
+                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+                                        alt="Customer">
                                 </div>
                                 <div class="author-info">
                                     <strong>Lisa Thompson</strong>
@@ -686,224 +834,116 @@
         </div>
     </section>
 
-    <!-- Main Content -->
-    <div class="container my-5">
-        <div class="row">
-            <!-- Filters Sidebar -->
-            <div class="col-lg-3">
-                <form method="GET" action="{{ route('home') }}" id="filter-form">
-                    <div class="filter-section mb-4">
-                        <h5 class="filter-title">Filters</h5>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Price</label>
-                            <select name="price" class="form-select" onchange="this.form.submit()">
-                                <option value="" {{ !request('price') ? 'selected' : '' }}>All Prices</option>
-                                <option value="low_to_high" {{ request('price') == 'low_to_high' ? 'selected' : '' }}>Low to High</option>
-                                <option value="high_to_low" {{ request('price') == 'high_to_low' ? 'selected' : '' }}>High to Low</option>
-                                <option value="under_100" {{ request('price') == 'under_100' ? 'selected' : '' }}>Under $100</option>
-                                <option value="100_500" {{ request('price') == '100_500' ? 'selected' : '' }}>$100 - $500</option>
-                                <option value="over_500" {{ request('price') == 'over_500' ? 'selected' : '' }}>Over $500</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Product Rating</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="rating" value="4" id="rating4" {{ request('rating') == '4' ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="rating4">
-                                    <span class="rating">★★★★</span> & Up
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="rating" value="3" id="rating3" {{ request('rating') == '3' ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="rating3">
-                                    <span class="rating">★★★</span> & Up
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Seller Type</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="seller_type[]" value="verified_manuf" id="verifiedManuf" {{ in_array('verified_manuf', request('seller_type', [])) ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="verifiedManuf">
-                                    Verified Manufacturers
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="seller_type[]" value="bulk_orders" id="bulkOrders" {{ in_array('bulk_orders', request('seller_type', [])) ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="bulkOrders">
-                                    Bulk Order Available
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Location</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="location[]" value="nearest" id="nearest" {{ in_array('nearest', request('location', [])) ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="nearest">
-                                    Nearest Sellers
-                                </label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                        <a href="{{ route('home') }}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
-                    </div>
-                </form>
-
-                <div class="filter-section">
-                    <h5 class="filter-title">Categories</h5>
-                    <ul class="list-group list-group-flush">
-                        @foreach($categories as $category)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{ route('home', array_merge(request()->query(), ['category' => $category->id])) }}" class="text-decoration-none text-dark">{{ $category->name }}</a>
-                            <span class="badge bg-primary rounded-pill">{{ $category->products_count }}</span>
-                        </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-
-            <div class="col-lg-9">
-                <div class="section-header mb-4">
-                    <h3 class="mb-1">All Products</h3>
-                    <p class="text-primary">Discover quality products from verified sellers</p>
-                </div>
-                
-                @if($featuredProducts->count() > 0)
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-                        @foreach ($featuredProducts as $product)
-                        <div class="col">
-                            @include('frontend.pages.partials.product-card', ['product' => $product])
-                        </div>
-                    @endforeach
-                </div>
-
-                <div class="d-flex justify-content-center mt-5">
-                    {{ $featuredProducts->links() }}
-                </div>
-                @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-search fa-3x text-primary mb-3"></i>
-                        <h4 class="text-primary">No products found</h4>
-                        <p class="text-primary">Try adjusting your search or filters.</p>
-                        <a href="{{ route('home') }}" class="btn btn-primary">Clear Filters</a>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
 
     <!-- Premium Sellers and Manufacturers Section -->
     @auth
-    <section class="premium-section">
-        <div class="premium-container">
-            <div class="premium-header">
-                <h2 class="premium-title">Discover <span class="accent-text">Sellers & Manufacturers</span></h2>
-                <p class="premium-subtitle">Connect with verified suppliers worldwide</p>
-            </div>
-
-            <!-- Premium Sellers -->
-            @if($sellers->count() > 0)
-            <div class="mb-5">
-                <div class="d-flex align-items-center mb-4">
-                    <i class="fas fa-store text-accent me-3" style="font-size: 1.5rem;"></i>
-                    <h3 class="premium-card-title mb-0">Verified Sellers</h3>
+        <section class="premium-section">
+            <div class="premium-container">
+                <div class="premium-header">
+                    <h2 class="premium-title">Discover <span class="accent-text">Sellers & Manufacturers</span></h2>
+                    <p class="premium-subtitle">Connect with verified suppliers worldwide</p>
                 </div>
-                <div class="premium-grid premium-grid-3">
-                    @foreach($sellers as $seller)
-                    <div class="premium-card premium-fade-in text-center">
-                        @if($seller->logo)
-                            <img src="{{ asset('storage/' . $seller->logo) }}" alt="{{ $seller->company_name }}" 
-                                 class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid var(--color-accent);">
-                        @else
-                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-accent" 
-                                 style="width: 80px; height: 80px; background: rgba(245, 158, 11, 0.1); border: 3px solid var(--color-accent);">
-                                <i class="fas fa-store fa-2x"></i>
-                            </div>
-                        @endif
-                        <h3 class="premium-card-title">{{ $seller->company_name }}</h3>
-                        <p class="premium-card-text mb-2">
-                            <i class="fas fa-box me-1"></i>{{ $seller->products->count() }} products available
-                        </p>
-                        <p class="premium-card-text mb-3">
-                            <i class="fas fa-map-marker-alt me-1"></i>{{ Str::limit($seller->company_address, 50) }}
-                        </p>
 
-                        @php
-                            $isFollowing = auth()->user()->followedSellers()->where('seller_id', $seller->id)->exists();
-                        @endphp
+                <!-- Premium Sellers -->
+                @if($sellers->count() > 0)
+                    <div class="mb-5">
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fas fa-store text-accent me-3" style="font-size: 1.5rem;"></i>
+                            <h3 class="premium-card-title mb-0">Verified Sellers</h3>
+                        </div>
+                        <div class="premium-grid premium-grid-3">
+                            @foreach($sellers as $seller)
+                                <div class="premium-card premium-fade-in text-center">
+                                    @if($seller->logo)
+                                        <img src="{{ asset('storage/' . $seller->logo) }}" alt="{{ $seller->company_name }}"
+                                            class="rounded-circle mb-3"
+                                            style="width: 80px; height: 80px; object-fit: cover; border: 3px solid var(--color-accent);">
+                                    @else
+                                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-accent"
+                                            style="width: 80px; height: 80px; background: rgba(245, 158, 11, 0.1); border: 3px solid var(--color-accent);">
+                                            <i class="fas fa-store fa-2x"></i>
+                                        </div>
+                                    @endif
+                                    <h3 class="premium-card-title">{{ $seller->company_name }}</h3>
+                                    <p class="premium-card-text mb-2">
+                                        <i class="fas fa-box me-1"></i>{{ $seller->products->count() }} products available
+                                    </p>
+                                    <p class="premium-card-text mb-3">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ Str::limit($seller->company_address, 50) }}
+                                    </p>
 
-                        <form action="{{ route('follow.seller', $seller->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @if($isFollowing)
-                                <button type="submit" class="btn-premium btn-premium-secondary">
-                                    <i class="fas fa-check me-1"></i>Following
-                                </button>
-                            @else
-                                <button type="submit" class="btn-premium btn-premium-primary">
-                                    <i class="fas fa-plus me-1"></i>Follow
-                                </button>
-                            @endif
-                        </form>
+                                    @php
+                                        $isFollowing = auth()->user()->followedSellers()->where('seller_id', $seller->id)->exists();
+                                    @endphp
+
+                                    <form action="{{ route('follow.seller', $seller->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @if($isFollowing)
+                                            <button type="submit" class="btn-premium btn-premium-secondary">
+                                                <i class="fas fa-check me-1"></i>Following
+                                            </button>
+                                        @else
+                                            <button type="submit" class="btn-premium btn-premium-primary">
+                                                <i class="fas fa-plus me-1"></i>Follow
+                                            </button>
+                                        @endif
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
+                @endif
 
-            <!-- Premium Manufacturers -->
-            @if($manufacturers->count() > 0)
-            <div class="mb-5">
-                <div class="d-flex align-items-center mb-4">
-                    <i class="fas fa-industry text-accent me-3" style="font-size: 1.5rem;"></i>
-                    <h3 class="premium-card-title mb-0">Verified Manufacturers</h3>
-                </div>
-                <div class="premium-grid premium-grid-3">
-                    @foreach($manufacturers as $manufacturer)
-                    <div class="premium-card premium-slide-up text-center">
-                        @if($manufacturer->company_profile && isset($manufacturer->company_profile['logo']))
-                            <img src="{{ asset('storage/' . $manufacturer->company_profile['logo']) }}" alt="{{ $manufacturer->company_name }}" 
-                                 class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid var(--color-accent);">
-                        @else
-                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-accent" 
-                                 style="width: 80px; height: 80px; background: rgba(245, 158, 11, 0.1); border: 3px solid var(--color-accent);">
-                                <i class="fas fa-industry fa-2x"></i>
-                            </div>
-                        @endif
-                        <h3 class="premium-card-title">{{ $manufacturer->company_name }}</h3>
-                        <p class="premium-card-text mb-2">
-                            <i class="fas fa-box me-1"></i>{{ $manufacturer->products->count() }} products available
-                        </p>
-                        <p class="premium-card-text mb-3">
-                            <i class="fas fa-map-marker-alt me-1"></i>{{ Str::limit($manufacturer->company_address, 50) }}
-                        </p>
+                <!-- Premium Manufacturers -->
+                @if($manufacturers->count() > 0)
+                    <div class="mb-5">
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fas fa-industry text-accent me-3" style="font-size: 1.5rem;"></i>
+                            <h3 class="premium-card-title mb-0">Verified Manufacturers</h3>
+                        </div>
+                        <div class="premium-grid premium-grid-3">
+                            @foreach($manufacturers as $manufacturer)
+                                <div class="premium-card premium-slide-up text-center">
+                                    @if($manufacturer->company_profile && isset($manufacturer->company_profile['logo']))
+                                        <img src="{{ asset('storage/' . $manufacturer->company_profile['logo']) }}"
+                                            alt="{{ $manufacturer->company_name }}" class="rounded-circle mb-3"
+                                            style="width: 80px; height: 80px; object-fit: cover; border: 3px solid var(--color-accent);">
+                                    @else
+                                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-accent"
+                                            style="width: 80px; height: 80px; background: rgba(245, 158, 11, 0.1); border: 3px solid var(--color-accent);">
+                                            <i class="fas fa-industry fa-2x"></i>
+                                        </div>
+                                    @endif
+                                    <h3 class="premium-card-title">{{ $manufacturer->company_name }}</h3>
+                                    <p class="premium-card-text mb-2">
+                                        <i class="fas fa-box me-1"></i>{{ $manufacturer->products->count() }} products available
+                                    </p>
+                                    <p class="premium-card-text mb-3">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ Str::limit($manufacturer->company_address, 50) }}
+                                    </p>
 
-                        @php
-                            $isFollowing = auth()->user()->followedManufacturers()->where('manufacturer_id', $manufacturer->id)->exists();
-                        @endphp
+                                    @php
+                                        $isFollowing = auth()->user()->followedManufacturers()->where('manufacturer_id', $manufacturer->id)->exists();
+                                    @endphp
 
-                        <form action="{{ route('follow.manufacturer', $manufacturer->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @if($isFollowing)
-                                <button type="submit" class="btn-premium btn-premium-secondary">
-                                    <i class="fas fa-check me-1"></i>Following
-                                </button>
-                            @else
-                                <button type="submit" class="btn-premium btn-premium-primary">
-                                    <i class="fas fa-plus me-1"></i>Follow
-                                </button>
-                            @endif
-                        </form>
+                                    <form action="{{ route('follow.manufacturer', $manufacturer->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @if($isFollowing)
+                                            <button type="submit" class="btn-premium btn-premium-secondary">
+                                                <i class="fas fa-check me-1"></i>Following
+                                            </button>
+                                        @else
+                                            <button type="submit" class="btn-premium btn-premium-primary">
+                                                <i class="fas fa-plus me-1"></i>Follow
+                                            </button>
+                                        @endif
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                    @endforeach
-                </div>
+                @endif
             </div>
-            @endif
-        </div>
-    </section>
+        </section>
     @endauth
 @endsection

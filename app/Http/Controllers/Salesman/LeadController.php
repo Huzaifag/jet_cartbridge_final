@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\Salesman;
 use App\Models\UserInquiry;
+use App\Traits\LogsEmployeeActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class LeadController extends Controller
 {
+    use LogsEmployeeActivity;
+
     /**
      * Display a listing of leads for the salesman
      */
@@ -102,6 +105,14 @@ class LeadController extends Controller
             'followed_up_at' => now(),
         ]);
 
+        // Log activity
+        $this->logActivity(
+            $request->status == 'converted' ? 'lead_converted' : 'lead_updated',
+            "Updated lead status to {$request->status}",
+            $lead,
+            ['old_status' => $lead->status, 'new_status' => $request->status]
+        );
+
         return redirect()->back()->with('success', 'Lead status updated successfully!');
     }
 
@@ -149,6 +160,14 @@ class LeadController extends Controller
             'assigned_at' => now(),
             'split_notes' => $request->split_notes,
         ]);
+
+        // Log activity
+        $this->logActivity(
+            'lead_assigned',
+            "Assigned lead to {$targetSalesman->name}",
+            $lead,
+            ['assigned_to' => $targetSalesman->name, 'notes' => $request->split_notes]
+        );
 
         return redirect()->route('salesman.leads.index')
             ->with('success', "Lead successfully assigned to {$targetSalesman->user->name}!");

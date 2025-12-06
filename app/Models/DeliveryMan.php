@@ -26,6 +26,11 @@ class DeliveryMan extends Authenticatable
     ];
 
     // Relation with Seller
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

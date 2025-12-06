@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Warehouse;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderStatus;
+use App\Traits\LogsEmployeeActivity;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class WarehouseOrdersController extends Controller
 {
+    use LogsEmployeeActivity;
+
     public function index()
     {
         // Get orders that are in warehouse_dispatch stage
@@ -120,6 +123,18 @@ class WarehouseOrdersController extends Controller
                 'status' => 'in_progress',
                 'started_at' => now(),
             ]);
+
+        // Log activity
+        $this->logActivity(
+            'product_dispatched',
+            "Dispatched order #{$order->id} via {$validated['courier_name']}",
+            $order,
+            [
+                'courier_name' => $validated['courier_name'],
+                'tracking_number' => $validated['tracking_number'],
+                'delivery_person_id' => $validated['delivery_person_id'] ?? null,
+            ]
+        );
 
         return redirect()
             ->route('warehouse.orders.show', $order->id)

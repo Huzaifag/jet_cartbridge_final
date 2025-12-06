@@ -124,4 +124,160 @@ class ReviewController extends Controller
 
         return $code;
     }
+
+    /**
+     * Show video reviews in reels format
+     */
+    public function videoReels($productSlug = null)
+    {
+        $query = Review::with(['user', 'product'])
+            ->where('review_type', 'video')
+            ->whereNotNull('media_urls')
+            ->orderBy('created_at', 'desc');
+
+        if ($productSlug) {
+            $product = Product::where('slug', $productSlug)->firstOrFail();
+            $query->where('product_id', $product->id);
+        }
+
+        $videoReviews = $query->get();
+
+        return view('frontend.pages.video-reviews', compact('videoReviews'));
+    }
+
+    /**
+     * Track video view
+     */
+    public function trackView(Request $request, $reviewId)
+    {
+        $review = Review::findOrFail($reviewId);
+        $review->increment('video_views');
+
+        return response()->json(['success' => true, 'views' => $review->video_views]);
+    }
+
+    /**
+     * Toggle like on video review
+     */
+    public function toggleLike(Request $request, $reviewId)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login to like'
+            ], 401);
+        }
+
+        $review = Review::findOrFail($reviewId);
+        $userId = Auth::id();
+
+        $like = \App\Models\ReviewLike::where('review_id', $reviewId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($like) {
+            // Unlike
+            $like->delete();
+            $review->decrement('video_likes');
+            $liked = false;
+        } else {
+            // Like
+            \App\Models\ReviewLike::create([
+                'review_id' => $reviewId,
+                'user_id' => $userId,
+            ]);
+            $review->increment('video_likes');
+            $liked = true;
+        }
+
+        return response()->json([
+            'success' => true,
+            'liked' => $liked,
+            'likes' => $review->fresh()->video_likes
+        ]);
+    }
+
+    /**
+     * Get comments for a review
+     */
+    public function getComments($reviewId)
+    {
+        $comments = \App\Models\ReviewComment::with('user')
+            ->where('review_id', $reviewId)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($comment) {
+                return [
+                    'id' => $comment->id,
+                    'text' => $comment->comment,
+                    'user' => [
+                        'name' => $comment->user->name,
+                        'avatar' => $comment->user->avatar ? asset('storage/' . $comment->user->avatar) : null,
+                    ],
+                    'created_at' => $comment->created_at->diffForHumans(),
+                ];
+            });
+
+        return response()->json([
+            'comments' => $comments
+        ]);
+    }
+
+    /**
+     * Post a comment on a review
+     */
+    public function postComment(Request $request, $reviewId)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login to comment'
+            ], 401);
+        }
+
+        $request->validate([
+            'text' => 'required|string|max:500'
+        ]);
+
+        $comment = \App\Models\ReviewComment::create([
+            'review_id' => $reviewId,
+            'user_id' => Auth::id(),
+            'comment' => $request->text,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment posted successfully',
+            'comment' => [
+                'id' => $comment->id,
+                'text' => $comment->comment,
+                'user' => [
+                    'name' => Auth::user()->name,
+                    'avatar' => Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : null,
+                ],
+                'created_at' => $comment->created_at->diffForHumans(),
+            ]
+        ]);
+    }
+
+    /**
+     * Track share
+     */
+    public function trackShare(Request $request, $reviewId)
+    {
+        $request->validate([
+            'platform' => 'required|in:whatsapp,facebook,twitter,copy'
+        ]);
+
+        \App\Models\ReviewShare::create([
+            'review_id' => $reviewId,
+            'user_id' => Auth::id(),
+            'platform' => $request->platform,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Share tracked'
+        ]);
+    }
 }

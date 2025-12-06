@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderDelivery;
 use App\Models\OrderStatus;
+use App\Traits\LogsEmployeeActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DeliveryManController extends Controller
 {
+    use LogsEmployeeActivity;
+
     /**
      * Display the deliveryman dashboard.
      */
@@ -149,6 +152,17 @@ class DeliveryManController extends Controller
                 'started_at' => now(),
                 'completed_at' => now(),
             ]);
+
+        // Log activity
+        $this->logActivity(
+            'delivery_completed',
+            "Delivered order #{$order->id} to customer",
+            $order,
+            [
+                'delivery_date' => $request->delivery_date,
+                'delivery_time' => $request->delivery_time,
+            ]
+        );
 
         return redirect()->route('deliveryman.orders.show', $order)
             ->with('success', 'Order delivered successfully!');

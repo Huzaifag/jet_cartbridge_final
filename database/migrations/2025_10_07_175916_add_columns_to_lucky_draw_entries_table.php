@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('lucky_draw_entries', function (Blueprint $table) {
-            $table->foreignId('promotion_id')->nullable()->constrained('promotions')->onDelete('cascade');
+            // Check if column doesn't exist before adding
+            if (!Schema::hasColumn('lucky_draw_entries', 'promotion_id')) {
+                $table->foreignId('promotion_id')->nullable()->constrained('promotions')->onDelete('cascade');
+            }
         });
     }
 
@@ -22,7 +25,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('lucky_draw_entries', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('lucky_draw_entries', 'promotion_id')) {
+                $table->dropForeign(['promotion_id']);
+                $table->dropColumn('promotion_id');
+            }
         });
     }
 };

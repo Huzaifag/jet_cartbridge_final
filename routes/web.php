@@ -138,7 +138,7 @@ Route::middleware(['auth'])->prefix('customer')->group(function () {
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('/chat/messages/{conversationId}', [ChatController::class, 'fetchMessages'])->name('chat.fetchMessages');
     Route::get('/chat/conversations', [ChatController::class, 'fetchConversations'])->name('chat.fetchConversations');
-    
+
     // Business History Routes
     Route::get('/business-history', [\App\Http\Controllers\Buyer\BusinessHistoryController::class, 'index'])->name('business-history.index');
     Route::get('/business-history/{seller}', [\App\Http\Controllers\Buyer\BusinessHistoryController::class, 'show'])->name('business-history.show');
@@ -171,6 +171,7 @@ Route::get('/manufacturers', [FrontendController::class, 'manufacturers'])->name
 Route::get('/resources', [FrontendController::class, 'resources'])->name('resources');
 
 Route::get('/product/{slug}', [FrontendController::class, 'showProduct'])->name('product.show');
+Route::get('/seller/{slug}', [FrontendController::class, 'sellerProfile'])->name('seller.profile');
 
 Route::get('/profile', [FrontendController::class, 'profile'])->name('user.profile')->middleware('auth');
 Route::get('/contributor-dashboard', [FrontendController::class, 'contributorDashboard'])->name('contributor.dashboard')->middleware('auth');
@@ -243,6 +244,20 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/checkout', [ReviewController::class, 'show'])
             ->name('checkout.page')
             ->middleware('signed');
+
+        // Video Reviews Routes
+        Route::get('/video-reviews/{slug?}', [ReviewController::class, 'videoReels'])->name('video.reviews');
+        Route::post('/api/reviews/{review}/view', [ReviewController::class, 'trackView'])->name('review.track-view');
+        Route::post('/api/reviews/{review}/like', [ReviewController::class, 'toggleLike'])->name('review.toggle-like');
+        Route::get('/api/reviews/{review}/comments', [ReviewController::class, 'getComments'])->name('review.get-comments');
+        Route::post('/api/reviews/{review}/comments', [ReviewController::class, 'postComment'])->name('review.post-comment');
+        Route::post('/api/reviews/{review}/share', [ReviewController::class, 'trackShare'])->name('review.track-share');
+
+        // Customer Support API Routes
+        Route::get('/api/sellers/list', [\App\Http\Controllers\Api\SupportController::class, 'getSellers'])->name('api.sellers.list');
+        Route::get('/api/manufacturers/list', [\App\Http\Controllers\Api\SupportController::class, 'getManufacturers'])->name('api.manufacturers.list');
+        Route::post('/api/conversations/create', [\App\Http\Controllers\Api\SupportController::class, 'createConversation'])->name('api.conversations.create');
+        Route::post('/api/meetings/request', [\App\Http\Controllers\Api\SupportController::class, 'requestMeeting'])->name('api.meetings.request');
     });
 });
 
@@ -326,6 +341,9 @@ Route::prefix('seller')
             Route::resource('delivery', DeliveryController::class);
         });
 
+        // Employee Activities Route
+        Route::get('/employee-activities', [\App\Http\Controllers\Seller\EmployeeActivityController::class, 'index'])->name('employee-activities.index');
+
         Route::get('/contact-book', [ContactBookController::class, 'index'])->name('contact-book.index');
 
         // Analytics Routes
@@ -343,7 +361,7 @@ Route::prefix('seller')
         Route::post('/inquiries/bulk-order/store', [InquiryController::class, 'storeBulkOrder'])->name('inquiries.bulk-order.store');
 
         Route::get('/inquiries/{inquiry}/response', [InquiryController::class, 'createResponse'])->name('inquiries.response.create');
-        
+
         Route::get('/inquiries/{inquiry}/assign', [InquiryController::class, 'showAssignForm'])->name('inquiries.assign');
         Route::post('/inquiries/{inquiry}/assign-salesman', [InquiryController::class, 'assignToSalesman'])->name('inquiries.assign-salesman');
 
@@ -515,7 +533,7 @@ Route::prefix('salesman')
         Route::post('products/bulk-delete', [SalesmanProductController::class, 'bulkDelete'])->name('products.bulk-delete');
 
         // Placed orders
-
+    
         Route::get('/placed-orders', [SalesmanOrderController::class, 'index'])->name('placed-orders.index');
 
         Route::get('/placed-orders/{id}', [SalesmanOrderController::class, 'show'])->name('placed-orders.show');
@@ -539,7 +557,7 @@ Route::prefix('accountant')
         Route::get('/dashboard', [AccountantDashboardController::class, 'index'])->name('dashboard.index');
 
         // Confirmed orders
-
+    
         Route::get('/confirmed-orders', [AccountantOrderController::class, 'index'])->name('confirmed-orders.index');
 
         Route::get('/confirmed-orders/{id}', [AccountantOrderController::class, 'show'])->name('confirmed-orders.show');
@@ -550,7 +568,7 @@ Route::prefix('accountant')
     });
 
 
-    Route::prefix('warehouse')
+Route::prefix('warehouse')
     ->name('warehouse.')
     ->middleware(['auth', 'role:warehouse'])
     ->group(function () {

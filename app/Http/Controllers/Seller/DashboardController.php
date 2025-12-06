@@ -152,8 +152,32 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Recent employee activities
+        $employeeActivities = \App\Models\EmployeeActivity::where('seller_id', $seller->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(function ($activity) {
+                $icons = [
+                    'salesman' => ['icon' => 'fas fa-user-tie', 'bg' => 'rgba(0, 123, 255, 0.1)', 'color' => '#007bff'],
+                    'accountant' => ['icon' => 'fas fa-calculator', 'bg' => 'rgba(255, 193, 7, 0.1)', 'color' => '#ffc107'],
+                    'warehouse' => ['icon' => 'fas fa-warehouse', 'bg' => 'rgba(23, 162, 184, 0.1)', 'color' => '#17a2b8'],
+                    'deliveryman' => ['icon' => 'fas fa-truck', 'bg' => 'rgba(220, 53, 69, 0.1)', 'color' => '#dc3545'],
+                ];
+                $icon = $icons[$activity->employee_type] ?? ['icon' => 'fas fa-user', 'bg' => 'rgba(108, 117, 125, 0.1)', 'color' => '#6c757d'];
+                
+                return [
+                    'type' => 'employee',
+                    'title' => $activity->description,
+                    'time' => $activity->created_at->diffForHumans(),
+                    'icon' => $icon['icon'],
+                    'icon_bg' => $icon['bg'],
+                    'icon_color' => $icon['color']
+                ];
+            });
+
         // Combine and sort activities
-        $recentActivities = $recentOrders->concat($recentReviews)->concat($lowStockProducts)
+        $recentActivities = $recentOrders->concat($recentReviews)->concat($lowStockProducts)->concat($employeeActivities)
             ->sortByDesc(function ($activity) {
                 return Carbon::parse($activity['time']);
             })

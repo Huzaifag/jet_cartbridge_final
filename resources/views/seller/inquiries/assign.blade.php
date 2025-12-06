@@ -14,6 +14,8 @@
                     <i class="fas fa-arrow-left me-2"></i>Back to Inquiries
                 </a>
             </div>
+            {{-- create new card --}}
+            
 
             <!-- Inquiry Details Card -->
             <div class="card shadow-sm mb-4">

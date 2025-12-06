@@ -5,7 +5,8 @@
             <div class="col-md-3">
                 <div class="premium-footer-brand mb-4">
                     <h4 class="text-white mb-2">Jet<span class="text-accent">Cartridge</span></h4>
-                    <p class="premium-footer-text">Leading B2B marketplace connecting buyers with verified suppliers worldwide.</p>
+                    <p class="premium-footer-text">Leading B2B marketplace connecting buyers with verified suppliers
+                        worldwide.</p>
                 </div>
                 <div class="premium-social-links">
                     <a href="#" class="premium-social-link"><i class="fab fa-facebook-f"></i></a>
@@ -17,9 +18,11 @@
             <div class="col-md-3">
                 <h5 class="premium-footer-title">Quick Links</h5>
                 <ul class="premium-footer-links">
-                    <li><a href="{{ route('categories') }}"><i class="fas fa-th-large me-2"></i>Product Categories</a></li>
+                    <li><a href="{{ route('categories') }}"><i class="fas fa-th-large me-2"></i>Product Categories</a>
+                    </li>
                     <li><a href="{{ route('sellers') }}"><i class="fas fa-store me-2"></i>Verified Sellers</a></li>
-                    <li><a href="{{ route('manufacturers') }}"><i class="fas fa-industry me-2"></i>Manufacturers</a></li>
+                    <li><a href="{{ route('manufacturers') }}"><i class="fas fa-industry me-2"></i>Manufacturers</a>
+                    </li>
                     <li><a href="{{ route('resources') }}"><i class="fas fa-book me-2"></i>Resources</a></li>
                 </ul>
             </div>
@@ -35,16 +38,17 @@
             <div class="col-md-3">
                 <h5 class="premium-footer-title">Legal</h5>
                 <ul class="premium-footer-links">
-                    <li><a href="{{ route('terms') }}"><i class="fas fa-file-contract me-2"></i>Terms of Service</a></li>
+                    <li><a href="{{ route('terms') }}"><i class="fas fa-file-contract me-2"></i>Terms of Service</a>
+                    </li>
                     <li><a href="#"><i class="fas fa-handshake me-2"></i>Trade Assurance</a></li>
                     <li><a href="#"><i class="fas fa-id-card me-2"></i>Business Identity</a></li>
                     <li><a href="#"><i class="fas fa-chart-line me-2"></i>Production Monitoring</a></li>
                 </ul>
             </div>
         </div>
-        
+
         <div class="premium-footer-divider"></div>
-        
+
         <div class="premium-footer-bottom">
             <div class="row align-items-center">
                 <div class="col-md-6">
@@ -71,201 +75,8 @@
     </div>
 </footer>
 
-<!-- Support Chat Button -->
-<div class="support-chat-button" id="chatButton">
-    <i class="fas fa-comments"></i>
-    <span class="chat-badge">1</span>
-</div>
 
-<!-- Support Chat Popup -->
-<div class="support-chat-popup" id="chatPopup">
-    <div class="chat-header">
-        <div class="chat-header-info">
-            <div class="chat-avatar">
-                <i class="fas fa-headset"></i>
-            </div>
-            <div>
-                <h5 class="chat-title">Customer Support</h5>
-                <p class="chat-status"><span class="status-dot"></span>Online</p>
-            </div>
-        </div>
-        <button class="chat-close" id="chatClose">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    
-    <div class="chat-body" id="supportChatBody">
-        @auth
-            <div class="chat-message chat-message-received">
-                <div class="message-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="message-content">
-                    <p>Hello {{ auth()->user()->name }}! 👋 How can we help you today?</p>
-                    <span class="message-time">Just now</span>
-                </div>
-            </div>
-            
-            <div class="chat-quick-actions">
-                <p class="quick-actions-title">Quick Actions:</p>
-                <a href="{{ route('track-order.form') }}" class="quick-action-btn">
-                    <i class="fas fa-shipping-fast"></i> Track Order
-                </a>
-                <a href="{{ route('home') }}" class="quick-action-btn">
-                    <i class="fas fa-box"></i> Browse Products
-                </a>
-                <a href="{{ route('contact') }}" class="quick-action-btn">
-                    <i class="fas fa-envelope"></i> Contact Us
-                </a>
-                <a href="{{ route('faq') }}" class="quick-action-btn">
-                    <i class="fas fa-question-circle"></i> FAQ
-                </a>
-            </div>
-        @else
-            <div class="chat-message chat-message-received">
-                <div class="message-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="message-content">
-                    <p>Hello! 👋 Please login to chat with sellers or get support.</p>
-                    <span class="message-time">Just now</span>
-                </div>
-            </div>
-            
-            <div class="chat-quick-actions">
-                <p class="quick-actions-title">Quick Actions:</p>
-                <a href="{{ route('login') }}" class="quick-action-btn">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </a>
-                <a href="{{ route('register') }}" class="quick-action-btn">
-                    <i class="fas fa-user-plus"></i> Register
-                </a>
-                <a href="{{ route('contact') }}" class="quick-action-btn">
-                    <i class="fas fa-envelope"></i> Contact Us
-                </a>
-                <a href="{{ route('faq') }}" class="quick-action-btn">
-                    <i class="fas fa-question-circle"></i> FAQ
-                </a>
-            </div>
-        @endauth
-    </div>
-    
-    @auth
-    <div class="chat-footer">
-        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
-        <button class="chat-send-btn" id="chatSend">
-            <i class="fas fa-paper-plane"></i>
-        </button>
-    </div>
-    @endauth
-</div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-// Support Chat Functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const chatButton = document.getElementById('chatButton');
-    const chatPopup = document.getElementById('chatPopup');
-    const chatClose = document.getElementById('chatClose');
-    const chatInput = document.getElementById('chatInput');
-    const chatSend = document.getElementById('chatSend');
-    const chatBody = chatPopup.querySelector('.chat-body');
-    
-    // Toggle chat popup
-    chatButton.addEventListener('click', function() {
-        chatPopup.classList.toggle('active');
-        chatButton.classList.toggle('active');
-        if (chatPopup.classList.contains('active')) {
-            chatInput.focus();
-            // Remove badge when opened
-            const badge = chatButton.querySelector('.chat-badge');
-            if (badge) badge.style.display = 'none';
-        }
-    });
-    
-    // Close chat
-    chatClose.addEventListener('click', function() {
-        chatPopup.classList.remove('active');
-        chatButton.classList.remove('active');
-    });
-    
-    // Send message
-    function sendMessage() {
-        const message = chatInput.value.trim();
-        if (message) {
-            addMessage(message, 'sent');
-            chatInput.value = '';
-            
-            @auth
-            // Send to support system (you can create a support conversation endpoint)
-            $.ajax({
-                url: '/support/message',
-                method: 'POST',
-                data: {
-                    message: message,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        addMessage('Thank you for your message! Our support team will respond shortly.', 'received');
-                    }
-                },
-                error: function() {
-                    addMessage('Message sent! Our team will get back to you soon.', 'received');
-                }
-            });
-            @else
-            // For guests, show login prompt
-            setTimeout(() => {
-                addMessage('Please login to send messages to our support team.', 'received');
-            }, 500);
-            @endauth
-        }
-    }
-    
-    if (chatSend) {
-        chatSend.addEventListener('click', sendMessage);
-    }
-    
-    if (chatInput) {
-        chatInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    }
-    
-    // Add message to chat
-    function addMessage(text, type) {
-        const chatBodyEl = document.getElementById('supportChatBody');
-        if (!chatBodyEl) return;
-        
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `chat-message chat-message-${type}`;
-        
-        const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        
-        if (type === 'received') {
-            messageDiv.innerHTML = `
-                <div class="message-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="message-content">
-                    <p>${text}</p>
-                    <span class="message-time">${time}</span>
-                </div>
-            `;
-        } else {
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    <p>${text}</p>
-                    <span class="message-time">${time}</span>
-                </div>
-            `;
-        }
-        
-        chatBodyEl.appendChild(messageDiv);
-        chatBodyEl.scrollTop = chatBodyEl.scrollHeight;
-    }
-});
-</script>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Accountant;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderStatus;
+use App\Traits\LogsEmployeeActivity;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Log;
 
 class AccountantOrderController extends Controller
 {
+    use LogsEmployeeActivity;
+
     public function index()
     {
         // Get orders that are in accountant_billing stage
@@ -109,6 +112,14 @@ class AccountantOrderController extends Controller
 
         // Save the PDF to storage
         Storage::put('public/invoices/' . $filename, $pdf->output());
+
+        // Log activity
+        $this->logActivity(
+            'invoice_generated',
+            "Generated invoice for order #{$order->id}",
+            $order,
+            ['invoice_filename' => $filename, 'total_amount' => $totalAmount]
+        );
 
         // Return the PDF for download
         return $pdf->download($filename);

@@ -80,6 +80,13 @@
         </li>
 
         <li class="nav-item">
+            <a href="{{ route('seller.employee-activities.index') }}"
+                class="nav-link {{ request()->routeIs('seller.employee-activities.*') ? 'active' : '' }}">
+                <i class="fas fa-clipboard-list"></i> Employee Activities
+            </a>
+        </li>
+
+        <li class="nav-item">
             <a href="{{ route('seller.analytics.index') }}"
                 class="nav-link {{ request()->routeIs('seller.analytics.*') ? 'active' : '' }}">
                 <i class="fas fa-chart-line"></i> Analytics

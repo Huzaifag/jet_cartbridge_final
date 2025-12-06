@@ -73,6 +73,8 @@
 
     @include('components.footer')
 
+    <!-- Customer Support Popup -->
+    @include('components.customer-support-popup')
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -197,16 +197,16 @@ class FrontendController extends Controller
         $followedProducts = collect();
         $trendingProducts = collect();
         $premiumSellers = collect();
-        
+
         if (auth()->check()) {
             // Get products from followed sellers
             $followedSellerIds = auth()->user()->followedSellers()->pluck('seller_id');
             $followedManufacturerIds = auth()->user()->followedManufacturers()->pluck('manufacturer_id');
-            
+
             $followedProducts = Product::where('status', 'active')
-                ->where(function($q) use ($followedSellerIds, $followedManufacturerIds) {
+                ->where(function ($q) use ($followedSellerIds, $followedManufacturerIds) {
                     $q->whereIn('seller_id', $followedSellerIds)
-                      ->orWhereIn('manufacturer_id', $followedManufacturerIds);
+                        ->orWhereIn('manufacturer_id', $followedManufacturerIds);
                 })
                 ->with(['seller', 'manufacturer'])
                 ->latest()
@@ -233,9 +233,9 @@ class FrontendController extends Controller
          * 🖥️ RETURN VIEW
          * ============================== */
         return view('frontend.pages.index', compact(
-            'featuredProducts', 
-            'sellers', 
-            'manufacturers', 
+            'featuredProducts',
+            'sellers',
+            'manufacturers',
             'categories',
             'followedProducts',
             'trendingProducts',
@@ -255,6 +255,12 @@ class FrontendController extends Controller
     {
         try {
             $product = Product::with('seller')->where('slug', $slug)->firstOrFail();
+
+            // Check if logged-in user is the seller of this product
+            if (auth()->check() && auth()->user()->seller && auth()->user()->seller->id === $product->seller_id) {
+                return redirect()->route('product.show', $slug)->with('error', 'You cannot send an inquiry for your own product.');
+            }
+
             $seller = $product->seller;
             $userContacts = auth()->user() ? auth()->user()->contacts : [];
             return view('frontend.pages.inquiry-form', compact('product', 'seller', 'userContacts'));
@@ -502,4 +508,31 @@ class FrontendController extends Controller
     //         return redirect()->route('home')->with('error', 'Seller not found or an error occurred.');
     //     }
     // }
+    public function sellerProfile($slug)
+    {
+        try {
+            $seller = Seller::where('slug', $slug)->where('status', 'approved')->firstOrFail();
+
+            // Get seller's products
+            $products = Product::where('seller_id', $seller->id)
+                ->where('status', 'active')
+                ->latest()
+                ->paginate(12);
+
+            // Get past orders for logged-in user with this seller
+            $pastOrders = collect();
+            if (auth()->check()) {
+                $pastOrders = \App\Models\Order::where('customer_id', auth()->id())
+                    ->where('seller_id', $seller->id)
+                    ->with(['orderItems.product', 'statuses'])
+                    ->latest()
+                    ->get();
+            }
+
+            return view('frontend.pages.seller-profile', compact('seller', 'products', 'pastOrders'));
+        } catch (\Exception $e) {
+            Log::error('Error fetching seller profile: ' . $e->getMessage());
+            return redirect()->route('home')->with('error', 'Seller not found.');
+        }
+    }
 }
