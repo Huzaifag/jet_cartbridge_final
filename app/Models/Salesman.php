@@ -38,5 +38,13 @@ class Salesman extends Authenticatable
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get products owned by this salesman (polymorphic relationship)
+     */
+    public function ownedProducts()
+    {
+        return $this->morphMany(Product::class, 'owner');
+    }
+
 
 }

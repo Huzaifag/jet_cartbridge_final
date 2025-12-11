@@ -171,7 +171,6 @@ Route::get('/manufacturers', [FrontendController::class, 'manufacturers'])->name
 Route::get('/resources', [FrontendController::class, 'resources'])->name('resources');
 
 Route::get('/product/{slug}', [FrontendController::class, 'showProduct'])->name('product.show');
-Route::get('/seller/{slug}', [FrontendController::class, 'sellerProfile'])->name('seller.profile');
 
 Route::get('/profile', [FrontendController::class, 'profile'])->name('user.profile')->middleware('auth');
 Route::get('/contributor-dashboard', [FrontendController::class, 'contributorDashboard'])->name('contributor.dashboard')->middleware('auth');
@@ -310,6 +309,30 @@ Route::prefix('seller')->name('seller.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Unified Admin Dashboard Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/dashboard', [\App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.dashboard');
+    
+    // Unified Product Management Routes
+    Route::resource('admin/products', \App\Http\Controllers\Admin\ProductController::class, [
+        'as' => 'admin'
+    ]);
+    
+    // Placeholder routes for navigation (you can implement these later)
+    Route::get('/admin/messages', function() { return redirect()->route('admin.dashboard'); })->name('admin.messages.index');
+    Route::get('/admin/settings', function() { return redirect()->route('admin.dashboard'); })->name('admin.settings.index');
+});
+
+// Demo route to show the unified dashboard implementation
+Route::get('/demo/unified-dashboard', function() {
+    return view('demo.unified-dashboard');
+})->name('demo.unified-dashboard');
+
+/*
+|--------------------------------------------------------------------------
 | Protected Seller Routes
 |--------------------------------------------------------------------------
 */
@@ -320,7 +343,7 @@ Route::prefix('seller')
     ->middleware(['auth', 'role:seller'])
     ->group(function () {
 
-        Route::get('/dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [SellerDashboardController::class, 'index'])->name('dashboard')->middleware('unified_dashboard');
 
         Route::post('/logout', [SellerAuthController::class, 'logout'])->name('logout');
 
@@ -430,6 +453,8 @@ Route::prefix('seller')
             ->name('meetings.index');
     });
 
+// Seller Profile Route (must come after seller dashboard routes to avoid conflicts)
+Route::get('/seller/{slug}', [FrontendController::class, 'sellerProfile'])->name('seller.profile');
 
 /*
 |--------------------------------------------------------------------------
@@ -464,7 +489,7 @@ Route::prefix('manufacturer')
     ->middleware(['auth', 'role:manufacturer'])
     ->group(function () {
 
-        Route::get('/dashboard', [ManufacturerDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [ManufacturerDashboardController::class, 'index'])->name('dashboard')->middleware('unified_dashboard');
 
         Route::post('/logout', [ManufacturerAuthController::class, 'logout'])->name('logout');
 

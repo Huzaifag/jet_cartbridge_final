@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name') }} - Warehouse Dashboard</title>
+    <title>{{ config('app.name') }} - Admin Dashboard</title>
 
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
 
@@ -20,7 +20,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom CSS -->
-    @include('seller.assets.css')
+    @include('admin.assets.css')
     @stack('styles')
 </head>
 
@@ -28,25 +28,37 @@
     <!-- Overlay for Mobile -->
     <div class="overlay"></div>
 
-    @include('warehouse.component.sidebar')
+    @include('admin.components.sidebar')
 
-    @include('warehouse.component.navbar')
+    @include('admin.components.navbar')
 
     <!-- Main Content -->
     <div class="main-content">
         <div class="content-wrapper animate-fadeIn">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             @yield('content')
         </div>
     </div>
 
-    <!-- jQuery -->
-    <script src="{{ asset('js/jquery-3.7.1.js') }}"></script>
+    <!-- Bootstrap JS -->
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom JS -->
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Custom JS -->
+    @include('admin.assets.js')
     <script>
         // Mobile sidebar toggle
         document.getElementById('sidebarToggle').addEventListener('click', function() {

@@ -120,6 +120,14 @@ class Seller extends Authenticatable
         return $this->hasMany(Product::class);
     }
 
+    /**
+     * Get products owned by this seller (polymorphic relationship)
+     */
+    public function ownedProducts()
+    {
+        return $this->morphMany(Product::class, 'owner');
+    }
+
     public function accountants(): HasMany
     {
         return $this->hasMany(Accountant::class);

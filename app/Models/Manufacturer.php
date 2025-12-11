@@ -49,6 +49,14 @@ class Manufacturer extends Model
         return $this->hasMany(Product::class);
     }
 
+    /**
+     * Get products owned by this manufacturer (polymorphic relationship)
+     */
+    public function ownedProducts()
+    {
+        return $this->morphMany(Product::class, 'owner');
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);

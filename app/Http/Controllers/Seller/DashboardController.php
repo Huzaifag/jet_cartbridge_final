@@ -16,7 +16,9 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $seller = auth()->user()->seller;
-
+        if (!$seller) {
+            return redirect()->route('seller.login')->with('error', 'Seller profile not found. Please complete your seller registration.');
+        }
         // Get date range from request or default to today
         $range = $request->get('range', 'today');
         $startDate = $this->getStartDate($range);

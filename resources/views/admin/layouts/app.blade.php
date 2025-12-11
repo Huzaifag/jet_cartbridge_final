@@ -59,44 +59,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Custom JS -->
     @include('admin.assets.js')
-    <script>
-        // Mobile sidebar toggle
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('show');
-            document.querySelector('.overlay').classList.toggle('show');
-        });
-
-        // Close sidebar when clicking overlay
-        document.querySelector('.overlay').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.remove('show');
-            this.classList.remove('show');
-        });
-
-        // Setup AJAX CSRF token
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        // Add animation to cards on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.card');
-            cards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
-            });
-
-            // Filter button functionality
-            document.querySelectorAll('.filter-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove(
-                        'active'));
-                    this.classList.add('active');
-                    // Here you would typically reload data based on the selected range
-                });
-            });
-        });
-    </script>
     @stack('scripts')
 </body>
 

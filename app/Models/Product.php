@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Promotion;
+use App\Models\Seller;
+use App\Models\Salesman;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,6 +15,8 @@ class Product extends Model
     protected $fillable = [
         'seller_id',
         'manufacturer_id',
+        'owner_type',
+        'owner_id',
         'name',
         'slug',
         'description',
@@ -44,15 +48,153 @@ class Product extends Model
 
     protected $with = ['category'];
 
+    /**
+     * Polymorphic relationship to the product owner (Seller, Manufacturer, or Salesman)
+     */
+    public function owner()
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * Legacy relationship - kept for backward compatibility
+     */
     public function seller()
     {
         return $this->belongsTo(Seller::class);
     }
 
-    // public function creator()
-    // {
-    //     return $this->belongsTo(Employee::class, 'created_by');
-    // }
+    /**
+     * Legacy relationship - kept for backward compatibility
+     */
+    public function manufacturer()
+    {
+        return $this->belongsTo(Manufacturer::class);
+    }
+
+    /**
+     * Get the actual owner model (Seller, Manufacturer, or Salesman)
+     */
+    public function getOwnerModelAttribute()
+    {
+        return $this->owner;
+    }
+
+    /**
+     * Get the owner type in a human-readable format
+     */
+    public function getOwnerTypeNameAttribute()
+    {
+        switch ($this->owner_type) {
+            case 'App\\Models\\Seller':
+                return 'Seller';
+            case 'App\\Models\\Manufacturer':
+                return 'Manufacturer';
+            case 'App\\Models\\Salesman':
+                return 'Salesman';
+            default:
+                return 'Unknown';
+        }
+    }
+
+    /**
+     * Get the owner's display name
+     */
+    public function getOwnerNameAttribute()
+    {
+        if (!$this->owner) {
+            return 'Unknown Owner';
+        }
+
+        switch ($this->owner_type) {
+            case 'App\\Models\\Seller':
+                return $this->owner->company_name ?? $this->owner->name ?? 'Seller';
+            case 'App\\Models\\Manufacturer':
+                return $this->owner->company_name ?? $this->owner->name ?? 'Manufacturer';
+            case 'App\\Models\\Salesman':
+                return $this->owner->user->name ?? 'Salesman';
+            default:
+                return 'Unknown Owner';
+        }
+    }
+
+    /**
+     * Scope to filter products by owner type
+     */
+    public function scopeByOwnerType($query, $ownerType)
+    {
+        return $query->where('owner_type', $ownerType);
+    }
+
+    /**
+     * Scope to filter products by specific owner
+     */
+    public function scopeByOwner($query, $ownerType, $ownerId)
+    {
+        return $query->where('owner_type', $ownerType)->where('owner_id', $ownerId);
+    }
+
+    /**
+     * Scope to include products accessible by the provided owner (seller, salesman, manufacturer).
+     * Seller <-> salesman share products; a salesman can see their seller's and sibling salesmen's products.
+     */
+    public function scopeAccessibleBy($query, array $owner)
+    {
+        $ownerSets = [];
+
+        if ($owner['role'] === 'seller') {
+            $ownerSets[] = [
+                'type' => Seller::class,
+                'ids' => [$owner['model']->id],
+            ];
+
+            $salesmanIds = $owner['model']->salesmen()->pluck('id')->all();
+            if (!empty($salesmanIds)) {
+                $ownerSets[] = [
+                    'type' => Salesman::class,
+                    'ids' => $salesmanIds,
+                ];
+            }
+        } elseif ($owner['role'] === 'salesman') {
+            $ownerSets[] = [
+                'type' => Salesman::class,
+                'ids' => [$owner['model']->id],
+            ];
+
+            $sellerId = $owner['model']->seller_id;
+            if ($sellerId) {
+                $ownerSets[] = [
+                    'type' => Seller::class,
+                    'ids' => [$sellerId],
+                ];
+            }
+
+            $peerSalesmanIds = $owner['model']->seller
+                ? $owner['model']->seller->salesmen()->pluck('id')->all()
+                : [];
+
+            if (!empty($peerSalesmanIds)) {
+                $ownerSets[] = [
+                    'type' => Salesman::class,
+                    'ids' => $peerSalesmanIds,
+                ];
+            }
+        } else {
+            $ownerSets[] = [
+                'type' => $owner['type'],
+                'ids' => [$owner['model']->id],
+            ];
+        }
+
+        return $query->where(function ($q) use ($ownerSets) {
+            foreach ($ownerSets as $set) {
+                $q->orWhere(function ($qq) use ($set) {
+                    $qq->where('owner_type', $set['type'])
+                        ->whereIn('owner_id', $set['ids']);
+                });
+            }
+        });
+    }
 
     public function getMainImageAttribute()
     {
@@ -83,11 +225,6 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
-    }
-
-    public function manufacturer()
-    {
-        return $this->belongsTo(Manufacturer::class);
     }
 
     public function category()
