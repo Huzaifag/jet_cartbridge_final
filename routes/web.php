@@ -59,6 +59,21 @@ Route::get('/link-storage', function () {
     }
 });
 
+// Seed database route
+
+Route::get('/seed-database/{class}', function ($class) {
+    $class = str_replace('-', '\\', $class); // Allow dashes in URL to represent namespace separators
+
+    try {
+        Artisan::call('db:seed', [
+            '--class' => $class,
+            '--force' => true
+        ]);
+    } catch (\Exception $e) {
+        return '<h3 style="color:red;">❌ Failed to seed database:</h3><pre>' . $e->getMessage() . '</pre>';
+    }
+});
+
 
 Route::get('/run-migrations', function () {
     try {

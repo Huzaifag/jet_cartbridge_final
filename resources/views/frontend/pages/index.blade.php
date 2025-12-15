@@ -241,15 +241,19 @@
 
                 <div class="filter-section">
                     <h5 class="filter-title">Categories</h5>
-                    <ul class="list-group list-group-flush">
-                        @foreach($categories as $category)
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="{{ route('home', array_merge(request()->query(), ['category' => $category->id])) }}"
-                                    class="text-decoration-none text-dark">{{ $category->name }}</a>
-                                <span class="badge bg-primary rounded-pill">{{ $category->products_count }}</span>
-                            </li>
+                    <form method="GET" action="{{ route('home') }}">
+                        <select name="category" class="form-select mb-3" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }} ({{ $category->products_count }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @foreach(request()->except('category') as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                         @endforeach
-                    </ul>
+                    </form>
                 </div>
             </div>
 
@@ -269,7 +273,7 @@
                     </div>
 
                     <div class="d-flex justify-content-center mt-5">
-                        {{ $featuredProducts->links('paginate::bootstrap-5') }}
+                        {{ $featuredProducts->links('vendor.pagination.bootstrap-5') }}
                     </div>
                 @else
                     <div class="text-center py-5">
