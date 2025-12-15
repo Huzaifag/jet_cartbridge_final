@@ -1,227 +1,406 @@
 @extends('frontend.layout.main')
 @section('content')
 <style>
-    /* Custom Styles for Modern Look */
-    .order-card {
+    /* === Amazon-Style Live Tracking UI === */
+    .order-tracking-card {
         border: none;
         border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        overflow: hidden;
     }
 
-    .order-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    .order-tracking-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     }
 
     .order-header {
-        background-color: #f8f9fa;
-        /* Light background for header */
-        border-bottom: 1px solid #eee;
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        color: #495057;
     }
 
-    /* Tracking Timeline Styles */
-    .tracking-timeline {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+    .order-id {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #212529;
+    }
+
+    .payment-badge {
+        font-size: 0.85rem;
+        padding: 0.35em 0.7em;
+    }
+
+    /* === Progress Bar === */
+    .progress-bar-container {
+        height: 6px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        margin: 1rem 0;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #198754, #20c997);
+        border-radius: 3px;
+        transition: width 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* === Status Timeline (Horizontal on lg+, vertical on smaller) === */
+    .timeline {
+        display: flex;
+        justify-content: space-between;
         position: relative;
+        margin-top: 1.5rem;
     }
 
-    .tracking-timeline:before {
+    .timeline::before {
         content: '';
         position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 10px;
-        width: 2px;
-        background-color: #dee2e6;
-        /* Gray line */
+        top: 24px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #dee2e6;
+        z-index: 0;
     }
 
     .timeline-item {
+        text-align: center;
         position: relative;
-        padding-left: 30px;
-        margin-bottom: 20px;
+        z-index: 1;
+        flex: 1;
+        min-width: 120px;
     }
 
-    .timeline-item .status-icon {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 20px;
-        height: 20px;
-        background-color: #fff;
+    .status-icon {
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
-        border: 2px solid #dee2e6;
-        z-index: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #dee2e6;
+        margin: 0 auto 0.75rem;
+        font-size: 1.2rem;
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s;
     }
 
-    /* Completed Status */
-    .timeline-item.completed .status-icon {
+    .status-icon.completed {
+        background: #e6f4ea;
+        color: #198754;
         border-color: #198754;
-        /* Green */
-        background-color: #198754;
-        color: #fff;
     }
 
-    /* In Progress Status */
-    .timeline-item.in-progress .status-icon {
+    .status-icon.in-progress {
+        background: #fff8e6;
+        color: #ffc107;
         border-color: #ffc107;
-        /* Yellow */
-        background-color: #ffc107;
-        color: #fff;
+        animation: pulse 2s infinite;
     }
 
-    .timeline-item.in-progress .status-icon i {
-        /* Makes the pulse effect */
-        animation: pulse 1.5s infinite;
+    .status-icon.upcoming {
+        opacity: 0.6;
+    }
+
+    .status-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .status-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .status-completed .status-label,
+    .status-completed .status-time {
+        color: #198754;
+    }
+
+    .status-in-progress .status-label {
+        color: #d97706;
+    }
+
+    /* Mobile timeline */
+    @media (max-width: 768px) {
+        .timeline {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .timeline::before {
+            top: 24px;
+            left: 24px;
+            bottom: 0;
+            width: 2px;
+            height: auto;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-icon {
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .timeline-item-content {
+            text-align: left;
+        }
     }
 
     @keyframes pulse {
-        0% {
-            box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
-        }
+        0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+        70% { box-shadow: 0 0 0 8px rgba(255, 193, 7, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    }
 
-        70% {
-            box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
-        }
+    /* Order Summary */
+    .order-summary {
+        background-color: #f9fafb;
+        border-radius: 10px;
+        padding: 1.25rem;
+    }
 
-        100% {
-            box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
-        }
+    .product-list {
+        max-height: 180px;
+        overflow-y: auto;
+    }
+
+    .product-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .product-item img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-right: 0.75rem;
+        border: 1px solid #eee;
+    }
+
+    /* CTA Buttons */
+    .order-actions .btn {
+        font-weight: 500;
     }
 </style>
 
-
 <div class="container py-5">
-    <h1 class="mb-4 text-center">
-        <i class="fas fa-shipping-fast me-2 text-primary"></i> Track Your Orders
-    </h1>
-    <hr class="mb-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-dark">
+            <i class="fas fa-truck-loading text-primary me-2"></i> Live Order Tracking
+        </h1>
+        <p class="text-muted">Real-time updates — just like Amazon</p>
+    </div>
+
     @if ($orders->count())
         @foreach ($orders as $order)
-            <div class="row justify-content-center">
-                <div class="col-lg-10 col-xl-9">
-                    <div class="card order-card mb-5">
-                        <div class="card-header order-header p-3 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 text-dark">
-                                Order #{{ $order->id }}
-                                @if ($order->payment_status === 'pending')
-                                    <span class="badge bg-warning text-dark ms-2">Payment Pending</span>
-                                @else
-                                    <span class="badge bg-success ms-2">Paid</span>
-                                @endif
-                            </h5>
-                            <span class="text-muted">
-                                Placed on: {{ $order->created_at->format('M d, Y') }}
-                            </span>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="row">
-                                {{-- Order Summary --}}
-                                <div class="col-lg-4 mb-4 mb-lg-0 border-end">
-                                    <h6 class="text-muted mb-3">Order Details</h6>
-                                    <p class="mb-1">
-                                        <i class="fas fa-wallet me-2 text-secondary"></i>
-                                        <strong>Total:</strong>
-                                        <span class="text-primary fw-bold">${{ number_format($order->total, 2) }}</span>
-                                    </p>
-                                    <p class="mb-1">
-                                        <i class="fas fa-hand-holding-usd me-2 text-secondary"></i>
-                                        <strong>Method:</strong> {{ strtoupper($order->payment_method) }}
-                                    </p>
-                                    <p class="mb-3">
-                                        <i class="fas fa-store me-2 text-secondary"></i>
-                                        <strong>Seller:</strong> {{ $order->seller->company_name ?? 'N/A' }}
-                                    </p>
+            @php
+                // Estimate delivery: +5 days from order (adjust logic as needed)
+                $expectedDelivery = $order->created_at->addDays(5);
+                $isDelivered = $order->statuses->contains('stage', 'delivered') && 
+                               $order->statuses->firstWhere('stage', 'delivered')?->status === 'completed';
+            @endphp
 
-                                    <h6 class="text-muted mb-3">
-                                        Items Purchased ({{ $order->products->count() }})
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-11">
+                    <div class="card order-tracking-card">
+                        <!-- Header -->
+                        <div class="order-header d-flex flex-wrap justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted me-2">Order placed</span>
+                                <strong>{{ $order->created_at->format('M d, Y') }}</strong>
+                                @if (!$isDelivered)
+                                    <span class="ms-3 badge bg-info text-dark">
+                                        <i class="fas fa-clock me-1"></i> Expected {{ $expectedDelivery->format('M d') }}
+                                    </span>
+                                @else
+                                    <span class="ms-3 badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i> Delivered {{ $order->statuses->firstWhere('stage', 'delivered')?->completed_at?->format('M d') }}
+                                    </span>
+                                @endif
+                            </div>
+                            <div class="mt-2 mt-md-0">
+                                <span class="order-id">Order #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</span>
+                                @if ($order->payment_status === 'pending')
+                                    <span class="payment-badge bg-warning text-dark ms-2">Payment Pending</span>
+                                @else
+                                    <span class="payment-badge bg-success ms-2">Paid</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+                                <!-- Left: Order Summary -->
+                                <div class="col-lg-4 order-summary">
+                                    <h6 class="fw-bold text-dark mb-3">
+                                        <i class="fas fa-shopping-cart me-2 text-primary"></i>
+                                        Order Summary
                                     </h6>
-                                    <ul class="list-unstyled small">
+
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Order Total</span>
+                                        <strong class="text-primary">${{ number_format($order->total, 2) }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Payment Method</span>
+                                        <span>{{ strtoupper($order->payment_method) }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span>Sold by</span>
+                                        <span class="fw-medium">{{ $order->seller->company_name ?? 'N/A' }}</span>
+                                    </div>
+
+                                    <hr class="my-3">
+
+                                    <h6 class="fw-bold text-dark mb-2">
+                                        <i class="fas fa-box me-2 text-info"></i>
+                                        {{ $order->products->count() }} Item{{ $order->products->count() !== 1 ? 's' : '' }}
+                                    </h6>
+
+                                    <div class="product-list">
                                         @foreach ($order->products as $product)
-                                            <li>
-                                                <i class="fas fa-tag me-1 text-info"></i>
-                                                {{ $product->name }}
-                                            </li>
+                                            <div class="product-item">
+                                                <img src="{{ $product->image ?? asset('assets/img/placeholder.jpg') }}" alt="{{ $product->name }}">
+                                                <div>
+                                                    <div class="fw-medium">{{ Str::limit($product->name, 30) }}</div>
+                                                    <small class="text-muted">${{ number_format($product->price, 2) }}</small>
+                                                </div>
+                                            </div>
                                         @endforeach
-                                    </ul>
+                                    </div>
                                 </div>
 
-                                {{-- Tracking Timeline --}}
+                                <!-- Right: Live Tracking -->
                                 <div class="col-lg-8">
-                                    <h5 class="text-dark mb-4">
-                                        <i class="fas fa-map-marked-alt me-2"></i>Tracking Status
-                                    </h5>
-                                    <ul class="tracking-timeline">
-                                        @foreach ($order->statuses as $status_item)
-                                            @php
-                                                $status_class = '';
-                                                $status_icon = 'fa-circle';
-                                                $status_text = ucwords(str_replace('_', ' ', $status_item->stage));
-                                                $status_time = $status_item->started_at
-                                                    ? \Carbon\Carbon::parse($status_item->started_at)->format(
-                                                        'h:i A, M d',
-                                                    )
-                                                    : 'Awaiting action';
+                                    <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                        <h5 class="fw-bold text-dark mb-0">
+                                            <i class="fas fa-map-pin text-success me-2"></i> Live Tracking
+                                        </h5>
+                                        @if ($order->tracking_number)
+                                            <a href="https://tools.usps.com/go/TrackConfirmAction?tLabels={{ $order->tracking_number }}"
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-truck me-1"></i> Track Package
+                                            </a>
+                                        @endif
+                                    </div>
 
-                                                if ($status_item->status === 'completed') {
-                                                    $status_class = 'completed';
-                                                    $status_icon = 'fa-check';
-                                                    $status_time = \Carbon\Carbon::parse(
-                                                        $status_item->completed_at,
-                                                    )->format('h:i A, M d');
-                                                } elseif ($status_item->status === 'in_progress') {
-                                                    $status_class = 'in-progress';
-                                                    $status_icon = 'fa-spinner fa-spin';
-                                                }
+                                    <!-- Progress Bar -->
+                                    @php
+                                        $stages = ['pending', 'confirmed', 'shipped', 'out_for_delivery', 'delivered'];
+                                        $currentStageIndex = -1;
+                                        foreach ($stages as $i => $stage) {
+                                            $status = $order->statuses->firstWhere('stage', $stage);
+                                            if ($status && $status->status === 'completed') {
+                                                $currentStageIndex = $i;
+                                            } elseif ($status && $status->status === 'in_progress') {
+                                                $currentStageIndex = $i - 0.5;
+                                                break;
+                                            }
+                                        }
+                                        $progress = $currentStageIndex >= 0 ? min(100, (($currentStageIndex + 1) / count($stages)) * 100) : 0;
+                                    @endphp
+
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill" style="width: {{ $progress }}%"></div>
+                                    </div>
+                                    <p class="text-center text-muted small mb-4">
+                                        {{ $progress == 100 ? 'Delivered!' : 'In transit — real-time updates' }}
+                                    </p>
+
+                                    <!-- Timeline -->
+                                    <div class="timeline">
+                                        @foreach ([
+                                            ['stage' => 'confirmed', 'label' => 'Order Confirmed', 'icon' => 'fa-check-circle'],
+                                            ['stage' => 'shipped', 'label' => 'Shipped', 'icon' => 'fa-truck'],
+                                            ['stage' => 'out_for_delivery', 'label' => 'Out for Delivery', 'icon' => 'fa-truck-ramp-box'],
+                                            ['stage' => 'delivered', 'label' => 'Delivered', 'icon' => 'fa-box-open']
+                                        ] as $item)
+                                            @php
+                                                $statusRecord = $order->statuses->firstWhere('stage', $item['stage']);
+                                                $status = $statusRecord ? $statusRecord->status : 'pending';
+                                                $isCompleted = $status === 'completed';
+                                                $isInProgress = $status === 'in_progress';
+                                                $cssClass = $isCompleted ? 'completed' : ($isInProgress ? 'in-progress' : 'upcoming');
+                                                $time = $statusRecord?->completed_at ?? $statusRecord?->started_at ?? null;
+                                                $timeStr = $time ? \Carbon\Carbon::parse($time)->format('M d, h:i A') : '—';
                                             @endphp
 
-                                            <li class="timeline-item {{ $status_class }}">
-                                                <div class="status-icon">
-                                                    <i class="fas {{ $status_icon }}"></i>
+                                            <div class="timeline-item">
+                                                <div class="status-icon {{ $cssClass }}">
+                                                    <i class="fas {{ $item['icon'] }}"></i>
                                                 </div>
-                                                <div class="fw-bold">
-                                                    {{ $status_text }}
-                                                    @if ($status_item->status === 'in_progress')
-                                                        <span class="badge bg-warning text-dark ms-2">In
-                                                            Progress</span>
-                                                    @elseif ($status_item->status === 'completed')
-                                                        <span class="badge bg-success ms-2">Completed</span>
-                                                    @else
-                                                        <span class="badge bg-light text-muted ms-2">Pending</span>
-                                                    @endif
+                                                <div class="timeline-item-content">
+                                                    <div class="status-label">
+                                                        {{ $item['label'] }}
+                                                        @if ($isInProgress)
+                                                            <span class="badge bg-warning text-dark ms-1">Now</span>
+                                                        @elseif ($isCompleted)
+                                                            <i class="fas fa-check-circle text-success ms-1"></i>
+                                                        @endif
+                                                    </div>
+                                                    <div class="status-time">{{ $timeStr }}</div>
                                                 </div>
-                                                <small class="text-muted">{{ $status_time }}</small>
-                                            </li>
+                                            </div>
                                         @endforeach
-                                    </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer text-end p-3 bg-light">
-                            <a href="#" class="btn btn-outline-dark btn-sm me-2"><i
-                                    class="fas fa-file-pdf me-1"></i> Download Invoice</a>
-                            <a href="#" class="btn btn-primary btn-sm"><i class="fas fa-comment me-1"></i>
-                                Contact
-                                Seller</a>
+
+                        <!-- Footer Actions -->
+                        <div class="card-footer bg-light p-3 text-end">
+                            <div class="order-actions">
+                                <a href="#" class="btn btn-outline-secondary btn-sm me-2">
+                                    <i class="fas fa-file-invoice me-1"></i> Invoice
+                                </a>
+                                <a href="#" class="btn btn-outline-primary btn-sm me-2">
+                                    <i class="fas fa-comment-dots me-1"></i> Message Seller
+                                </a>
+                                <a href="{{ route('order.details', $order->id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-info-circle me-1"></i> View Details
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         @endforeach
+
+        <!-- Pagination -->
+        @if ($orders->hasPages())
+            <div class="d-flex justify-content-center mt-4">
+                {{ $orders->links() }}
+            </div>
+        @endif
+
     @else
-        <div class="alert alert-info text-center" role="alert">
-            <i class="fas fa-box-open me-2"></i> No orders found.
+        <div class="text-center py-5">
+            <div class="display-1 text-muted mb-3">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <h4 class="text-muted">No orders yet</h4>
+            <p class="text-muted mb-4">Your tracked orders will appear here once placed.</p>
+            <a href="{{ route('shop') }}" class="btn btn-primary px-4 py-2">
+                <i class="fas fa-shopping-cart me-2"></i> Continue Shopping
+            </a>
         </div>
     @endif
-
 </div>
 @endsection
