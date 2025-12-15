@@ -27,19 +27,25 @@ class ProductController extends Controller
         }
 
         if ($request->stock_range) {
-            $stockRange = explode('-', $request->stock_range);
-            $query->whereBetween('stock_quantity', [
-                (int)($stockRange[0] ?? 0),
-                (int)($stockRange[1] ?? PHP_INT_MAX)
-            ]);
+            if ($request->stock_range === '500+') {
+                $query->where('stock_quantity', '>=', 500);
+            } else {
+                $stockRange = explode('-', $request->stock_range);
+                $minStock = (int)($stockRange[0] ?? 0);
+                $maxStock = isset($stockRange[1]) ? (int)$stockRange[1] : PHP_INT_MAX;
+                $query->whereBetween('stock_quantity', [$minStock, $maxStock]);
+            }
         }
 
         if ($request->price_range) {
-            $priceRange = explode('-', $request->price_range);
-            $query->whereBetween('price', [
-                (int)($priceRange[0] ?? 0),
-                (int)($priceRange[1] ?? PHP_INT_MAX)
-            ]);
+            if ($request->price_range === '501+') {
+                $query->where('b2c_price', '>=', 501);
+            } else {
+                $priceRange = explode('-', $request->price_range);
+                $minPrice = (int)($priceRange[0] ?? 0);
+                $maxPrice = isset($priceRange[1]) ? (int)$priceRange[1] : PHP_INT_MAX;
+                $query->whereBetween('b2c_price', [$minPrice, $maxPrice]);
+            }
         }
 
         $products = $query->latest()->paginate(10);

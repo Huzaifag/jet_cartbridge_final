@@ -197,7 +197,9 @@
                                         <div class="flex-grow-1 ms-3">
                                             <div class="fw-bold">{{ $meeting->title ?? 'Meeting Request' }}</div>
                                             <div class="small text-muted">From: {{ $meeting->sender->name }}</div>
-                                            <div class="small text-muted">📅 {{ $meeting->scheduled_at->format('d M, h:i A') }}
+                                            <div class="small text-muted">
+                                                📅
+                                                {{ $meeting->scheduled_at ? $meeting->scheduled_at->format('d M, h:i A') : 'Not scheduled' }}
                                             </div>
 
                                             <div class="mt-2 d-flex gap-2">

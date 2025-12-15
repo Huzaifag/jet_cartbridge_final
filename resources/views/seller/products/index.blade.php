@@ -113,7 +113,7 @@
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">{{ $products->where('verification_status', 'approved')->count() }}</div>
+                    <div class="stat-value">{{ $products->getCollection()->where('verification_status', 'approved')->count() }}</div>
                     <div class="stat-title">Approved Products</div>
                 </div>
             </div>
@@ -123,7 +123,7 @@
                     <i class="fas fa-hourglass-half"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">{{ $products->where('verification_status', 'pending')->count() }}</div>
+                    <div class="stat-value">{{ $products->getCollection()->where('verification_status', 'pending')->count() }}</div>
                     <div class="stat-title">Pending Products</div>
                 </div>
             </div>
@@ -186,7 +186,7 @@
                                 @if (request('search'))
                                     <div class="filter-tag">
                                         Search: "{{ request('search') }}"
-                                        <a href="{{ route('seller.products.index', request()->except('search')) }}"
+                                        <a href="{{ route('seller.products.index', array_merge(request()->except('search'), ['page' => 1])) }}"
                                             class="close">&times;</a>
                                     </div>
                                 @endif
@@ -194,7 +194,7 @@
                                 @if (request('status'))
                                     <div class="filter-tag">
                                         Status: {{ ucfirst(request('status')) }}
-                                        <a href="{{ route('seller.products.index', request()->except('status')) }}"
+                                        <a href="{{ route('seller.products.index', array_merge(request()->except('status'), ['page' => 1])) }}"
                                             class="close">&times;</a>
                                     </div>
                                 @endif
@@ -202,7 +202,7 @@
                                 @if (request('stock_range'))
                                     <div class="filter-tag">
                                         Stock: {{ request('stock_range') }}
-                                        <a href="{{ route('seller.products.index', request()->except('stock_range')) }}"
+                                        <a href="{{ route('seller.products.index', array_merge(request()->except('stock_range'), ['page' => 1])) }}"
                                             class="close">&times;</a>
                                     </div>
                                 @endif
@@ -210,7 +210,7 @@
                                 @if (request('price_range'))
                                     <div class="filter-tag">
                                         Price: ${{ request('price_range') }}
-                                        <a href="{{ route('seller.products.index', request()->except('price_range')) }}"
+                                        <a href="{{ route('seller.products.index', array_merge(request()->except('price_range'), ['page' => 1])) }}"
                                             class="close">&times;</a>
                                     </div>
                                 @endif
@@ -368,10 +368,10 @@
                     {{-- Pagination --}}
                     <div class="mt-4 d-flex justify-content-between align-items-center">
                         <div class="text-muted small">
-                            Showing {{ $products->firstItem() }} to {{ $products->lastItem() }} of {{ $products->total() }} products
+                            Showing {{ $products->firstItem() ?? 0 }} to {{ $products->lastItem() ?? 0 }} of {{ $products->total() }} products
                         </div>
                         <div>
-                            {{ $products->appends(request()->query())->links('pagination::bootstrap-5') }}
+                            {{ $products->appends(request()->query())->links('pagination.custom-bootstrap-5') }}
                         </div>
                     </div>
                 @else

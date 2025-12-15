@@ -92,7 +92,7 @@
                             <i class="fas fa-box-open"></i>
                         </div>
                         <div class="stat-content">
-                            <div class="stat-value">{{ $products->count() }}</div>
+                            <div class="stat-value">{{ $products->total() }}</div>
                             <div class="stat-title">Total Products</div>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="stat-content">
-                            <div class="stat-value">{{ $products->where('verification_status', 'approved')->count() }}</div>
+                            <div class="stat-value">{{ $products->getCollection()->where('verification_status', 'approved')->count() }}</div>
                             <div class="stat-title">Approved Products</div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                             <i class="fas fa-hourglass-half"></i>
                         </div>
                         <div class="stat-content">
-                            <div class="stat-value">{{ $products->where('verification_status', 'pending')->count() }}</div>
+                            <div class="stat-value">{{ $products->getCollection()->where('verification_status', 'pending')->count() }}</div>
                             <div class="stat-title">Pending Products</div>
                         </div>
                     </div>
@@ -343,8 +343,13 @@
                     </div>
 
                     {{-- Pagination --}}
-                    <div class="mt-4">
-                        {{ $products->links('pagination::bootstrap-5') }}
+                    <div class="mt-4 d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            Showing {{ $products->firstItem() ?? 0 }} to {{ $products->lastItem() ?? 0 }} of {{ $products->total() }} products
+                        </div>
+                        <div>
+                            {{ $products->appends(request()->query())->links('pagination::bootstrap-5') }}
+                        </div>
                     </div>
                 @else
                     <div class="text-center py-5">

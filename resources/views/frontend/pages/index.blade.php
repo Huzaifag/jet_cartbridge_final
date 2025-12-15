@@ -269,7 +269,7 @@
                     </div>
 
                     <div class="d-flex justify-content-center mt-5">
-                        {{ $featuredProducts->links() }}
+                        {{ $featuredProducts->links('paginate::bootstrap-5') }}
                     </div>
                 @else
                     <div class="text-center py-5">

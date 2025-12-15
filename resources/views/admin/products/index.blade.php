@@ -119,7 +119,7 @@
                                             </td>
                                             <td>
                                                 @if($product->category)
-                                                    <span class="badge bg-info">{{ $product->category->name }}</span>
+                                                    <span class="badge bg-info">{{ $product->category }}</span>
                                                 @else
                                                     <span class="text-muted">No Category</span>
                                                 @endif
@@ -174,10 +174,10 @@
                         <!-- Pagination -->
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <div>
-                                Showing {{ $products->firstItem() }} to {{ $products->lastItem() }} of {{ $products->total() }} results
+                                Showing {{ $products->firstItem() ?? 0 }} to {{ $products->lastItem() ?? 0 }} of {{ $products->total() }} results
                             </div>
                             <div>
-                                {{ $products->links() }}
+                                {{ $products->appends(request()->query())->links('pagination.custom-bootstrap-5') }}
                             </div>
                         </div>
                     @else
