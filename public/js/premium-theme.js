@@ -484,6 +484,9 @@ document.head.appendChild(style);
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
         
+        // Prevent body scroll
+        document.body.classList.add('modal-open');
+        
         // Show modal with animation
         setTimeout(() => {
             modal.classList.add('show');
@@ -500,6 +503,7 @@ document.head.appendChild(style);
         const modal = document.querySelector('.location-modal');
         if (modal) {
             modal.classList.remove('show');
+            document.body.classList.remove('modal-open');
             setTimeout(() => {
                 modal.remove();
             }, 300);
@@ -584,6 +588,9 @@ document.head.appendChild(style);
         
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
+        
+        // Prevent body scroll
+        document.body.classList.add('modal-open');
         
         // Show modal with animation
         setTimeout(() => {

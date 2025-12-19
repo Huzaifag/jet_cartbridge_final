@@ -3871,85 +3871,141 @@ ch button responsive text/icon */
 
 /* Location permission modal styles */
 .location-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+    font-family: 'Inter', 'Segoe UI', sans-serif !important;
 }
 
 .location-modal.show {
-    opacity: 1;
-    visibility: visible;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .location-modal-content {
-    background: var(--color-dark-navy);
-    border: 1px solid var(--color-accent);
-    border-radius: 1rem;
-    padding: 2rem;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
+    background: #0d0d1e !important;
+    border: 2px solid #f59e0b !important;
+    border-radius: 1rem !important;
+    padding: 2rem !important;
+    max-width: 450px !important;
+    width: 90% !important;
+    text-align: center !important;
     transform: scale(0.9);
     transition: transform 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+    position: relative !important;
 }
 
 .location-modal.show .location-modal-content {
-    transform: scale(1);
+    transform: scale(1) !important;
 }
 
 .location-modal h4 {
-    color: var(--color-white);
-    margin-bottom: 1rem;
+    color: #ffffff !important;
+    margin-bottom: 1rem !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
 }
 
 .location-modal p {
-    color: var(--color-text-dim);
-    margin-bottom: 1.5rem;
+    color: #9ca3af !important;
+    margin-bottom: 1.5rem !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
 }
 
 .location-modal-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
+    display: flex !important;
+    gap: 1rem !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
 }
 
 .location-modal-btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition-fast);
+    padding: 0.75rem 1.5rem !important;
+    border: none !important;
+    border-radius: 0.5rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    font-size: 0.95rem !important;
+    min-width: 120px !important;
+    text-align: center !important;
 }
 
 .location-modal-btn.primary {
-    background: var(--color-accent);
-    color: var(--color-dark-navy);
+    background: #f59e0b !important;
+    color: #0d0d1e !important;
+    border: 2px solid #f59e0b !important;
 }
 
 .location-modal-btn.primary:hover {
-    background: var(--color-accent-light);
+    background: #fbbf24 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
 }
 
 .location-modal-btn.secondary {
-    background: transparent;
-    color: var(--color-accent);
-    border: 1px solid var(--color-accent);
+    background: transparent !important;
+    color: #f59e0b !important;
+    border: 2px solid #f59e0b !important;
 }
 
 .location-modal-btn.secondary:hover {
-    background: var(--color-accent);
-    color: var(--color-dark-navy);
+    background: #f59e0b !important;
+    color: #0d0d1e !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Icon styling in modal */
+.location-modal .fas {
+    margin-right: 0.5rem !important;
+}
+
+.location-modal .text-accent {
+    color: #f59e0b !important;
+}
+
+.location-modal .text-warning {
+    color: #f59e0b !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 576px) {
+    .location-modal-content {
+        padding: 1.5rem !important;
+        max-width: 95% !important;
+    }
+    
+    .location-modal h4 {
+        font-size: 1.1rem !important;
+    }
+    
+    .location-modal p {
+        font-size: 0.9rem !important;
+    }
+    
+    .location-modal-buttons {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+    
+    .location-modal-btn {
+        width: 100% !important;
+        padding: 0.875rem 1rem !important;
+    }
 }
 
 /* Responsive adjustments */
@@ -4457,5 +4513,87 @@ er location styling */
 @media (max-width: 768px) {
     .seller-location-text {
         font-size: 0.65rem;
+    }
+}/* =
+=======================================
+   LOCATION MODAL ENHANCEMENTS
+   ======================================== */
+
+/* Ensure modal appears above all other elements */
+.location-modal {
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+}
+
+/* Animation for modal appearance */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.location-modal.show .location-modal-content {
+    animation: modalFadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* Button focus states */
+.location-modal-btn:focus {
+    outline: 3px solid rgba(245, 158, 11, 0.3) !important;
+    outline-offset: 2px !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden !important;
+}
+
+/* Loading state for buttons */
+.location-modal-btn.loading {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+.location-modal-btn.loading::after {
+    content: '' !important;
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    border: 2px solid currentColor !important;
+    border-radius: 50% !important;
+    border-top-color: transparent !important;
+    animation: spin 1s linear infinite !important;
+    margin-left: 0.5rem !important;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .location-modal-content {
+        border-width: 3px !important;
+    }
+    
+    .location-modal-btn {
+        border-width: 2px !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .location-modal,
+    .location-modal-content,
+    .location-modal-btn {
+        transition: none !important;
+        animation: none !important;
     }
 }
