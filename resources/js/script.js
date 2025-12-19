@@ -26,15 +26,66 @@ if (contactForm) {
     });
 }
 
-// Navbar background change on scroll
+// Premium Navbar scroll effect
 window.addEventListener('scroll', function() {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
-        navbar.classList.add('bg-orange');
-        navbar.classList.remove('bg-orange');
-    } else {
-        navbar.classList.add('bg-orange');
-        navbar.classList.remove('bg-orange');
+    const navbar = document.querySelector('.premium-navbar');
+    if (navbar) {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    }
+});
+
+// Add body padding class if premium top bar exists
+document.addEventListener('DOMContentLoaded', function() {
+    const topBar = document.querySelector('.premium-top-bar');
+    if (topBar) {
+        document.body.classList.add('has-premium-top-bar');
+    }
+});
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.querySelector('.hero-search-inline form');
+    const searchInput = document.querySelector('.hero-search-input');
+    
+    if (searchForm && searchInput) {
+        // Add search suggestions (optional enhancement)
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            if (query.length > 2) {
+                // You can add search suggestions here
+                console.log('Searching for:', query);
+            }
+        });
+        
+        // Handle form submission
+        searchForm.addEventListener('submit', function(e) {
+            const query = searchInput.value.trim();
+            if (!query) {
+                e.preventDefault();
+                searchInput.focus();
+                return false;
+            }
+            // Form will submit normally to the route
+        });
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape' && document.activeElement === searchInput) {
+                searchInput.value = '';
+                searchInput.blur();
+            }
+        });
     }
 });
 

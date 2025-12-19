@@ -2,11 +2,15 @@
 <div class="premium-top-bar">
     <div class="premium-container">
         <div class="d-flex justify-content-between align-items-center">
-            <!-- Left Side: Ship To -->
+            <!-- Left Side: Ship To & Nearest Seller -->
             <div class="d-flex align-items-center py-2">
                 <i class="fas fa-globe text-accent me-2"></i>
                 <span class="d-none d-sm-inline me-2 text-dim">Ship to:</span>
-                <img src="https://placehold.co/20x15/f03a47/ffffff?text=US" alt="Country Flag" class="rounded-1">
+                <img src="https://placehold.co/20x15/f03a47/ffffff?text=US" alt="Country Flag" class="rounded-1 me-3">
+                <a href="#" id="nearestSellerBtn" class="nearest-seller-link" onclick="findNearestSellers()">
+                    <i class="fas fa-map-marker-alt me-1"></i>
+                    <span>Find Nearest Sellers</span>
+                </a>
             </div>
 
             <!-- Right Side: Links -->
@@ -97,7 +101,7 @@
 </div>
 
 <!-- Premium Main Navigation Bar -->
-<nav class="premium-navbar">
+<nav class="premium-navbar fixed-top">
     <div class="premium-container">
         <!-- Premium Logo -->
         <a class="premium-nav-brand" href="{{ url('/') }}">
@@ -221,9 +225,20 @@
                 </button>
             </div>
             
-            <a href="#" class="premium-icon-link ms-3">
-                <i class="fas fa-search"></i>
-            </a>
+            <!-- Search Bar Inside Navbar -->
+            <div class="hero-search-inline ms-3" style="max-width: 280px; min-width: 180px; width: 100%;" data-animation="fadeInUp" data-delay="300">
+                <form method="GET" action="{{ route('home') }}">
+                    <div class="hero-search-wrapper" style="width: 100%;">
+                        <i class="fas fa-search hero-search-icon"></i>
+                        <input type="text" name="search" class="hero-search-input" style="color: #222; background: #fff; border-radius: 20px; font-size: 0.95rem; height: 36px; padding-left: 36px; width: 100%;"
+                               placeholder="Search products..."
+                               value="{{ request('search') }}">
+                        <button type="submit" class="hero-search-btn" style="height: 36px; border-radius: 20px 20px 20px 20px; font-size: 0.95rem; padding: 0 16px;">
+                            search
+                        </button>
+                    </div>
+                </form>
+            </div>
             @if (auth()->check() && auth()->user()->role == 'b2c')
                 <a href="{{ route('cart') }}" class="premium-icon-link position-relative ms-3">
                     <i class="fas fa-shopping-cart"></i>
@@ -269,8 +284,8 @@
                     </ul>
                 </div>
             @else
-                <a href="{{ route('login') }}" class="btn-premium btn-premium-secondary ms-3">
-                    <i class="fas fa-sign-in-alt me-1"></i>Login
+                <a href="{{ route('login') }}" class="btn-premium-compact btn-premium-compact-secondary ms-3">
+                    <i class="fas fa-sign-in-alt"></i>Login
                 </a>
             @endif
         </div>

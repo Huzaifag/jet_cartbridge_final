@@ -5,8 +5,68 @@
     <div class="row">
         <div class="col-12">
             <div class="text-center mb-5">
-                <h1 class="display-4 fw-bold text-primary mb-3">Verified Sellers</h1>
-                <p class="lead text-muted">Connect with trusted suppliers and manufacturers worldwide</p>
+                @if(request('nearest') == '1')
+                    <h1 class="display-4 fw-bold text-primary mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>Nearest Sellers
+                    </h1>
+                    <p class="lead text-muted">Sellers near your location for faster delivery and service</p>
+                    @if(request('user_lat') && request('user_lng'))
+                        <div class="alert alert-info d-inline-block">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Showing sellers within {{ request('radius', 25) }}km of your location
+                        </div>
+                    @endif
+                @else
+                    <h1 class="display-4 fw-bold text-primary mb-3">Verified Sellers</h1>
+                    <p class="lead text-muted">Connect with trusted suppliers and manufacturers worldwide</p>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="GET" action="{{ route('sellers') }}" class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label">Search Sellers</label>
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Search by business name, city, or description..."
+                                   value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Radius (km)</label>
+                            <select name="radius" class="form-select" {{ !request('nearest') ? 'disabled' : '' }}>
+                                <option value="10" {{ request('radius') == '10' ? 'selected' : '' }}>10 km</option>
+                                <option value="25" {{ request('radius', '25') == '25' ? 'selected' : '' }}>25 km</option>
+                                <option value="50" {{ request('radius') == '50' ? 'selected' : '' }}>50 km</option>
+                                <option value="100" {{ request('radius') == '100' ? 'selected' : '' }}>100 km</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i>Search
+                                </button>
+                                @if(request('nearest') == '1')
+                                    <input type="hidden" name="nearest" value="1">
+                                    <input type="hidden" name="user_lat" value="{{ request('user_lat') }}">
+                                    <input type="hidden" name="user_lng" value="{{ request('user_lng') }}">
+                                @endif
+                                <a href="{{ route('sellers') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>Clear
+                                </a>
+                                @if(!request('nearest'))
+                                    <button type="button" class="btn btn-success" onclick="findNearestSellers()">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Near Me
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -46,6 +106,11 @@
                             <p class="text-muted mb-2">
                                 <i class="bi bi-geo-alt me-1"></i>
                                 {{ $seller->city }}, {{ $seller->country }}
+                                @if(isset($seller->distance))
+                                    <span class="badge bg-success ms-2">
+                                        <i class="fas fa-route me-1"></i>{{ number_format($seller->distance, 1) }} km away
+                                    </span>
+                                @endif
                             </p>
                         @endif
                         <p class="text-muted mb-2">
@@ -103,9 +168,30 @@
         @empty
         <div class="col-12">
             <div class="text-center py-5">
-                <i class="bi bi-building fs-1 text-muted mb-3"></i>
-                <h3 class="text-muted">No sellers available</h3>
-                <p class="text-muted">Check back later for new verified sellers.</p>
+                @if(request('nearest') == '1')
+                    <i class="fas fa-map-marker-alt fs-1 text-muted mb-3"></i>
+                    <h3 class="text-muted">No sellers found nearby</h3>
+                    <p class="text-muted mb-4">
+                        We couldn't find any sellers within {{ request('radius', 25) }}km of your location.
+                        <br>Try expanding your search radius or browse all sellers.
+                    </p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="{{ route('sellers', ['nearest' => 1, 'user_lat' => request('user_lat'), 'user_lng' => request('user_lng'), 'radius' => 50]) }}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-expand-arrows-alt me-1"></i>Expand to 50km
+                        </a>
+                        <a href="{{ route('sellers') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-globe me-1"></i>Browse All Sellers
+                        </a>
+                    </div>
+                @else
+                    <i class="bi bi-building fs-1 text-muted mb-3"></i>
+                    <h3 class="text-muted">No sellers available</h3>
+                    <p class="text-muted mb-4">Check back later for new verified sellers.</p>
+                    <button type="button" class="btn btn-success" onclick="findNearestSellers()">
+                        <i class="fas fa-map-marker-alt me-1"></i>Find Sellers Near Me
+                    </button>
+                @endif
             </div>
         </div>
         @endforelse

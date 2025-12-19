@@ -471,12 +471,57 @@ class FrontendController extends Controller
         return view('frontend.pages.categories', compact('categories'));
     }
 
-    public function sellers()
+    public function sellers(Request $request)
     {
-        $sellers = Seller::with('products')
-            ->where('status', 'approved')
-            ->latest()
-            ->paginate(12);
+        $query = Seller::with('products')
+            ->where('status', 'approved');
+
+        /* ==============================
+         * 📍 LOCATION FILTER (NEAREST SELLERS)
+         * ============================== */
+        if ($request->filled('nearest') && $request->nearest == '1') {
+            $userLat = $request->input('user_lat');
+            $userLng = $request->input('user_lng');
+            $radius = $request->input('radius', 25); // Default 25km radius
+
+            if ($userLat && $userLng) {
+                $query->whereNotNull('latitude')
+                    ->whereNotNull('longitude')
+                    ->selectRaw("
+                        sellers.*, 
+                        (6371 * acos(
+                            cos(radians(?)) * cos(radians(sellers.latitude)) *
+                            cos(radians(sellers.longitude) - radians(?)) +
+                            sin(radians(?)) * sin(radians(sellers.latitude))
+                        )) AS distance
+                    ", [$userLat, $userLng, $userLat])
+                    ->having('distance', '<=', $radius)
+                    ->orderBy('distance', 'asc');
+            }
+        } else {
+            $query->latest();
+        }
+
+        /* ==============================
+         * 🔍 SEARCH FILTER
+         * ============================== */
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('business_name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('state', 'like', "%{$search}%");
+            });
+        }
+
+        $sellers = $query->paginate(12);
+        
+        // Add distance to each seller if location search was performed
+        if ($request->filled('nearest') && $request->nearest == '1') {
+            $sellers->appends($request->only(['nearest', 'user_lat', 'user_lng', 'radius']));
+        }
+
         return view('frontend.pages.sellers', compact('sellers'));
     }
 

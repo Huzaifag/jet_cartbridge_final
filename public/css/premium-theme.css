@@ -3248,7 +3248,7 @@ body {
 
 /* Search Inline Inside Hero */
 .hero-search-inline {
-    margin-bottom: 2rem;
+    /* margin-bottom: 2rem; */
     max-width: 700px;
 }
 

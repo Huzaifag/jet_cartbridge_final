@@ -3388,3 +3388,967 @@ body {
         font-size: 0.75rem;
     }
 }
+
+/* ========================================
+   FIXED NAVBAR & SEARCH STYLES
+   ======================================== */
+
+/* Fixed navbar positioning */
+.premium-navbar.fixed-top {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1030 !important;
+    width: 100% !important;
+}
+
+/* Add padding to body to compensate for fixed navbar */
+body {
+    padding-top: 120px; /* Adjust based on navbar height */
+}
+
+/* Adjust for premium top bar */
+.premium-top-bar + .premium-navbar.fixed-top {
+    top: 0;
+}
+
+body.has-premium-top-bar {
+    padding-top: 160px; /* More padding when top bar is present */
+}
+
+/* Compact Navbar Search Styles */
+.hero-search-inline {
+    display: flex;
+    align-items: center;
+    max-width: 280px;
+    margin: 0;
+}
+
+.hero-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 25px;
+    overflow: hidden;
+    transition: var(--transition-fast);
+    backdrop-filter: blur(10px);
+    height: 36px;
+}
+
+.hero-search-wrapper:hover,
+.hero-search-wrapper:focus-within {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.hero-search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--color-accent);
+    font-size: 0.85rem;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.hero-search-input {
+    flex: 1;
+    padding: 8px 10px 8px 35px;
+    border: none;
+    background: transparent;
+    color: var(--color-white);
+    font-size: 0.8rem;
+    outline: none;
+    width: 100%;
+    min-width: 140px;
+}
+
+.hero-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+}
+
+.hero-search-btn {
+    padding: 8px 14px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+    color: var(--color-dark-navy);
+    border: none;
+    font-weight: 600;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+    border-radius: 0 25px 25px 0;
+    height: 100%;
+}
+
+.hero-search-btn:hover {
+    background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%);
+    transform: translateX(1px);
+}
+
+/* Compact Login Button Styles */
+.btn-premium-compact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: var(--transition-premium);
+    border: none;
+    cursor: pointer;
+    height: 36px;
+    white-space: nowrap;
+}
+
+.btn-premium-compact-secondary {
+    background: transparent;
+    color: var(--color-accent);
+    border: 1.5px solid var(--color-accent);
+}
+
+.btn-premium-compact-secondary:hover {
+    background: var(--color-accent);
+    color: var(--color-dark-navy);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-premium-compact i {
+    font-size: 0.75rem;
+    margin-right: 0.4rem;
+}
+
+/* Responsive search bar */
+@media (max-width: 1200px) {
+    .hero-search-inline {
+        max-width: 240px;
+    }
+    
+    .hero-search-input {
+        min-width: 120px;
+        font-size: 0.75rem;
+    }
+    
+    .hero-search-input::placeholder {
+        font-size: 0.7rem;
+    }
+    
+    .hero-search-btn {
+        padding: 8px 12px;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .hero-search-inline {
+        max-width: 200px;
+    }
+    
+    .hero-search-input {
+        min-width: 100px;
+        padding: 6px 8px 6px 30px;
+        font-size: 0.7rem;
+    }
+    
+    .hero-search-btn {
+        padding: 6px 10px;
+        font-size: 0.65rem;
+    }
+    
+    .hero-search-icon {
+        left: 10px;
+        font-size: 0.75rem;
+    }
+    
+    .hero-search-wrapper {
+        height: 32px;
+    }
+    
+    .btn-premium-compact {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        height: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Hide search on mobile to save space */
+    .hero-search-inline {
+        display: none;
+    }
+    
+    .btn-premium-compact {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+        height: 30px;
+    }
+}
+
+/* Animation for search bar */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-search-inline[data-animation="fadeInUp"] {
+    animation: fadeInUp 0.6s ease-out;
+    animation-delay: var(--delay, 0s);
+    animation-fill-mode: both;
+}
+
+/* Navbar scroll effect */
+.premium-navbar.scrolled {
+    background: rgba(13, 13, 30, 0.98) !important;
+    backdrop-filter: blur(25px) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ensure proper spacing for navbar content */
+.premium-navbar .premium-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
+
+/* Adjust navbar brand and navigation spacing */
+@media (min-width: 992px) {
+    .premium-navbar .d-none.d-lg-flex {
+        flex: 1;
+        justify-content: center;
+        margin: 0 2rem;
+    }
+}
+
+/* Mobile navbar adjustments for fixed positioning */
+@media (max-width: 991px) {
+    body {
+        padding-top: 80px;
+    }
+    
+    body.has-premium-top-bar {
+        padding-top: 120px;
+    }
+    
+    .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(13, 13, 30, 0.98);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(245, 158, 11, 0.1);
+        border-top: none;
+        border-radius: 0 0 1rem 1rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Search focus states */
+.hero-search-input:focus {
+    outline: none;
+}
+
+.hero-search-wrapper:focus-within {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--color-accent-light);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+/* Search button active state */
+.hero-search-btn:active {
+    transform: translateX(1px) scale(0.98);
+}/* ==
+======================================
+   NAVBAR COMPACT LAYOUT IMPROVEMENTS
+   ======================================== */
+
+/* Ensure proper spacing between navbar elements */
+.premium-navbar .premium-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+}
+
+/* Compact navbar height */
+.premium-navbar {
+    padding: 0;
+    min-height: 60px;
+}
+
+/* Adjust body padding for smaller navbar */
+body {
+    padding-top: 100px; /* Reduced from 120px */
+}
+
+body.has-premium-top-bar {
+    padding-top: 140px; /* Reduced from 160px */
+}
+
+/* Theme toggle button compact size */
+.theme-toggle-container {
+    margin: 0 0.5rem;
+}
+
+.theme-toggle-track {
+    width: 40px;
+    height: 20px;
+}
+
+.theme-toggle-thumb {
+    width: 16px;
+    height: 16px;
+    top: 2px;
+    left: 2px;
+}
+
+.theme-toggle-btn.dark-mode .theme-toggle-thumb {
+    transform: translateX(20px);
+}
+
+.theme-toggle-btn.dark-mode:hover .theme-toggle-thumb {
+    transform: translateX(20px) scale(1.1);
+}
+
+/* Compact icon links */
+.premium-icon-link {
+    padding: 0.5rem;
+    margin: 0 0.25rem;
+}
+
+.premium-icon-link i {
+    font-size: 1rem;
+}
+
+/* Compact divider */
+.premium-divider {
+    height: 20px;
+    margin: 0 0.5rem;
+}
+
+/* Adjust navigation links spacing */
+.premium-nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+/* Logo container adjustment */
+.logo-container img {
+    height: 35px; /* Reduced from 40px */
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 991px) {
+    body {
+        padding-top: 70px;
+    }
+    
+    body.has-premium-top-bar {
+        padding-top: 110px;
+    }
+    
+    .premium-navbar {
+        min-height: 50px;
+    }
+    
+    .premium-navbar .premium-container {
+        padding: 0.5rem 1rem;
+    }
+    
+    .logo-container img {
+        height: 30px;
+    }
+}
+
+/* Extra compact mode for very small screens */
+@media (max-width: 576px) {
+    .premium-navbar .premium-container {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .theme-toggle-container {
+        margin: 0 0.25rem;
+    }
+    
+    .premium-icon-link {
+        padding: 0.4rem;
+        margin: 0 0.1rem;
+    }
+    
+    .premium-icon-link i {
+        font-size: 0.9rem;
+    }
+    
+    .btn-premium-compact {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+        height: 28px;
+    }
+}
+
+/* Ensure search and login button align properly */
+.premium-navbar .d-flex.align-items-center > * {
+    flex-shrink: 0;
+}
+
+/* Smooth transitions for all navbar elements */
+.premium-navbar * {
+    transition: all 0.2s ease;
+}/* Sear
+ch button responsive text/icon */
+.hero-search-btn i {
+    font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .hero-search-btn {
+        min-width: 32px;
+        padding: 6px 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}/* =
+=======================================
+   NEAREST SELLER LINK STYLES
+   ======================================== */
+
+.nearest-seller-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: var(--transition-fast);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.nearest-seller-link:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.nearest-seller-link i {
+    font-size: 0.75rem;
+    animation: pulse 2s infinite;
+}
+
+.nearest-seller-link.loading {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    cursor: not-allowed;
+}
+
+.nearest-seller-link.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Location permission modal styles */
+.location-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.location-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.location-modal-content {
+    background: var(--color-dark-navy);
+    border: 1px solid var(--color-accent);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.location-modal.show .location-modal-content {
+    transform: scale(1);
+}
+
+.location-modal h4 {
+    color: var(--color-white);
+    margin-bottom: 1rem;
+}
+
+.location-modal p {
+    color: var(--color-text-dim);
+    margin-bottom: 1.5rem;
+}
+
+.location-modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.location-modal-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.location-modal-btn.primary {
+    background: var(--color-accent);
+    color: var(--color-dark-navy);
+}
+
+.location-modal-btn.primary:hover {
+    background: var(--color-accent-light);
+}
+
+.location-modal-btn.secondary {
+    background: transparent;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+}
+
+.location-modal-btn.secondary:hover {
+    background: var(--color-accent);
+    color: var(--color-dark-navy);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nearest-seller-link {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .nearest-seller-link span {
+        display: none;
+    }
+    
+    .nearest-seller-link::after {
+        content: "Near Me";
+        margin-left: 0.25rem;
+    }
+}
+
+/* ========================================
+   COLLAPSIBLE FILTERS STYLES
+   ======================================== */
+
+/* Filter toggle button */
+#filterToggleBtn {
+    border: 2px solid var(--color-accent);
+    color: var(--color-accent);
+    background: transparent;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+#filterToggleBtn:hover {
+    background: var(--color-accent);
+    color: var(--color-dark-navy);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+#filterToggleBtn.collapsed .filter-chevron {
+    transform: rotate(0deg);
+}
+
+#filterToggleBtn:not(.collapsed) .filter-chevron {
+    transform: rotate(180deg);
+}
+
+.filter-chevron {
+    transition: transform 0.3s ease;
+}
+
+/* Filters container */
+.filters-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+}
+
+/* Filter section styling */
+.filter-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(245, 158, 11, 0.08);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    transition: var(--transition-fast);
+}
+
+.filter-section:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(245, 158, 11, 0.15);
+}
+
+.filter-title {
+    color: var(--color-white);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--color-accent);
+    display: flex;
+    align-items: center;
+}
+
+.filter-title i {
+    color: var(--color-accent);
+    font-size: 1rem;
+}
+
+/* Form controls styling */
+.filter-section .form-label {
+    color: var(--color-white);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.filter-section .form-select {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: var(--color-white);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    transition: var(--transition-fast);
+}
+
+.filter-section .form-select:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    color: var(--color-white);
+}
+
+.filter-section .form-select option {
+    background: var(--color-dark-navy);
+    color: var(--color-white);
+}
+
+/* Form check styling */
+.filter-section .form-check {
+    margin-bottom: 0.75rem;
+    padding-left: 2rem;
+}
+
+.filter-section .form-check-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(245, 158, 11, 0.3);
+    margin-top: 0.25rem;
+}
+
+.filter-section .form-check-input:checked {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.filter-section .form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.filter-section .form-check-label {
+    color: var(--color-text-light);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.filter-section .form-check-label:hover {
+    color: var(--color-accent);
+}
+
+/* Rating stars styling */
+.rating {
+    color: #ffc107;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+/* Filter buttons */
+.filter-section .btn {
+    border-radius: 0.5rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: var(--transition-fast);
+}
+
+.filter-section .btn-primary {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+    border: none;
+    color: var(--color-dark-navy);
+}
+
+.filter-section .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.filter-section .btn-outline-secondary {
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text-light);
+    background: transparent;
+}
+
+.filter-section .btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--color-white);
+    transform: translateY(-1px);
+}
+
+/* Collapse animation */
+#filtersCollapse {
+    transition: all 0.3s ease;
+}
+
+#filtersCollapse.collapsing {
+    opacity: 0.5;
+}
+
+#filtersCollapse.show {
+    opacity: 1;
+}
+
+/* Active filter indicators */
+.filter-section .form-check-input:checked + .form-check-label {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.filter-section .form-select:not([value=""]) {
+    border-color: var(--color-accent);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 991px) {
+    .filters-container {
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+    
+    .filter-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    #filterToggleBtn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .filter-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    #filterToggleBtn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    #filterToggleBtn .filter-btn-text {
+        display: none;
+    }
+    
+    #filterToggleBtn::after {
+        content: "Filters";
+    }
+    
+    .filters-container {
+        padding: 0.75rem;
+    }
+    
+    .filter-section {
+        padding: 0.75rem;
+    }
+}
+
+/* Filter badge for active filters */
+.active-filters-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--color-accent);
+    color: var(--color-dark-navy);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    animation: pulse 2s infinite;
+}
+
+/* Light theme adjustments */
+[data-theme="light"] .filters-container {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .filter-section {
+    background: rgba(0, 0, 0, 0.01);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .filter-section:hover {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+[data-theme="light"] .filter-title {
+    color: var(--color-dark-navy);
+}
+
+[data-theme="light"] .filter-section .form-label {
+    color: var(--color-dark-navy);
+}
+
+[data-theme="light"] .filter-section .form-select {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-dark-navy);
+}
+
+[data-theme="light"] .filter-section .form-check-label {
+    color: #6b7280;
+}
+
+[data-theme="light"] .filter-section .form-check-label:hover {
+    color: var(--color-accent);
+}/* =====
+===================================
+   DYNAMIC LAYOUT FOR COLLAPSED FILTERS
+   ======================================== */
+
+/* When filters are collapsed, products take full width */
+#filtersCollapse:not(.show) ~ #productsColumn {
+    transition: all 0.3s ease;
+}
+
+/* Filters column hidden state */
+.filters-column-hidden {
+    display: none !important;
+}
+
+/* Products column full width when filters hidden */
+.products-full-width {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+}
+
+/* Smooth transitions for layout changes */
+.container .row > [class*="col-"] {
+    transition: all 0.3s ease;
+}
+
+/* Filter toggle button positioning */
+.filter-toggle-container {
+    position: relative;
+    z-index: 10;
+}
+
+/* Ensure button is always visible */
+#filterToggleBtn {
+    position: relative;
+    z-index: 1000;
+}
+
+/* Responsive adjustments for button */
+@media (max-width: 576px) {
+    #filterToggleBtn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    #filterToggleBtn .filter-btn-text {
+        display: none;
+    }
+    
+    #filterToggleBtn::after {
+        content: "Filters";
+    }
+}/
+* ========================================
+   FILTER BUTTON ACTIVE STATE
+   ======================================== */
+
+/* Button with active filters */
+#filterToggleBtn.has-active-filters {
+    border-color: var(--color-accent);
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--color-accent);
+}
+
+#filterToggleBtn.has-active-filters:hover {
+    background: var(--color-accent);
+    color: var(--color-dark-navy);
+}
+
+/* Pulse animation for active filters */
+@keyframes filterPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+    }
+}
+
+#filterToggleBtn.has-active-filters {
+    animation: filterPulse 2s infinite;
+}

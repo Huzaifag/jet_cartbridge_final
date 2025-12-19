@@ -162,106 +162,167 @@
         </div>
     </section>
 
+    <!-- Categories Section -->
+    <section class="premium-section">
+        <div class="premium-container">
+            <div class="premium-header">
+                <h2 class="premium-title">Shop by <span class="accent-text">Category</span></h2>
+                <p class="premium-subtitle">Explore our wide range of product categories</p>
+            </div>
+            <div class="premium-grid premium-grid-4">
+                <div class="premium-card premium-fade-in">
+                    <img src="https://img.freepik.com/free-photo/electronic-devices_144627-41317.jpg" alt="Electronics"
+                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                    <h3 class="premium-card-title">Electronics</h3>
+                    <p class="premium-card-text">20,000+ products</p>
+                </div>
+                <div class="premium-card premium-fade-in">
+                    <img src="https://img.freepik.com/free-photo/industrial-machines_1127-3426.jpg" alt="Machinery"
+                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                    <h3 class="premium-card-title">Machinery</h3>
+                    <p class="premium-card-text">15,000+ products</p>
+                </div>
+                <div class="premium-card premium-fade-in">
+                    <img src="https://img.freepik.com/free-photo/fabric-samples-textile-swatches_93675-130843.jpg"
+                        alt="Textiles" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                    <h3 class="premium-card-title">Textiles</h3>
+                    <p class="premium-card-text">25,000+ products</p>
+                </div>
+                <div class="premium-card premium-fade-in">
+                    <img src="https://img.freepik.com/free-photo/construction-equipment_1127-3294.jpg" alt="Construction"
+                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                    <h3 class="premium-card-title">Construction</h3>
+                    <p class="premium-card-text">18,000+ products</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Main Content -->
     <div class="container my-5">
         <div class="row">
-            <!-- Filters Sidebar -->
-            <div class="col-lg-3">
-                <form method="GET" action="{{ route('home') }}" id="filter-form">
-                    <div class="filter-section mb-4">
-                        <h5 class="filter-title">Filters</h5>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Price</label>
-                            <select name="price" class="form-select" onchange="this.form.submit()">
-                                <option value="" {{ !request('price') ? 'selected' : '' }}>All Prices</option>
-                                <option value="low_to_high" {{ request('price') == 'low_to_high' ? 'selected' : '' }}>Low to
-                                    High</option>
-                                <option value="high_to_low" {{ request('price') == 'high_to_low' ? 'selected' : '' }}>High to
-                                    Low</option>
-                                <option value="under_100" {{ request('price') == 'under_100' ? 'selected' : '' }}>Under $100
-                                </option>
-                                <option value="100_500" {{ request('price') == '100_500' ? 'selected' : '' }}>$100 - $500
-                                </option>
-                                <option value="over_500" {{ request('price') == 'over_500' ? 'selected' : '' }}>Over $500
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Product Rating</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="rating" value="4" id="rating4" {{ request('rating') == '4' ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="rating4">
-                                    <span class="rating">★★★★</span> & Up
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="rating" value="3" id="rating3" {{ request('rating') == '3' ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="rating3">
-                                    <span class="rating">★★★</span> & Up
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Seller Type</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="seller_type[]" value="verified_manuf"
-                                    id="verifiedManuf" {{ in_array('verified_manuf', request('seller_type', [])) ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="verifiedManuf">
-                                    Verified Manufacturers
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="seller_type[]" value="bulk_orders"
-                                    id="bulkOrders" {{ in_array('bulk_orders', request('seller_type', [])) ? 'checked' : '' }} onchange="this.form.submit()">
-                                <label class="form-check-label" for="bulkOrders">
-                                    Bulk Order Available
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Location</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="location[]" value="nearest"
-                                    id="nearest" {{ in_array('nearest', request('location', [])) ? 'checked' : '' }}
-                                    onchange="this.form.submit()">
-                                <label class="form-check-label" for="nearest">
-                                    Nearest Sellers
-                                </label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                        <a href="{{ route('home') }}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+            <!-- Filter Toggle Button -->
+            <div class="col-12 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="section-header">
+                        <h3 class="mb-1">All Products</h3>
+                        <p class="text-primary mb-0">Discover quality products from verified sellers</p>
                     </div>
-                </form>
-
-                <div class="filter-section">
-                    <h5 class="filter-title">Categories</h5>
-                    <form method="GET" action="{{ route('home') }}">
-                        <select name="category" class="form-select mb-3" onchange="this.form.submit()">
-                            <option value="">All Categories</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }} ({{ $category->products_count }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @foreach(request()->except('category') as $key => $value)
-                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                        @endforeach
-                    </form>
+                    <button class="btn btn-outline-primary" type="button" id="filterToggleBtn" 
+                            data-bs-toggle="collapse" data-bs-target="#filtersCollapse" 
+                            aria-expanded="false" aria-controls="filtersCollapse">
+                        <i class="fas fa-filter me-2"></i>
+                        <span class="filter-btn-text">Show Filters</span>
+                        <i class="fas fa-chevron-down ms-2 filter-chevron"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="col-lg-9">
-                <div class="section-header mb-4">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <div class="collapse" id="filtersCollapse">
+                    <div class="filters-container">
+                        <form method="GET" action="{{ route('home') }}" id="filter-form">
+                            <div class="filter-section mb-4">
+                                <h5 class="filter-title">
+                                    <i class="fas fa-sliders-h me-2"></i>Filters
+                                </h5>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Price</label>
+                                    <select name="price" class="form-select" onchange="this.form.submit()">
+                                        <option value="" {{ !request('price') ? 'selected' : '' }}>All Prices</option>
+                                        <option value="low_to_high" {{ request('price') == 'low_to_high' ? 'selected' : '' }}>Low to
+                                            High</option>
+                                        <option value="high_to_low" {{ request('price') == 'high_to_low' ? 'selected' : '' }}>High to
+                                            Low</option>
+                                        <option value="under_100" {{ request('price') == 'under_100' ? 'selected' : '' }}>Under $100
+                                        </option>
+                                        <option value="100_500" {{ request('price') == '100_500' ? 'selected' : '' }}>$100 - $500
+                                        </option>
+                                        <option value="over_500" {{ request('price') == 'over_500' ? 'selected' : '' }}>Over $500
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Product Rating</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="rating" value="4" id="rating4" {{ request('rating') == '4' ? 'checked' : '' }} onchange="this.form.submit()">
+                                        <label class="form-check-label" for="rating4">
+                                            <span class="rating">★★★★</span> & Up
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="rating" value="3" id="rating3" {{ request('rating') == '3' ? 'checked' : '' }} onchange="this.form.submit()">
+                                        <label class="form-check-label" for="rating3">
+                                            <span class="rating">★★★</span> & Up
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Seller Type</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="seller_type[]" value="verified_manuf"
+                                            id="verifiedManuf" {{ in_array('verified_manuf', request('seller_type', [])) ? 'checked' : '' }} onchange="this.form.submit()">
+                                        <label class="form-check-label" for="verifiedManuf">
+                                            Verified Manufacturers
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="seller_type[]" value="bulk_orders"
+                                            id="bulkOrders" {{ in_array('bulk_orders', request('seller_type', [])) ? 'checked' : '' }} onchange="this.form.submit()">
+                                        <label class="form-check-label" for="bulkOrders">
+                                            Bulk Order Available
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Location</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="location[]" value="nearest"
+                                            id="nearest" {{ in_array('nearest', request('location', [])) ? 'checked' : '' }}
+                                            onchange="this.form.submit()">
+                                        <label class="form-check-label" for="nearest">
+                                            Nearest Sellers
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                                <a href="{{ route('home') }}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                            </div>
+                        </form>
+
+                        <div class="filter-section">
+                            <h5 class="filter-title">
+                                <i class="fas fa-tags me-2"></i>Categories
+                            </h5>
+                            <form method="GET" action="{{ route('home') }}">
+                                <select name="category" class="form-select mb-3" onchange="this.form.submit()">
+                                    <option value="">All Categories</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }} ({{ $category->products_count }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @foreach(request()->except('category') as $key => $value)
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endforeach
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9" id="productsColumn">
+                {{-- <div class="section-header mb-4 d-none d-lg-block">
                     <h3 class="mb-1">All Products</h3>
                     <p class="text-primary">Discover quality products from verified sellers</p>
-                </div>
+                </div> --}}
 
                 @if($featuredProducts->count() > 0)
                     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
@@ -367,42 +428,6 @@
             </div>
         </section>
     @endif
-
-    <!-- Categories Section -->
-    <section class="premium-section">
-        <div class="premium-container">
-            <div class="premium-header">
-                <h2 class="premium-title">Shop by <span class="accent-text">Category</span></h2>
-                <p class="premium-subtitle">Explore our wide range of product categories</p>
-            </div>
-            <div class="premium-grid premium-grid-4">
-                <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/electronic-devices_144627-41317.jpg" alt="Electronics"
-                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
-                    <h3 class="premium-card-title">Electronics</h3>
-                    <p class="premium-card-text">20,000+ products</p>
-                </div>
-                <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/industrial-machines_1127-3426.jpg" alt="Machinery"
-                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
-                    <h3 class="premium-card-title">Machinery</h3>
-                    <p class="premium-card-text">15,000+ products</p>
-                </div>
-                <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/fabric-samples-textile-swatches_93675-130843.jpg"
-                        alt="Textiles" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
-                    <h3 class="premium-card-title">Textiles</h3>
-                    <p class="premium-card-text">25,000+ products</p>
-                </div>
-                <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/construction-equipment_1127-3294.jpg" alt="Construction"
-                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
-                    <h3 class="premium-card-title">Construction</h3>
-                    <p class="premium-card-text">18,000+ products</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Premium Sellers Spotlight -->
     @if($premiumSellers->count() > 0)

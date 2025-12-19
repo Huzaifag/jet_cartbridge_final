@@ -6,11 +6,17 @@
 document.addEventListener('DOMContentLoaded', function() {
     
     // ========================================
-    // NAVBAR SCROLL EFFECTS
+    // NAVBAR SCROLL EFFECTS & FIXED POSITIONING
     // ========================================
     
     const navbar = document.querySelector('.premium-navbar');
+    const topBar = document.querySelector('.premium-top-bar');
     let lastScrollTop = 0;
+    
+    // Add body padding class if premium top bar exists
+    if (topBar) {
+        document.body.classList.add('has-premium-top-bar');
+    }
     
     window.addEventListener('scroll', function() {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -22,14 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
             navbar?.classList.remove('scrolled');
         }
         
-        // Hide/show navbar on scroll
-        if (scrollTop > lastScrollTop && scrollTop > 100) {
-            // Scrolling down
-            navbar?.style.setProperty('transform', 'translateY(-100%)');
-        } else {
-            // Scrolling up
-            navbar?.style.setProperty('transform', 'translateY(0)');
-        }
+        // For fixed navbar, we don't hide it on scroll - keep it always visible
+        // Remove the hide/show behavior for better UX with fixed positioning
         
         lastScrollTop = scrollTop;
     });
@@ -197,7 +197,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // PREMIUM SEARCH ENHANCEMENTS
     // ========================================
     
-    const searchInputs = document.querySelectorAll('.premium-form-input[type="search"], input[name="search"]');
+    const searchInputs = document.querySelectorAll('.premium-form-input[type="search"], input[name="search"], .hero-search-input');
+    const searchForm = document.querySelector('.hero-search-inline form');
+    const searchInput = document.querySelector('.hero-search-input');
+    
+    // Enhanced search functionality
     searchInputs.forEach(input => {
         let searchTimeout;
         
@@ -213,6 +217,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Handle search form submission
+    if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', function(e) {
+            const query = searchInput.value.trim();
+            if (!query) {
+                e.preventDefault();
+                searchInput.focus();
+                // Add visual feedback for empty search
+                searchInput.style.borderColor = '#ef4444';
+                setTimeout(() => {
+                    searchInput.style.borderColor = '';
+                }, 1000);
+                return false;
+            }
+            // Form will submit normally to the route
+        });
+        
+        // Add keyboard shortcuts for search
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape' && document.activeElement === searchInput) {
+                searchInput.value = '';
+                searchInput.blur();
+            }
+        });
+        
+        // Add search input focus effects
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    }
     
     // ========================================
     // PREMIUM CART BADGE ANIMATION
@@ -311,4 +358,392 @@ style.textContent = `
     }
 `;
 
-document.head.appendChild(style);
+document.head.appendChild(style); 
+   // ========================================
+    // NEAREST SELLERS FUNCTIONALITY
+    // ========================================
+    
+    // Add nearest sellers functionality to global scope
+    window.findNearestSellers = function() {
+        const btn = document.getElementById('nearestSellerBtn');
+        const originalContent = btn.innerHTML;
+        
+        // Show loading state
+        btn.classList.add('loading');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i><span>Locating...</span>';
+        
+        // Check if geolocation is supported
+        if (!navigator.geolocation) {
+            showLocationError('Geolocation is not supported by this browser.');
+            resetButton();
+            return;
+        }
+        
+        // Request user location
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                // Redirect to sellers page with location parameters
+                const url = new URL('/sellers', window.location.origin);
+                url.searchParams.set('nearest', '1');
+                url.searchParams.set('user_lat', lat);
+                url.searchParams.set('user_lng', lng);
+                url.searchParams.set('radius', '25');
+                
+                window.location.href = url.toString();
+            },
+            function(error) {
+                let errorMessage = 'Unable to retrieve your location.';
+                
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = 'Location access denied. Please enable location services and try again.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = 'Location information is unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = 'Location request timed out.';
+                        break;
+                }
+                
+                showLocationError(errorMessage);
+                resetButton();
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000 // 5 minutes
+            }
+        );
+        
+        function resetButton() {
+            btn.classList.remove('loading');
+            btn.innerHTML = originalContent;
+        }
+    };
+    
+    // Show location error modal
+    function showLocationError(message) {
+        // Remove existing modal if any
+        const existingModal = document.querySelector('.location-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'location-modal';
+        modal.innerHTML = `
+            <div class="location-modal-content">
+                <h4><i class="fas fa-exclamation-triangle text-warning me-2"></i>Location Access</h4>
+                <p>${message}</p>
+                <div class="location-modal-buttons">
+                    <button class="location-modal-btn secondary" onclick="closeLocationModal()">Cancel</button>
+                    <button class="location-modal-btn primary" onclick="retryLocation()">Try Again</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Show modal with animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+        
+        // Auto close after 5 seconds
+        setTimeout(() => {
+            closeLocationModal();
+        }, 5000);
+    }
+    
+    // Close location modal
+    window.closeLocationModal = function() {
+        const modal = document.querySelector('.location-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        }
+    };
+    
+    // Retry location
+    window.retryLocation = function() {
+        closeLocationModal();
+        findNearestSellers();
+    };
+    
+    // Add click outside to close modal
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('location-modal')) {
+            closeLocationModal();
+        }
+    });
+    
+    // ========================================
+    // LOCATION PERMISSION PROMPT
+    // ========================================
+    
+    // Show location permission prompt on first visit
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if user has already been prompted
+        const hasBeenPrompted = localStorage.getItem('locationPrompted');
+        
+        if (!hasBeenPrompted && navigator.geolocation) {
+            // Show subtle notification about location features
+            setTimeout(() => {
+                showLocationPrompt();
+            }, 3000); // Show after 3 seconds
+        }
+    });
+    
+    function showLocationPrompt() {
+        const modal = document.createElement('div');
+        modal.className = 'location-modal';
+        modal.innerHTML = `
+            <div class="location-modal-content">
+                <h4><i class="fas fa-map-marker-alt text-accent me-2"></i>Find Nearby Sellers</h4>
+                <p>Allow location access to discover sellers and products near you for faster delivery and better service.</p>
+                <div class="location-modal-buttons">
+                    <button class="location-modal-btn secondary" onclick="declineLocation()">Maybe Later</button>
+                    <button class="location-modal-btn primary" onclick="allowLocation()">Allow Location</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+    
+    window.allowLocation = function() {
+        localStorage.setItem('locationPrompted', 'true');
+        closeLocationModal();
+        findNearestSellers();
+    };
+    
+    window.declineLocation = function() {
+        localStorage.setItem('locationPrompted', 'true');
+        closeLocationModal();
+    };
+    
+    // ========================================
+    // COLLAPSIBLE FILTERS FUNCTIONALITY
+    // ========================================
+    
+    // Initialize filter toggle functionality
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filtersCollapse = document.getElementById('filtersCollapse');
+    const filtersColumn = document.querySelector('.col-lg-3');
+    const productsColumn = document.getElementById('productsColumn');
+    
+    if (filterToggleBtn && filtersCollapse) {
+        // Set initial state - filters are collapsed by default
+        filterToggleBtn.classList.add('collapsed');
+        
+        // Update button text and icon based on collapse state
+        filtersCollapse.addEventListener('show.bs.collapse', function () {
+            const btnText = filterToggleBtn.querySelector('.filter-btn-text');
+            if (btnText) {
+                btnText.textContent = 'Hide Filters';
+            }
+            filterToggleBtn.classList.remove('collapsed');
+            
+            // Adjust layout - show filters column
+            if (filtersColumn) {
+                filtersColumn.classList.remove('filters-column-hidden');
+            }
+            if (productsColumn) {
+                productsColumn.classList.remove('products-full-width');
+                productsColumn.className = productsColumn.className.replace(/col-\w+-\d+/g, '');
+                productsColumn.classList.add('col-lg-9');
+            }
+        });
+        
+        filtersCollapse.addEventListener('hide.bs.collapse', function () {
+            const btnText = filterToggleBtn.querySelector('.filter-btn-text');
+            if (btnText) {
+                btnText.textContent = 'Show Filters';
+            }
+            filterToggleBtn.classList.add('collapsed');
+            
+            // Adjust layout - hide filters column and expand products
+            if (filtersColumn) {
+                filtersColumn.classList.add('filters-column-hidden');
+            }
+            if (productsColumn) {
+                productsColumn.classList.add('products-full-width');
+                productsColumn.className = productsColumn.className.replace(/col-\w+-\d+/g, '');
+                productsColumn.classList.add('col-12');
+            }
+        });
+        
+        // Set initial layout state (filters hidden)
+        if (filtersColumn) {
+            filtersColumn.classList.add('filters-column-hidden');
+        }
+        if (productsColumn) {
+            productsColumn.classList.add('products-full-width');
+            productsColumn.className = productsColumn.className.replace(/col-\w+-\d+/g, '');
+            productsColumn.classList.add('col-12');
+        }
+        
+        // Add active filters counter
+        updateActiveFiltersCount();
+        
+        // Listen for form changes to update counter
+        const filterForm = document.getElementById('filter-form');
+        if (filterForm) {
+            filterForm.addEventListener('change', function() {
+                setTimeout(updateActiveFiltersCount, 100);
+            });
+        }
+    }
+    
+    // Function to count and display active filters
+    function updateActiveFiltersCount() {
+        const filterToggleBtn = document.getElementById('filterToggleBtn');
+        if (!filterToggleBtn) return;
+        
+        let activeCount = 0;
+        
+        // Count active filters from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterParams = ['price', 'rating', 'seller_type', 'location', 'category'];
+        
+        filterParams.forEach(param => {
+            if (urlParams.has(param) && urlParams.get(param) !== '') {
+                if (param === 'seller_type' || param === 'location') {
+                    // Count array parameters
+                    const values = urlParams.getAll(param + '[]');
+                    activeCount += values.length;
+                } else {
+                    activeCount++;
+                }
+            }
+        });
+        
+        // Remove existing badge
+        const existingBadge = filterToggleBtn.querySelector('.active-filters-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+        
+        // Add badge if there are active filters
+        if (activeCount > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'active-filters-badge';
+            badge.textContent = activeCount;
+            filterToggleBtn.style.position = 'relative';
+            filterToggleBtn.appendChild(badge);
+            filterToggleBtn.classList.add('has-active-filters');
+        } else {
+            filterToggleBtn.classList.remove('has-active-filters');
+        }
+    }
+    
+    // ========================================
+    // FILTER FORM ENHANCEMENTS
+    // ========================================
+    
+    // Add loading state to filter form submissions
+    const filterSelects = document.querySelectorAll('#filter-form select, #filter-form input[type="checkbox"], #filter-form input[type="radio"]');
+    filterSelects.forEach(element => {
+        element.addEventListener('change', function() {
+            // Add loading state
+            const form = this.closest('form');
+            if (form) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Applying...';
+                    
+                    // Reset after form submission
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }, 2000);
+                }
+            }
+        });
+    });
+    
+    // ========================================
+    // FILTER PERSISTENCE
+    // ========================================
+    
+    // Save filter state to localStorage
+    function saveFilterState() {
+        const filterState = {};
+        const form = document.getElementById('filter-form');
+        if (form) {
+            const formData = new FormData(form);
+            for (let [key, value] of formData.entries()) {
+                if (filterState[key]) {
+                    if (Array.isArray(filterState[key])) {
+                        filterState[key].push(value);
+                    } else {
+                        filterState[key] = [filterState[key], value];
+                    }
+                } else {
+                    filterState[key] = value;
+                }
+            }
+            localStorage.setItem('productFilters', JSON.stringify(filterState));
+        }
+    }
+    
+    // Auto-save filters on change
+    const filterInputs = document.querySelectorAll('#filter-form input, #filter-form select');
+    filterInputs.forEach(input => {
+        input.addEventListener('change', saveFilterState);
+    });
+    
+    // ========================================
+    // FILTER ANIMATIONS
+    // ========================================
+    
+    // Add smooth animations to filter sections
+    const filterSections = document.querySelectorAll('.filter-section');
+    filterSections.forEach((section, index) => {
+        section.style.animationDelay = `${index * 0.1}s`;
+        section.classList.add('premium-fade-in');
+    });
+    
+    // Highlight active filters
+    function highlightActiveFilters() {
+        const activeInputs = document.querySelectorAll('#filter-form input:checked, #filter-form select:not([value=""])');
+        activeInputs.forEach(input => {
+            const parent = input.closest('.mb-3') || input.closest('.form-check');
+            if (parent) {
+                parent.classList.add('filter-active');
+            }
+        });
+    }
+    
+    // Initialize filter highlighting
+    highlightActiveFilters();
+    
+    // ========================================
+    // FILTER KEYBOARD SHORTCUTS
+    // ========================================
+    
+    // Add keyboard shortcut to toggle filters (F key)
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'f' || e.key === 'F') {
+            // Only if not typing in an input
+            if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+                e.preventDefault();
+                if (filterToggleBtn) {
+                    filterToggleBtn.click();
+                }
+            }
+        }
+    });
