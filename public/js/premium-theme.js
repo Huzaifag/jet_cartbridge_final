@@ -366,11 +366,14 @@ document.head.appendChild(style);
     // Add nearest sellers functionality to global scope
     window.findNearestSellers = function() {
         const btn = document.getElementById('nearestSellerBtn');
+        if (!btn) return;
+        
         const originalContent = btn.innerHTML;
         
         // Show loading state
         btn.classList.add('loading');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i><span>Locating...</span>';
+        btn.disabled = true;
         
         // Check if geolocation is supported
         if (!navigator.geolocation) {
@@ -407,6 +410,9 @@ document.head.appendChild(style);
                     case error.TIMEOUT:
                         errorMessage = 'Location request timed out.';
                         break;
+                    default:
+                        errorMessage = 'An unknown error occurred while retrieving your location.';
+                        break;
                 }
                 
                 showLocationError(errorMessage);
@@ -420,8 +426,11 @@ document.head.appendChild(style);
         );
         
         function resetButton() {
-            btn.classList.remove('loading');
-            btn.innerHTML = originalContent;
+            if (btn) {
+                btn.classList.remove('loading');
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
         }
     };
     
@@ -436,17 +445,43 @@ document.head.appendChild(style);
         // Create modal
         const modal = document.createElement('div');
         modal.className = 'location-modal';
-        modal.innerHTML = `
-            <div class="location-modal-content">
-                <h4><i class="fas fa-exclamation-triangle text-warning me-2"></i>Location Access</h4>
-                <p>${message}</p>
-                <div class="location-modal-buttons">
-                    <button class="location-modal-btn secondary" onclick="closeLocationModal()">Cancel</button>
-                    <button class="location-modal-btn primary" onclick="retryLocation()">Try Again</button>
-                </div>
-            </div>
-        `;
         
+        // Create the modal content structure
+        const modalContent = document.createElement('div');
+        modalContent.className = 'location-modal-content';
+        
+        // Create header
+        const header = document.createElement('h4');
+        header.innerHTML = '<i class="fas fa-exclamation-triangle text-warning me-2"></i>Location Access';
+        
+        // Create description
+        const description = document.createElement('p');
+        description.textContent = message;
+        
+        // Create buttons container
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'location-modal-buttons';
+        
+        // Create buttons
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'location-modal-btn secondary';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.onclick = closeLocationModal;
+        
+        const retryBtn = document.createElement('button');
+        retryBtn.className = 'location-modal-btn primary';
+        retryBtn.textContent = 'Try Again';
+        retryBtn.onclick = retryLocation;
+        
+        // Assemble the modal
+        buttonsContainer.appendChild(cancelBtn);
+        buttonsContainer.appendChild(retryBtn);
+        
+        modalContent.appendChild(header);
+        modalContent.appendChild(description);
+        modalContent.appendChild(buttonsContainer);
+        
+        modal.appendChild(modalContent);
         document.body.appendChild(modal);
         
         // Show modal with animation
@@ -473,8 +508,15 @@ document.head.appendChild(style);
     
     // Retry location
     window.retryLocation = function() {
-        closeLocationModal();
-        findNearestSellers();
+        try {
+            closeLocationModal();
+            setTimeout(() => {
+                findNearestSellers();
+            }, 300); // Small delay to ensure modal is closed
+        } catch (error) {
+            console.error('Error retrying location:', error);
+            closeLocationModal();
+        }
     };
     
     // Add click outside to close modal
@@ -504,33 +546,70 @@ document.head.appendChild(style);
     function showLocationPrompt() {
         const modal = document.createElement('div');
         modal.className = 'location-modal';
-        modal.innerHTML = `
-            <div class="location-modal-content">
-                <h4><i class="fas fa-map-marker-alt text-accent me-2"></i>Find Nearby Sellers</h4>
-                <p>Allow location access to discover sellers and products near you for faster delivery and better service.</p>
-                <div class="location-modal-buttons">
-                    <button class="location-modal-btn secondary" onclick="declineLocation()">Maybe Later</button>
-                    <button class="location-modal-btn primary" onclick="allowLocation()">Allow Location</button>
-                </div>
-            </div>
-        `;
         
+        // Create the modal content structure
+        const modalContent = document.createElement('div');
+        modalContent.className = 'location-modal-content';
+        
+        // Create header
+        const header = document.createElement('h4');
+        header.innerHTML = '<i class="fas fa-map-marker-alt text-accent me-2"></i>Find Nearby Sellers';
+        
+        // Create description
+        const description = document.createElement('p');
+        description.textContent = 'Allow location access to discover sellers and products near you for faster delivery and better service.';
+        
+        // Create buttons container
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'location-modal-buttons';
+        
+        // Create buttons
+        const declineBtn = document.createElement('button');
+        declineBtn.className = 'location-modal-btn secondary';
+        declineBtn.textContent = 'Maybe Later';
+        declineBtn.onclick = declineLocation;
+        
+        const allowBtn = document.createElement('button');
+        allowBtn.className = 'location-modal-btn primary';
+        allowBtn.textContent = 'Allow Location';
+        allowBtn.onclick = allowLocation;
+        
+        // Assemble the modal
+        buttonsContainer.appendChild(declineBtn);
+        buttonsContainer.appendChild(allowBtn);
+        
+        modalContent.appendChild(header);
+        modalContent.appendChild(description);
+        modalContent.appendChild(buttonsContainer);
+        
+        modal.appendChild(modalContent);
         document.body.appendChild(modal);
         
+        // Show modal with animation
         setTimeout(() => {
             modal.classList.add('show');
         }, 10);
     }
     
     window.allowLocation = function() {
-        localStorage.setItem('locationPrompted', 'true');
-        closeLocationModal();
-        findNearestSellers();
+        try {
+            localStorage.setItem('locationPrompted', 'true');
+            closeLocationModal();
+            findNearestSellers();
+        } catch (error) {
+            console.error('Error allowing location:', error);
+            closeLocationModal();
+        }
     };
     
     window.declineLocation = function() {
-        localStorage.setItem('locationPrompted', 'true');
-        closeLocationModal();
+        try {
+            localStorage.setItem('locationPrompted', 'true');
+            closeLocationModal();
+        } catch (error) {
+            console.error('Error declining location:', error);
+            closeLocationModal();
+        }
     };
     
     // ========================================
