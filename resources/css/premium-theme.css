@@ -4322,8 +4322,9 @@ ch button responsive text/icon */
     #filterToggleBtn::after {
         content: "Filters";
     }
-}/
-* ========================================
+}
+
+/* ========================================
    FILTER BUTTON ACTIVE STATE
    ======================================== */
 
@@ -4351,4 +4352,110 @@ ch button responsive text/icon */
 
 #filterToggleBtn.has-active-filters {
     animation: filterPulse 2s infinite;
+}/*
+ ========================================
+   PRODUCT CARD SELLER INFORMATION
+   ======================================== */
+
+/* Seller name styling */
+.seller-name {
+    font-size: 0.8rem;
+    color: var(--color-text-dim);
+    font-weight: 500;
+    transition: var(--transition-fast);
+    text-decoration: none;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.seller-name:hover {
+    color: var(--color-accent);
+}
+
+/* Seller info container */
+.premium-product-card .seller-info {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Seller badges */
+.seller-info .fas.fa-check-circle {
+    color: #10b981 !important;
+    filter: drop-shadow(0 1px 2px rgba(16, 185, 129, 0.3));
+}
+
+.seller-info .fas.fa-crown {
+    color: #f59e0b !important;
+    filter: drop-shadow(0 1px 2px rgba(245, 158, 11, 0.3));
+}
+
+.seller-info .fas.fa-store {
+    color: var(--color-accent);
+    opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .seller-name {
+        font-size: 0.75rem;
+        max-width: 120px;
+    }
+}
+
+/* Light theme adjustments */
+[data-theme="light"] .seller-name {
+    color: #6b7280;
+}
+
+[data-theme="light"] .seller-name:hover {
+    color: var(--color-accent);
+}
+
+/* Seller info hover effect */
+.premium-product-card:hover .seller-name {
+    color: var(--color-accent);
+}
+
+/* Animation for seller badges */
+.seller-info .fas.fa-check-circle,
+.seller-info .fas.fa-crown {
+    animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes subtle-pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}/* Sell
+er location styling */
+.seller-location {
+    margin-top: 0.25rem;
+    margin-left: 1rem;
+}
+
+.seller-location-text {
+    font-size: 0.7rem;
+    color: var(--color-text-dim);
+    opacity: 0.8;
+}
+
+/* Light theme adjustments for location */
+[data-theme="light"] .seller-location-text {
+    color: #9ca3af;
+}
+
+/* Responsive adjustments for location */
+@media (max-width: 768px) {
+    .seller-location-text {
+        font-size: 0.65rem;
+    }
 }

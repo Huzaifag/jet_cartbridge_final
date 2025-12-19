@@ -30,6 +30,34 @@
             </span>
         </div>
 
+        {{-- Seller Information --}}
+        @if($product->seller)
+        <div class="mb-2">
+            <div class="d-flex align-items-center seller-info">
+                <i class="fas fa-store text-accent me-1" style="font-size: 0.75rem;"></i>
+                <a href="{{ route('seller.profile', $product->seller->slug) }}" 
+                   class="seller-name text-decoration-none" 
+                   title="View {{ $product->seller->business_name ?? $product->seller->company_name }} profile">
+                    {{ $product->seller->business_name ?? $product->seller->company_name }}
+                </a>
+                @if($product->seller->is_verified)
+                    <i class="fas fa-check-circle text-success ms-1" style="font-size: 0.7rem;" title="Verified Seller"></i>
+                @endif
+                @if($product->seller->is_premium)
+                    <i class="fas fa-crown text-warning ms-1" style="font-size: 0.7rem;" title="Premium Seller"></i>
+                @endif
+            </div>
+            @if($product->seller->city || $product->seller->country)
+            <div class="seller-location">
+                <i class="fas fa-map-marker-alt text-muted me-1" style="font-size: 0.65rem;"></i>
+                <span class="seller-location-text">
+                    {{ $product->seller->city }}{{ $product->seller->city && $product->seller->country ? ', ' : '' }}{{ $product->seller->country }}
+                </span>
+            </div>
+            @endif
+        </div>
+        @endif
+
         <div class="mb-2">
             <span class="text-accent">
                 @for($i = 1; $i <= 5; $i++)
