@@ -547,56 +547,56 @@ document.head.appendChild(style);
         }
     });
     
-    function showLocationPrompt() {
-        const modal = document.createElement('div');
-        modal.className = 'location-modal';
+    // function showLocationPrompt() {
+    //     const modal = document.createElement('div');
+    //     modal.className = 'location-modal';
         
-        // Create the modal content structure
-        const modalContent = document.createElement('div');
-        modalContent.className = 'location-modal-content';
+    //     // Create the modal content structure
+    //     const modalContent = document.createElement('div');
+    //     modalContent.className = 'location-modal-content';
         
-        // Create header
-        const header = document.createElement('h4');
-        header.innerHTML = '<i class="fas fa-map-marker-alt text-accent me-2"></i>Find Nearby Sellers';
+    //     // Create header
+    //     const header = document.createElement('h4');
+    //     header.innerHTML = '<i class="fas fa-map-marker-alt text-accent me-2"></i>Find Nearby Sellers';
         
-        // Create description
-        const description = document.createElement('p');
-        description.textContent = 'Allow location access to discover sellers and products near you for faster delivery and better service.';
+    //     // Create description
+    //     const description = document.createElement('p');
+    //     description.textContent = 'Allow location access to discover sellers and products near you for faster delivery and better service.';
         
-        // Create buttons container
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.className = 'location-modal-buttons';
+    //     // Create buttons container
+    //     const buttonsContainer = document.createElement('div');
+    //     buttonsContainer.className = 'location-modal-buttons';
         
-        // Create buttons
-        const declineBtn = document.createElement('button');
-        declineBtn.className = 'location-modal-btn secondary';
-        declineBtn.textContent = 'Maybe Later';
-        declineBtn.onclick = declineLocation;
+    //     // Create buttons
+    //     const declineBtn = document.createElement('button');
+    //     declineBtn.className = 'location-modal-btn secondary';
+    //     declineBtn.textContent = 'Maybe Later';
+    //     declineBtn.onclick = declineLocation;
         
-        const allowBtn = document.createElement('button');
-        allowBtn.className = 'location-modal-btn primary';
-        allowBtn.textContent = 'Allow Location';
-        allowBtn.onclick = allowLocation;
+    //     const allowBtn = document.createElement('button');
+    //     allowBtn.className = 'location-modal-btn primary';
+    //     allowBtn.textContent = 'Allow Location';
+    //     allowBtn.onclick = allowLocation;
         
-        // Assemble the modal
-        buttonsContainer.appendChild(declineBtn);
-        buttonsContainer.appendChild(allowBtn);
+    //     // Assemble the modal
+    //     buttonsContainer.appendChild(declineBtn);
+    //     buttonsContainer.appendChild(allowBtn);
         
-        modalContent.appendChild(header);
-        modalContent.appendChild(description);
-        modalContent.appendChild(buttonsContainer);
+    //     modalContent.appendChild(header);
+    //     modalContent.appendChild(description);
+    //     modalContent.appendChild(buttonsContainer);
         
-        modal.appendChild(modalContent);
-        document.body.appendChild(modal);
+    //     modal.appendChild(modalContent);
+    //     document.body.appendChild(modal);
         
-        // Prevent body scroll
-        document.body.classList.add('modal-open');
+    //     // Prevent body scroll
+    //     document.body.classList.add('modal-open');
         
-        // Show modal with animation
-        setTimeout(() => {
-            modal.classList.add('show');
-        }, 10);
-    }
+    //     // Show modal with animation
+    //     setTimeout(() => {
+    //         modal.classList.add('show');
+    //     }, 10);
+    // }
     
     window.allowLocation = function() {
         try {
