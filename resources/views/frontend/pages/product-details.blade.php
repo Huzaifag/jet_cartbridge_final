@@ -873,7 +873,13 @@ $videoReviews = $reviews->where('review_type', 'video');
                         <div class="mb-3">
                             <label for="reviewMedia" class="form-label">Upload Media (Images / Video)</label>
                             <input class="form-control" type="file" name="media[]" id="reviewMedia"
-                                accept="image/*, video/mp4" multiple>
+                                accept="image/*, video/mp4, video/mov, video/avi" multiple>
+                            <div class="form-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Maximum file size: 100MB per file. Supported formats: JPG, PNG, GIF, MP4, MOV, AVI
+                                </small>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -1479,54 +1485,78 @@ $videoReviews = $reviews->where('review_type', 'video');
         submitReviewBtn.addEventListener('click', function (e) {
             e.preventDefault();
 
+            // Basic file size validation
+            const fileInput = document.getElementById('reviewMedia');
+            if (fileInput.files.length > 0) {
+                const maxSize = 100 * 1024 * 1024; // 100MB
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    if (fileInput.files[i].size > maxSize) {
+                        alert(`File "${fileInput.files[i].name}" is too large. Maximum file size is 100MB.`);
+                        return;
+                    }
+                }
+            }
+
             const formData = new FormData(reviewForm);
 
             submitReviewBtn.disabled = true;
-            submitReviewBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+            submitReviewBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Uploading...';
 
-            fetch('/product/{{ $product->slug }}/review', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
+            // Use XMLHttpRequest for better upload progress tracking
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    submitReviewBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Uploading... ${Math.round(percentComplete)}%`;
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('submitReviewModal'));
-                    modal.hide();
+            });
 
-                    reviewForm.reset();
-                    document.querySelectorAll('#reviewRating .star').forEach(star => {
-                        star.classList.remove('fas');
-                        star.classList.add('far');
-                    });
-                    document.getElementById('ratingInput').value = '0';
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('submitReviewModal'));
+                        modal.hide();
 
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    let errorMessage = 'Please fix the following errors:\n';
-                    if (data.errors) {
-                        for (let field in data.errors) {
-                            errorMessage += data.errors[field].join('\n') + '\n';
-                        }
+                        reviewForm.reset();
+                        document.querySelectorAll('#reviewRating .star').forEach(star => {
+                            star.classList.remove('fas');
+                            star.classList.add('far');
+                        });
+                        document.getElementById('ratingInput').value = '0';
+
+                        alert(data.message);
+                        location.reload();
                     } else {
-                        errorMessage = data.message;
+                        let errorMessage = 'Please fix the following errors:\n';
+                        if (data.errors) {
+                            for (let field in data.errors) {
+                                errorMessage += data.errors[field].join('\n') + '\n';
+                            }
+                        } else {
+                            errorMessage = data.message;
+                        }
+                        alert(errorMessage);
                     }
-                    alert(errorMessage);
+                } else {
+                    alert('Upload failed. Please try again.');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while submitting your review. Please try again.');
-            })
-            .finally(() => {
+                
                 submitReviewBtn.disabled = false;
                 submitReviewBtn.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Post Review';
-            });
+            };
+
+            xhr.onerror = function() {
+                alert('Upload failed. Please check your connection and try again.');
+                submitReviewBtn.disabled = false;
+                submitReviewBtn.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Post Review';
+            };
+
+            xhr.open('POST', '/product/{{ $product->slug }}/review');
+            xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.send(formData);
         });
     });
     </script>

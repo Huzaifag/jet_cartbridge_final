@@ -20,6 +20,21 @@ class UserInquiry extends Model
         'destination',
         'deadline',
         'message',
+        'status',
+        'priority',
+        'inquiry_type',
+        'admin_notes',
+        'follow_up_date',
+        'assigned_to',
+        'responded_at',
+        'response',
+    ];
+
+    protected $casts = [
+        'deadline' => 'date',
+        'follow_up_date' => 'datetime',
+        'responded_at' => 'datetime',
+        'target_price' => 'decimal:2',
     ];
 
     // Relationships

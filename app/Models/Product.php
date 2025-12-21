@@ -201,6 +201,30 @@ class Product extends Model
         return $this->images[0] ?? 'default-product.jpg';
     }
 
+    public function getImageUrlAttribute()
+    {
+        if (!empty($this->images) && is_array($this->images)) {
+            return asset('storage/' . $this->images[0]);
+        }
+        return 'https://via.placeholder.com/300x200?text=Product';
+    }
+
+    public function getPriceAttribute()
+    {
+        // Return B2C price if available, otherwise B2B price
+        return $this->b2c_price ?? $this->b2b_price;
+    }
+
+    public function getFormattedPriceAttribute()
+    {
+        if ($this->b2c_price) {
+            return '$' . number_format($this->b2c_price, 2);
+        } elseif ($this->b2b_price) {
+            return '$' . number_format($this->b2b_price, 2) . ' (B2B)';
+        }
+        return 'Price on request';
+    }
+
     public function activePromotion()
     {
         return $this

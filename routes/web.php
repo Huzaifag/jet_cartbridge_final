@@ -187,7 +187,6 @@ Route::get('/resources', [FrontendController::class, 'resources'])->name('resour
 
 Route::get('/product/{slug}', [FrontendController::class, 'showProduct'])->name('product.show');
 
-Route::get('/profile', [FrontendController::class, 'profile'])->name('user.profile')->middleware('auth');
 Route::get('/contributor-dashboard', [FrontendController::class, 'contributorDashboard'])->name('contributor.dashboard')->middleware('auth');
 
 Route::middleware('auth')->group(function () {
@@ -254,6 +253,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::post('product/send-inquiry', [FrontendController::class, 'submitInquiry'])->name('inquiry.submit');
 
         Route::post('/product/{slug}/review', [ReviewController::class, 'store'])->name('review.store');
+        Route::post('/test-upload', [ReviewController::class, 'testUpload'])->name('review.test-upload');
         Route::post('/product/{review}/ref-order', [ReviewController::class, 'orderWithFer'])->name('review.orderWithFer');
         Route::get('/checkout', [ReviewController::class, 'show'])
             ->name('checkout.page')
@@ -335,6 +335,24 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('admin/products', \App\Http\Controllers\Admin\ProductController::class, [
         'as' => 'admin'
     ]);
+    
+    // Appointment Management Routes
+    Route::prefix('admin/appointments')->name('admin.appointments.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\AppointmentController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\AppointmentController::class, 'show'])->name('show');
+        Route::post('/create', [\App\Http\Controllers\Admin\AppointmentController::class, 'createMeeting'])->name('create');
+        Route::post('/{id}/status', [\App\Http\Controllers\Admin\AppointmentController::class, 'updateStatus'])->name('update-status');
+        Route::get('/calendar/data', [\App\Http\Controllers\Admin\AppointmentController::class, 'getCalendarData'])->name('calendar-data');
+        Route::get('/search-customers', [\App\Http\Controllers\Admin\AppointmentController::class, 'searchCustomers'])->name('search-customers');
+        Route::get('/export', [\App\Http\Controllers\Admin\AppointmentController::class, 'export'])->name('export');
+    });
+    
+    // Inquiry Management Routes
+    Route::prefix('admin/inquiries')->name('admin.inquiries.')->group(function () {
+        Route::get('/{id}', [\App\Http\Controllers\Admin\AppointmentController::class, 'showInquiry'])->name('show');
+        Route::post('/{id}/status', [\App\Http\Controllers\Admin\AppointmentController::class, 'updateInquiryStatus'])->name('update-status');
+        Route::post('/{id}/convert-to-lead', [\App\Http\Controllers\Admin\AppointmentController::class, 'convertToLead'])->name('convert-to-lead');
+    });
     
     // Placeholder routes for navigation (you can implement these later)
     Route::get('/admin/messages', function() { return redirect()->route('admin.dashboard'); })->name('admin.messages.index');
@@ -629,3 +647,41 @@ Route::prefix('deliveryman')
         Route::post('/orders/{order}/deliver', [App\Http\Controllers\Deliveryman\DeliveryManController::class, 'deliver'])->name('orders.deliver');
         Route::get('/orders/{order}/deliver/edit', [App\Http\Controllers\Deliveryman\DeliveryManController::class, 'edit'])->name('orders.edit');
     });
+/*
+|--------------------------------------------------------------------------
+| Enhanced User Profile Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+    // Profile routes
+    Route::get('/profile', [App\Http\Controllers\UserProfileController::class, 'show'])->name('user.profile');
+    Route::get('/profile/edit', [App\Http\Controllers\UserProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/basic', [App\Http\Controllers\UserProfileController::class, 'updateBasic'])->name('profile.update.basic');
+    Route::put('/profile/pictures', [App\Http\Controllers\UserProfileController::class, 'updatePictures'])->name('profile.update.pictures');
+    Route::put('/profile/privacy', [App\Http\Controllers\UserProfileController::class, 'updatePrivacy'])->name('profile.update.privacy');
+    Route::put('/profile/password', [App\Http\Controllers\UserProfileController::class, 'changePassword'])->name('profile.change.password');
+    
+    // Public profile view
+    Route::get('/user/{user}', [App\Http\Controllers\UserProfileController::class, 'show'])->name('user.profile.public');
+    
+    // Work Experience routes
+    Route::post('/profile/work-experience', [App\Http\Controllers\WorkExperienceController::class, 'store'])->name('work-experience.store');
+    Route::put('/profile/work-experience/{workExperience}', [App\Http\Controllers\WorkExperienceController::class, 'update'])->name('work-experience.update');
+    Route::delete('/profile/work-experience/{workExperience}', [App\Http\Controllers\WorkExperienceController::class, 'destroy'])->name('work-experience.destroy');
+    
+    // Education routes
+    Route::post('/profile/education', [App\Http\Controllers\UserEducationController::class, 'store'])->name('education.store');
+    Route::put('/profile/education/{education}', [App\Http\Controllers\UserEducationController::class, 'update'])->name('education.update');
+    Route::delete('/profile/education/{education}', [App\Http\Controllers\UserEducationController::class, 'destroy'])->name('education.destroy');
+    
+    // Certification routes
+    Route::post('/profile/certification', [App\Http\Controllers\UserCertificationController::class, 'store'])->name('certification.store');
+    Route::put('/profile/certification/{certification}', [App\Http\Controllers\UserCertificationController::class, 'update'])->name('certification.update');
+    Route::delete('/profile/certification/{certification}', [App\Http\Controllers\UserCertificationController::class, 'destroy'])->name('certification.destroy');
+    
+    // Connection routes
+    Route::get('/profile/connections', [App\Http\Controllers\UserProfileController::class, 'connections'])->name('profile.connections');
+    Route::post('/profile/connect/{user}', [App\Http\Controllers\UserProfileController::class, 'sendConnectionRequest'])->name('profile.connect');
+    Route::put('/profile/connection/{connection}/respond', [App\Http\Controllers\UserProfileController::class, 'respondToConnection'])->name('profile.connection.respond');
+});

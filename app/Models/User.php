@@ -130,4 +130,83 @@ class User extends Authenticatable
         return $this->hasOne(CustomerProfile::class);
     }
 
+    // Enhanced Profile Relationships
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function workExperiences()
+    {
+        return $this->hasMany(WorkExperience::class)->orderByDate();
+    }
+
+    public function educations()
+    {
+        return $this->hasMany(UserEducation::class)->orderByDate();
+    }
+
+    public function certifications()
+    {
+        return $this->hasMany(UserCertification::class)->orderByDate();
+    }
+
+    public function connections()
+    {
+        return $this->hasMany(UserConnection::class)->accepted();
+    }
+
+    public function pendingConnections()
+    {
+        return $this->hasMany(UserConnection::class, 'connected_user_id')->pending();
+    }
+
+    public function sentConnectionRequests()
+    {
+        return $this->hasMany(UserConnection::class)->pending();
+    }
+
+    // Helper methods for profile
+    public function getFullNameAttribute()
+    {
+        if ($this->profile) {
+            return $this->profile->full_name;
+        }
+        return $this->name;
+    }
+
+    public function getProfilePictureUrlAttribute()
+    {
+        if ($this->profile) {
+            return $this->profile->profile_picture_url;
+        }
+        
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+        
+        $initials = strtoupper(substr($this->name, 0, 2));
+        return "https://ui-avatars.com/api/?name={$initials}&background=f59e0b&color=0d0d1e&size=200";
+    }
+
+    public function isConnectedWith($userId)
+    {
+        return $this->connections()->where('connected_user_id', $userId)->exists();
+    }
+
+    public function hasPendingConnectionWith($userId)
+    {
+        return $this->sentConnectionRequests()->where('connected_user_id', $userId)->exists();
+    }
+
+    public function getCurrentJobAttribute()
+    {
+        return $this->workExperiences()->current()->first();
+    }
+
+    public function getConnectionCountAttribute()
+    {
+        return $this->connections()->count();
+    }
+
 }

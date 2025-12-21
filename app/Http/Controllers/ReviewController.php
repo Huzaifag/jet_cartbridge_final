@@ -15,14 +15,62 @@ class ReviewController extends Controller
 {
     public function store(Request $request, $productSlug)
     {
+        // Increase PHP limits programmatically
+        ini_set('upload_max_filesize', '100M');
+        ini_set('post_max_size', '110M');
+        ini_set('max_execution_time', '300');
+        ini_set('memory_limit', '256M');
+        
         $product = Product::where('slug', $productSlug)->firstOrFail();
 
+        // Check for upload errors first
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $index => $file) {
+                $uploadError = $file->getError();
+                if ($uploadError !== UPLOAD_ERR_OK) {
+                    $errorMessages = [
+                        UPLOAD_ERR_INI_SIZE => 'File is too large (exceeds upload_max_filesize)',
+                        UPLOAD_ERR_FORM_SIZE => 'File is too large (exceeds MAX_FILE_SIZE)',
+                        UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
+                        UPLOAD_ERR_NO_FILE => 'No file was uploaded',
+                        UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+                        UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+                        UPLOAD_ERR_EXTENSION => 'File upload stopped by extension',
+                    ];
+                    
+                    $errorMessage = $errorMessages[$uploadError] ?? 'Unknown upload error';
+                    
+                    \Log::error('File upload error', [
+                        'file' => $file->getClientOriginalName(),
+                        'error_code' => $uploadError,
+                        'error_message' => $errorMessage,
+                        'file_size' => $file->getSize(),
+                        'php_upload_max' => ini_get('upload_max_filesize'),
+                        'php_post_max' => ini_get('post_max_size')
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ["media.{$index}" => [$errorMessage . " (Error code: {$uploadError})"]]
+                    ], 422);
+                }
+                
+                \Log::info('File upload details', [
+                    'file' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                    'extension' => $file->getClientOriginalExtension(),
+                    'is_valid' => $file->isValid()
+                ]);
+            }
+        }
+
+        // Simplified validation - remove file validation temporarily
         $validator = Validator::make($request->all(), [
             'rating' => 'required|integer|min:1|max:5',
             'review_text' => 'nullable|string|max:1000',
             'review_type' => 'required|in:text,text_image,video',
             'media' => 'nullable|array|max:5',
-            'media.*' => 'file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:10240', // 10MB max
         ]);
 
         if ($validator->fails()) {
@@ -30,6 +78,46 @@ class ReviewController extends Controller
                 'success' => false,
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        // Manual file validation with better error reporting
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $index => $file) {
+                if (!$file->isValid()) {
+                    \Log::error('Invalid file detected', [
+                        'file' => $file->getClientOriginalName(),
+                        'error' => $file->getError(),
+                        'error_message' => $file->getErrorMessage()
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ["media.{$index}" => ['Invalid file: ' . $file->getErrorMessage()]]
+                    ], 422);
+                }
+                
+                // Check file size manually
+                $fileSize = $file->getSize();
+                $maxSize = 100 * 1024 * 1024; // 100MB
+                
+                if ($fileSize > $maxSize) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ["media.{$index}" => ['File size (' . round($fileSize/1024/1024, 2) . 'MB) exceeds maximum allowed size (100MB)']]
+                    ], 422);
+                }
+                
+                // Check file type
+                $extension = strtolower($file->getClientOriginalExtension());
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi'];
+                
+                if (!in_array($extension, $allowedExtensions)) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ["media.{$index}" => ['File type not allowed. Allowed types: ' . implode(', ', $allowedExtensions)]]
+                    ], 422);
+                }
+            }
         }
 
         // Check if user already reviewed this product
@@ -46,9 +134,30 @@ class ReviewController extends Controller
 
         $mediaUrls = [];
         if ($request->hasFile('media')) {
-            foreach ($request->file('media') as $file) {
-                $path = $file->store('reviews', 'public');
-                $mediaUrls[] = $path;
+            foreach ($request->file('media') as $index => $file) {
+                if (!$file->isValid()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ["media.{$index}" => ['The file failed to upload. Please check file size and format.']]
+                    ], 422);
+                }
+
+                try {
+                    $path = $file->store('reviews', 'public');
+                    if ($path) {
+                        $mediaUrls[] = $path;
+                    } else {
+                        return response()->json([
+                            'success' => false,
+                            'errors' => ["media.{$index}" => ['Failed to store the uploaded file.']]
+                        ], 422);
+                    }
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ["media.{$index}" => ['File upload failed: ' . $e->getMessage()]]
+                    ], 422);
+                }
             }
         }
 
@@ -258,6 +367,38 @@ class ReviewController extends Controller
                 'created_at' => $comment->created_at->diffForHumans(),
             ]
         ]);
+    }
+
+    /**
+     * Test file upload functionality
+     */
+    public function testUpload(Request $request)
+    {
+        $debug = [
+            'upload_max_filesize' => ini_get('upload_max_filesize'),
+            'post_max_size' => ini_get('post_max_size'),
+            'max_file_uploads' => ini_get('max_file_uploads'),
+            'has_files' => $request->hasFile('media'),
+            'files_count' => $request->hasFile('media') ? count($request->file('media')) : 0,
+            'request_method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
+            'content_length' => $request->header('Content-Length'),
+        ];
+        
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $index => $file) {
+                $debug["file_{$index}"] = [
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                    'extension' => $file->getClientOriginalExtension(),
+                    'error' => $file->getError(),
+                    'is_valid' => $file->isValid(),
+                ];
+            }
+        }
+        
+        return response()->json($debug);
     }
 
     /**

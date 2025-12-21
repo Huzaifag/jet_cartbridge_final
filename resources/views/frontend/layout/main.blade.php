@@ -60,6 +60,8 @@
             transition: none !important;
         }
     </style>
+@stack('styles')
+    
 </head>
 
 <body class="preload">

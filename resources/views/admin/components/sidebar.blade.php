@@ -13,6 +13,33 @@
             </a>
         </li>
 
+        <!-- Appointments - Admin feature -->
+        <li class="nav-item">
+            <a href="{{ route('admin.appointments.index') }}"
+                class="nav-link {{ request()->routeIs('admin.appointments.*') ? 'active' : '' }}">
+                <i class="fas fa-calendar-alt"></i>
+                Appointments
+                @php
+                    try {
+                        $pendingMeetings = \App\Models\Meeting::where('status', 'pending')->count();
+                    } catch (\Exception $e) {
+                        $pendingMeetings = 0;
+                    }
+                    
+                    try {
+                        $pendingInquiries = \App\Models\UserInquiry::where('status', 'pending')->count();
+                    } catch (\Exception $e) {
+                        $pendingInquiries = 0;
+                    }
+                    
+                    $pendingCount = $pendingMeetings + $pendingInquiries;
+                @endphp
+                @if($pendingCount > 0)
+                    <span class="badge bg-danger ms-2" style="font-size: 0.7rem;">{{ $pendingCount }}</span>
+                @endif
+            </a>
+        </li>
+
         @if(auth()->user()->seller || auth()->user()->manufacturer || auth()->user()->salesman)
             <!-- Unified Product Management -->
             <li class="nav-item">

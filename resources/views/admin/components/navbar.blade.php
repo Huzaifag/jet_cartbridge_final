@@ -226,6 +226,28 @@
                 </div>
             @endif
 
+            <!-- Appointments Button -->
+            <div class="me-3">
+                <a href="{{ route('admin.appointments.index') }}" 
+                   class="btn btn-outline-primary btn-sm d-flex align-items-center {{ request()->routeIs('admin.appointments.*') ? 'active' : '' }}"
+                   title="Appointments">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    <span class="d-none d-lg-inline">Appointments</span>
+                    @php
+                        try {
+                            $pendingMeetings = \App\Models\Meeting::where('status', 'pending')->count();
+                            $pendingInquiries = \App\Models\UserInquiry::where('status', 'pending')->count();
+                            $totalPending = $pendingMeetings + $pendingInquiries;
+                        } catch (\Exception $e) {
+                            $totalPending = 0;
+                        }
+                    @endphp
+                    @if($totalPending > 0)
+                        <span class="badge bg-danger ms-1" style="font-size: 0.7rem;">{{ $totalPending }}</span>
+                    @endif
+                </a>
+            </div>
+
             <!-- Quick Actions Dropdown -->
             <div class="dropdown me-3 d-none d-md-block">
                 <a class="nav-link" href="#" role="button" id="quickActionsDropdown" data-bs-toggle="dropdown"
@@ -238,6 +260,11 @@
                     </li>
                     <li>
                         <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('admin.appointments.index') }}">
+                            <i class="fas fa-calendar-alt text-primary me-2"></i>Manage Appointments
+                        </a>
                     </li>
                     @if($user->seller)
                         <li>

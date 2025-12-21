@@ -11,8 +11,8 @@ class Meeting extends Model
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';
-    public const STATUS_ACCEPTED = 'accepted';
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_CONFIRMED = 'confirmed';
+    public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
 
     /**
@@ -21,13 +21,22 @@ class Meeting extends Model
      * @var array<int,string>
      */
     protected $fillable = [
+        'customer_id',
+        'seller_id',
+        'manufacturer_id',
         'sender_id',
         'receiver_id',
         'room_name',
         'title',
+        'description',
         'message',
         'status',
+        'meeting_type',
         'scheduled_at',
+        'duration',
+        'location',
+        'admin_notes',
+        'created_by_admin',
     ];
 
     /**
@@ -37,6 +46,8 @@ class Meeting extends Model
      */
     protected $casts = [
         'scheduled_at' => 'datetime',
+        'created_by_admin' => 'boolean',
+        'duration' => 'integer',
     ];
 
     /**
@@ -63,6 +74,21 @@ class Meeting extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class, 'seller_id');
+    }
+
+    public function manufacturer()
+    {
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
 
     // -------------------------

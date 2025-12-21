@@ -4596,4 +4596,549 @@ body.modal-open {
         transition: none !important;
         animation: none !important;
     }
+}/* =
+=======================================
+   LINKEDIN-STYLE PROFILE STYLES
+   ======================================== */
+
+/* Profile Cover Section */
+.profile-cover {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.cover-photo {
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    border-radius: 0 0 1rem 1rem;
+    overflow: hidden;
+}
+
+.cover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+}
+
+.profile-header {
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.profile-info {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+}
+
+.profile-avatar {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid white;
+    object-fit: cover;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #10b981;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    font-size: 0.9rem;
+}
+
+.profile-details {
+    flex: 1;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.profile-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+.profile-job {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.95;
+}
+
+.profile-location {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+    font-size: 0.95rem;
+}
+
+.stat-item {
+    opacity: 0.9;
+}
+
+.profile-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+/* Profile Content */
+.profile-content {
+    padding-top: 4rem;
+}
+
+.profile-section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.section-title {
+    color: var(--color-white);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--color-accent);
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: var(--color-accent);
+}
+
+.section-content {
+    color: var(--color-text-light);
+}
+
+/* Experience Items */
+.experience-item,
+.education-item,
+.certification-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.1);
+}
+
+.experience-item:last-child,
+.education-item:last-child,
+.certification-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.experience-logo,
+.education-logo,
+.certification-logo {
+    flex-shrink: 0;
+}
+
+.experience-logo img,
+.education-logo img,
+.certification-logo img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.experience-details,
+.education-details,
+.certification-details {
+    flex: 1;
+}
+
+.experience-title,
+.education-institution,
+.certification-name {
+    color: var(--color-white);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.experience-company,
+.education-degree,
+.certification-organization {
+    color: var(--color-accent);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.experience-duration,
+.education-duration,
+.certification-duration {
+    color: var(--color-text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.experience-location {
+    color: var(--color-text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.experience-description,
+.education-description {
+    color: var(--color-text-light);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.experience-skills {
+    margin-top: 1rem;
+}
+
+.skill-tag {
+    display: inline-block;
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--color-accent);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Activity Items */
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.1);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.activity-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+}
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.activity-title a {
+    color: var(--color-white);
+    text-decoration: none;
+}
+
+.activity-title a:hover {
+    color: var(--color-accent);
+}
+
+.activity-description {
+    color: var(--color-text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-date {
+    color: var(--color-text-dim);
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+/* Sidebar Sections */
+.profile-sidebar-section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.sidebar-title {
+    color: var(--color-white);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-title .count {
+    color: var(--color-text-dim);
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+/* Contact Info */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--color-text-light);
+}
+
+.contact-item i {
+    color: var(--color-accent);
+    width: 16px;
+    text-align: center;
+}
+
+.contact-item a {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+.contact-item a:hover {
+    text-decoration: underline;
+}
+
+/* Skills List */
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Connections Preview */
+.connections-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.connection-avatar {
+    display: block;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(245, 158, 11, 0.2);
+    transition: var(--transition-fast);
+}
+
+.connection-avatar:hover {
+    border-color: var(--color-accent);
+    transform: scale(1.05);
+}
+
+.connection-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.connection-more {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(245, 158, 11, 0.1);
+    border: 2px solid rgba(245, 158, 11, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Professional Summary */
+.professional-summary {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--color-white);
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.bio {
+    color: var(--color-text-light);
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+    .profile-header {
+        position: static;
+        margin-top: 2rem;
+    }
+    
+    .profile-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .profile-details {
+        color: var(--color-white);
+        text-shadow: none;
+    }
+    
+    .profile-name {
+        font-size: 2rem;
+    }
+    
+    .profile-stats {
+        justify-content: center;
+    }
+    
+    .profile-actions {
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .profile-content {
+        padding-top: 2rem;
+    }
+    
+    .avatar-img {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (max-width: 576px) {
+    .cover-photo {
+        height: 200px;
+    }
+    
+    .profile-name {
+        font-size: 1.75rem;
+    }
+    
+    .profile-job {
+        font-size: 1.1rem;
+    }
+    
+    .profile-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .profile-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .profile-actions .btn {
+        width: 100%;
+    }
+    
+    .experience-item,
+    .education-item,
+    .certification-item {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .experience-logo,
+    .education-logo,
+    .certification-logo {
+        align-self: flex-start;
+    }
+}
+
+/* Light Theme Adjustments */
+[data-theme="light"] .profile-section,
+[data-theme="light"] .profile-sidebar-section {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .section-title,
+[data-theme="light"] .sidebar-title,
+[data-theme="light"] .profile-name,
+[data-theme="light"] .experience-title,
+[data-theme="light"] .education-institution,
+[data-theme="light"] .certification-name {
+    color: var(--color-dark-navy);
+}
+
+[data-theme="light"] .section-content,
+[data-theme="light"] .contact-info,
+[data-theme="light"] .professional-summary,
+[data-theme="light"] .bio {
+    color: #374151;
+}
+
+[data-theme="light"] .experience-item,
+[data-theme="light"] .education-item,
+[data-theme="light"] .certification-item,
+[data-theme="light"] .activity-item {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .activity-title a {
+    color: var(--color-dark-navy);
+}
+
+[data-theme="light"] .skill-tag {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+[data-theme="light"] .activity-icon {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+[data-theme="light"] .connection-more {
+    background: rgba(245, 158, 11, 0.1);
 }
