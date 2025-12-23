@@ -106,7 +106,7 @@ Route::get('/run-migrations', function () {
             'trace' => $e->getTraceAsString(),
         ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
-})->middleware('auth'); // optional but strongly recommended
+}); // optional but strongly recommended
 
 
 

@@ -32,6 +32,7 @@ class Meeting extends Model
         'message',
         'status',
         'meeting_type',
+        'type',
         'scheduled_at',
         'duration',
         'location',
