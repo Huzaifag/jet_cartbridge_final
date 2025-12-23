@@ -470,16 +470,14 @@
                                         <span class="status-badge {{ strtolower($meeting->status) }}">{{ $meeting->status }}</span>
                                     </div>
                                 </div>
-                                
                                 <div class="appointment-details">
                                     <div class="appointment-type">
-                                        <i class="fas fa-{{ $meeting->meeting_type === 'video' ? 'video' : ($meeting->meeting_type === 'call' ? 'phone' : 'map-marker-alt') }}"></i>
-                                        {{ ucfirst($meeting->meeting_type) }} Meeting
+                                        <i class="fas fa-{{ $meeting->type === 'video' ? 'video' : ($meeting->type === 'audio' ? 'headphones' : ($meeting->type === 'chats' ? 'comments' : 'map-marker-alt')) }}"></i>
+                                        {{ ucfirst($meeting->type) }} Meeting
                                         @if($meeting->duration)
                                             - {{ $meeting->duration }} min
                                         @endif
                                     </div>
-                                    
                                     <div class="appointment-actions">
                                         <button class="action-btn call" onclick="event.stopPropagation(); callCustomer('{{ $meeting->customer->phone ?? '' }}')">
                                             <i class="fas fa-phone"></i>

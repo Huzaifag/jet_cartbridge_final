@@ -1,3 +1,7 @@
+// Admin Meeting Management
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('meetings', MeetingController::class);
+});
 <?php
 
 use App\Http\Controllers\Accountant\AccountantOrderController;
