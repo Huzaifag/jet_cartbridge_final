@@ -873,11 +873,11 @@ $videoReviews = $reviews->where('review_type', 'video');
                         <div class="mb-3">
                             <label for="reviewMedia" class="form-label">Upload Media (Images / Video)</label>
                             <input class="form-control" type="file" name="media[]" id="reviewMedia"
-                                accept="image/*, video/mp4, video/mov, video/avi" multiple>
+                                accept="image/*,video/mp4,video/mov,video/avi,video/webm,video/x-msvideo,video/quicktime" multiple>
                             <div class="form-text">
                                 <small class="text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Maximum file size: 100MB per file. Supported formats: JPG, PNG, GIF, MP4, MOV, AVI
+                                    Maximum file size: 100MB per file. Supported formats: JPG, PNG, GIF, MP4, MOV, AVI, WEBM
                                 </small>
                             </div>
                         </div>
@@ -1485,16 +1485,57 @@ $videoReviews = $reviews->where('review_type', 'video');
         submitReviewBtn.addEventListener('click', function (e) {
             e.preventDefault();
 
-            // Basic file size validation
+            // Get form data
+            const reviewType = document.getElementById('reviewType').value;
             const fileInput = document.getElementById('reviewMedia');
+            const rating = document.getElementById('ratingInput').value;
+
+            // Validate rating
+            if (rating === '0') {
+                alert('Please select a rating before submitting your review.');
+                return;
+            }
+
+            // Enhanced file validation
             if (fileInput.files.length > 0) {
                 const maxSize = 100 * 1024 * 1024; // 100MB
+                const allowedImageTypes = ['jpg', 'jpeg', 'png', 'gif'];
+                const allowedVideoTypes = ['mp4', 'mov', 'avi', 'webm', 'mkv'];
+                let hasVideo = false;
+                let hasValidFiles = false;
+
                 for (let i = 0; i < fileInput.files.length; i++) {
-                    if (fileInput.files[i].size > maxSize) {
-                        alert(`File "${fileInput.files[i].name}" is too large. Maximum file size is 100MB.`);
+                    const file = fileInput.files[i];
+                    const fileName = file.name.toLowerCase();
+                    const fileExtension = fileName.split('.').pop();
+
+                    // Check file size
+                    if (file.size > maxSize) {
+                        alert(`File "${file.name}" is too large. Maximum file size is 100MB.`);
                         return;
                     }
+
+                    // Check file type
+                    if (!allowedImageTypes.includes(fileExtension) && !allowedVideoTypes.includes(fileExtension)) {
+                        alert(`File "${file.name}" has an unsupported format. Allowed formats: ${[...allowedImageTypes, ...allowedVideoTypes].join(', ')}`);
+                        return;
+                    }
+
+                    if (allowedVideoTypes.includes(fileExtension)) {
+                        hasVideo = true;
+                    }
+
+                    hasValidFiles = true;
                 }
+
+                // For video reviews, ensure at least one video is uploaded
+                if (reviewType === 'video' && !hasVideo) {
+                    alert('Video reviews must include at least one video file (MP4, MOV, AVI, WEBM, or MKV).');
+                    return;
+                }
+            } else if (reviewType === 'video') {
+                alert('Video reviews require at least one video file to be uploaded.');
+                return;
             }
 
             const formData = new FormData(reviewForm);
@@ -1514,33 +1555,63 @@ $videoReviews = $reviews->where('review_type', 'video');
 
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    if (data.success) {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('submitReviewModal'));
-                        modal.hide();
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('submitReviewModal'));
+                            modal.hide();
 
-                        reviewForm.reset();
-                        document.querySelectorAll('#reviewRating .star').forEach(star => {
-                            star.classList.remove('fas');
-                            star.classList.add('far');
-                        });
-                        document.getElementById('ratingInput').value = '0';
+                            reviewForm.reset();
+                            document.querySelectorAll('#reviewRating .star').forEach(star => {
+                                star.classList.remove('fas');
+                                star.classList.add('far');
+                            });
+                            document.getElementById('ratingInput').value = '0';
 
-                        alert(data.message);
-                        location.reload();
-                    } else {
-                        let errorMessage = 'Please fix the following errors:\n';
+                            alert(data.message || 'Review submitted successfully!');
+                            location.reload();
+                        } else {
+                            let errorMessage = 'Please fix the following errors:\n';
+                            if (data.errors) {
+                                for (let field in data.errors) {
+                                    if (Array.isArray(data.errors[field])) {
+                                        errorMessage += data.errors[field].join('\n') + '\n';
+                                    } else {
+                                        errorMessage += data.errors[field] + '\n';
+                                    }
+                                }
+                            } else {
+                                errorMessage = data.message || 'An error occurred while submitting your review.';
+                            }
+                            alert(errorMessage);
+                        }
+                    } catch (parseError) {
+                        console.error('Failed to parse response:', parseError);
+                        alert('An unexpected error occurred. Please try again.');
+                    }
+                } else if (xhr.status === 422) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        let errorMessage = 'Validation errors:\n';
                         if (data.errors) {
                             for (let field in data.errors) {
-                                errorMessage += data.errors[field].join('\n') + '\n';
+                                if (Array.isArray(data.errors[field])) {
+                                    errorMessage += data.errors[field].join('\n') + '\n';
+                                } else {
+                                    errorMessage += data.errors[field] + '\n';
+                                }
                             }
                         } else {
-                            errorMessage = data.message;
+                            errorMessage = data.message || 'Please check your input and try again.';
                         }
                         alert(errorMessage);
+                    } catch (parseError) {
+                        alert('Please check your input and try again.');
                     }
+                } else if (xhr.status === 413) {
+                    alert('File too large. Please reduce file size and try again.');
                 } else {
-                    alert('Upload failed. Please try again.');
+                    alert(`Upload failed (Error ${xhr.status}). Please check your connection and try again.`);
                 }
                 
                 submitReviewBtn.disabled = false;
@@ -1548,10 +1619,19 @@ $videoReviews = $reviews->where('review_type', 'video');
             };
 
             xhr.onerror = function() {
-                alert('Upload failed. Please check your connection and try again.');
+                alert('Upload failed. Please check your internet connection and try again.');
                 submitReviewBtn.disabled = false;
                 submitReviewBtn.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Post Review';
             };
+
+            xhr.ontimeout = function() {
+                alert('Upload timed out. Please try again with smaller files.');
+                submitReviewBtn.disabled = false;
+                submitReviewBtn.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Post Review';
+            };
+
+            // Set timeout for large uploads (5 minutes)
+            xhr.timeout = 300000;
 
             xhr.open('POST', '/product/{{ $product->slug }}/review');
             xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));

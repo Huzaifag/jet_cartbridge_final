@@ -254,6 +254,13 @@ Route::middleware(['web', 'auth'])->group(function () {
 
         Route::post('/product/{slug}/review', [ReviewController::class, 'store'])->name('review.store');
         Route::post('/test-upload', [ReviewController::class, 'testUpload'])->name('review.test-upload');
+        Route::get('/test-upload', function() {
+            return view('test-upload');
+        })->name('test-upload.page');
+        Route::post('/debug-review-upload', [ReviewController::class, 'debugUpload'])->name('debug.review.upload');
+        Route::get('/debug-upload', function() {
+            return view('debug-upload');
+        })->name('debug-upload.page');
         Route::post('/product/{review}/ref-order', [ReviewController::class, 'orderWithFer'])->name('review.orderWithFer');
         Route::get('/checkout', [ReviewController::class, 'show'])
             ->name('checkout.page')

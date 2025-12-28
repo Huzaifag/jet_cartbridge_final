@@ -17,152 +17,143 @@ use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
-    
 
 
-public function store(Request $request, $productSlug)
-{
-    // Find product early
-    $product = Product::where('slug', $productSlug)->firstOrFail();
 
-    // Prevent duplicate reviews
-    if (Review::where('product_id', $product->id)->where('user_id', Auth::id())->exists()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'You have already reviewed this product.'
-        ], 422);
-    }
+    public function store(Request $request, $productSlug)
+    {
+        // Find product
+        $product = Product::where('slug', $productSlug)->firstOrFail();
 
-    // Validation rules
-    $rules = [
-        'rating'       => 'required|integer|min:1|max:5',
-        'review_text'  => 'nullable|string|max:1000',
-        'review_type'  => 'required|in:text,text_image,video',
-        'media'        => 'nullable|array|max:5',
-        'media.*'      => [
-            'file',
-            'max:102400', // 100MB in KB
-            function ($attribute, $value, $fail) {
-                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi'];
-                $extension = strtolower($value->getClientOriginalExtension());
+        // Prevent duplicate reviews
+        if (Review::where('product_id', $product->id)->where('user_id', Auth::id())->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already reviewed this product.'
+            ], 422);
+        }
 
-                if (!in_array($extension, $allowed)) {
-                    $fail('The file type is not allowed. Allowed: ' . implode(', ', $allowed));
+        /* ---------------- VALIDATION ---------------- */
+
+        $rules = [
+            'rating' => 'required|integer|min:1|max:5',
+            'review_text' => 'nullable|string|max:1000',
+            'review_type' => 'required|in:text,text_image,video',
+            'media' => 'nullable|array|max:5',
+            'media.*' => [
+                'file',
+                'max:102400', // 100MB
+                function ($attribute, $file, $fail) {
+                    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi', 'webm', 'mkv'];
+                    $ext = strtolower($file->getClientOriginalExtension());
+
+                    if (!in_array($ext, $allowed)) {
+                        $fail('Unsupported file type.');
+                    }
+
+                    if (in_array($ext, ['mp4', 'mov', 'avi', 'webm', 'mkv']) && $file->getSize() > 100 * 1024 * 1024) {
+                        $fail('Video must be under 100MB.');
+                    }
                 }
+            ],
+        ];
 
-                // For video reviews, require at least one video
-                if (request('review_type') === 'video' && !in_array($extension, ['mp4', 'mov', 'avi'])) {
-                    $fail('Video reviews must include at least one video file.');
-                }
-            },
-        ],
-    ];
+        if ($request->review_type === 'video') {
+            $rules['media'] = 'required|array|min:1';
+        }
 
-    // If review_type is video, ensure at least one video is uploaded
-    if ($request->review_type === 'video') {
-        $rules['media'] = 'required|array|min:1|max:5';
-    }
+        $validator = Validator::make($request->all(), $rules);
 
-    $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'errors'  => $validator->errors()
-        ], 422);
-    }
+        /* ---------------- UPLOAD ---------------- */
 
-    $mediaUrls = [];
+        $mediaUrls = [];
+        $uploadedVideoCount = 0;
 
-    try {
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $file) {
+
                 if (!$file->isValid()) {
-                    Log::warning('Invalid uploaded file skipped', [
-                        'original_name' => $file->getClientOriginalName(),
-                        'error'         => $file->getErrorMessage()
-                    ]);
-                    continue; // Skip invalid files but continue processing others
+                    continue;
                 }
 
-                $extension = strtolower($file->getClientOriginalExtension());
-                $isVideo = in_array($extension, ['mp4', 'mov', 'avi']);
+                $ext = strtolower($file->getClientOriginalExtension());
+                $isVideo = in_array($ext, ['mp4', 'mov', 'avi', 'webm', 'mkv']);
 
-                $options = [
-                    'folder'     => 'reviews/' . $product->id,
-                    'public_id'  => 'review_' . Auth::id() . '_' . uniqid(),
-                    'overwrite' => false,
-                    'resource_type' => $isVideo ? 'video' : 'image',
-                ];
+                try {
+                    if ($isVideo) {
+                        // ✅ FIX: stream upload (works on Windows)
+                        $upload = Cloudinary::uploadVideo(
+                            fopen($file->getPathname(), 'r'),
+                            [
+                                'folder' => 'reviews/' . $product->id,
+                                'public_id' => 'review_' . Auth::id() . '_' . uniqid(),
+                                'quality' => 'auto:good',
+                                'fetch_format' => 'auto',
+                            ]
+                        );
 
-                // Recommended video optimizations
-                if ($isVideo) {
-                    $options = array_merge($options, [
-                        'quality'       => 'auto',
-                        'fetch_format'  => 'auto',
-                        'resource_type' => 'video', // Explicit
+                        $uploadedVideoCount++;
+                    } else {
+                        $upload = Cloudinary::upload(
+                            fopen($file->getPathname(), 'r'),
+                            [
+                                'folder' => 'reviews/' . $product->id,
+                                'public_id' => 'review_' . Auth::id() . '_' . uniqid(),
+                                'quality' => 'auto:good',
+                                'fetch_format' => 'auto',
+                            ]
+                        );
+                    }
+
+                    $mediaUrls[] = $upload->getSecurePath();
+
+                } catch (\Exception $e) {
+                    Log::error('Cloudinary upload failed', [
+                        'file' => $file->getClientOriginalName(),
+                        'error' => $e->getMessage(),
                     ]);
-
-                    // Use dedicated video upload method
-                    $uploadResult = Cloudinary::uploadVideo($file->getRealPath(), $options);
-                } else {
-                    $uploadResult = Cloudinary::upload($file->getRealPath(), $options);
                 }
-
-                $mediaUrls[] = $uploadResult->getSecurePath();
-            }
-
-            // Final check: if video review but no video uploaded successfully
-            if ($request->review_type === 'video' && empty(array_filter($mediaUrls, fn($url) => str_contains($url, '/video/')))) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Video review must contain at least one successfully uploaded video.'
-                ], 422);
             }
         }
 
-        // Generate referral code (assuming you have this method)
-        $referralCode = $this->generateReferralCode(Auth::id());
+        /* ---------------- FINAL VIDEO CHECK ---------------- */
 
-        // Create review inside transaction for consistency
-        $review = DB::transaction(function () use (
-            $product, $request, $mediaUrls, $referralCode
-        ) {
-            return Review::create([
-                'product_id'          => $product->id,
-                'user_id'             => Auth::id(),
-                'rating'              => $request->rating,
-                'review_text'         => $request->review_text,
-                'review_type'         => $request->review_type,
-                'media_urls'          => $mediaUrls, // Store as JSON array in DB
-                'is_verified_purchase'=> $this->hasVerifiedPurchase($product->id),
-                'referral_code'       => $referralCode,
-            ]);
-        });
+        if ($request->review_type === 'video' && $uploadedVideoCount === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Video review must include at least one successfully uploaded video.'
+            ], 422);
+        }
+
+        /* ---------------- SAVE REVIEW ---------------- */
+
+        $review = Review::create([
+            'product_id' => $product->id,
+            'user_id' => Auth::id(),
+            'rating' => $request->rating,
+            'review_text' => $request->review_text,
+            'review_type' => $request->review_type,
+            'media_urls' => $mediaUrls,
+            'is_verified_purchase' => $this->hasVerifiedPurchase($product->id),
+            'referral_code' => $this->generateReferralCode(Auth::id()),
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Review submitted successfully!',
-            'review'  => $review->load('user')
+            'review' => $review->load('user')
         ], 201);
-
-    } catch (\Exception $e) {
-        Log::error('Review submission failed', [
-            'user_id'     => Auth::id(),
-            'product_id'  => $product->id,
-            'error'       => $e->getMessage(),
-            'trace'       => $e->getTraceAsString(),
-            'files_count' => $request->hasFile('media') ? count($request->file('media')) : 0,
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'message' => 'An error occurred while submitting your review. Please try again later.'
-        ], 500);
     }
-}
 
-    public function orderWithFer(Review $review){
+    public function orderWithFer(Review $review)
+    {
         $checkoutUrl = URL::temporarySignedRoute(
             'checkout.page',
             now()->addMinutes(15), // expires in 15 mins
@@ -171,15 +162,16 @@ public function store(Request $request, $productSlug)
                 'referral_code' => $review->referral_code,
             ]
         );
-    
+
         return redirect($checkoutUrl);
     }
 
-    public function show(Request $request){
+    public function show(Request $request)
+    {
         $product = Product::findOrFail($request->input('product_id'));
         $review = Review::with('user')
-        ->where('referral_code', $request->input('referral_code'))
-        ->first();
+            ->where('referral_code', $request->input('referral_code'))
+            ->first();
         // dd($review);
         $userContacts = auth()->user()->contacts->toArray();
 
@@ -293,7 +285,7 @@ public function store(Request $request, $productSlug)
             ->where('review_id', $reviewId)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function($comment) {
+            ->map(function ($comment) {
                 return [
                     'id' => $comment->id,
                     'text' => $comment->comment,
@@ -348,34 +340,165 @@ public function store(Request $request, $productSlug)
     }
 
     /**
+     * Debug upload functionality specifically for video reviews
+     */
+    public function debugUpload(Request $request)
+    {
+        $debug = [
+            'request_data' => [
+                'review_type' => $request->review_type,
+                'rating' => $request->rating,
+                'review_text' => $request->review_text,
+                'has_files' => $request->hasFile('media'),
+                'files_count' => $request->hasFile('media') ? count($request->file('media')) : 0,
+            ],
+            'php_config' => [
+                'upload_max_filesize' => ini_get('upload_max_filesize'),
+                'post_max_size' => ini_get('post_max_size'),
+                'max_file_uploads' => ini_get('max_file_uploads'),
+            ],
+            'files' => [],
+            'upload_results' => [],
+        ];
+
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $index => $file) {
+                $extension = strtolower($file->getClientOriginalExtension());
+                $isVideo = in_array($extension, ['mp4', 'mov', 'avi', 'webm', 'mkv']);
+
+                $fileInfo = [
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'size_mb' => round($file->getSize() / 1024 / 1024, 2),
+                    'mime' => $file->getMimeType(),
+                    'extension' => $extension,
+                    'is_video' => $isVideo,
+                    'error' => $file->getError(),
+                    'is_valid' => $file->isValid(),
+                ];
+
+                $debug['files'][] = $fileInfo;
+
+                // Test upload to Cloudinary
+                if ($file->isValid()) {
+                    try {
+                        $options = [
+                            'folder' => 'debug-uploads',
+                            'public_id' => 'debug_' . uniqid(),
+                            'resource_type' => $isVideo ? 'video' : 'image',
+                        ];
+
+                        if ($isVideo) {
+                            $result = Cloudinary::uploadVideo($file->getRealPath(), $options);
+                        } else {
+                            $result = Cloudinary::upload($file->getRealPath(), $options);
+                        }
+
+                        $debug['upload_results'][] = [
+                            'file_index' => $index,
+                            'success' => true,
+                            'url' => $result->getSecurePath(),
+                            'public_id' => $result->getPublicId(),
+                            'resource_type' => $result->getResourceType() ?? 'unknown',
+                            'format' => $result->getFormat() ?? 'unknown',
+                            'is_video_detected' => $isVideo,
+                        ];
+                    } catch (\Exception $e) {
+                        $debug['upload_results'][] = [
+                            'file_index' => $index,
+                            'success' => false,
+                            'error' => $e->getMessage(),
+                            'is_video_detected' => $isVideo,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Test the video detection logic
+        $uploadedVideoFiles = [];
+        foreach ($debug['upload_results'] as $result) {
+            if ($result['success'] && $result['is_video_detected']) {
+                $uploadedVideoFiles[] = $result['url'];
+            }
+        }
+
+        $debug['video_detection'] = [
+            'uploaded_video_files' => $uploadedVideoFiles,
+            'has_videos' => !empty($uploadedVideoFiles),
+            'would_pass_validation' => $request->review_type !== 'video' || !empty($uploadedVideoFiles),
+        ];
+
+        return response()->json($debug, 200, [], JSON_PRETTY_PRINT);
+    }
+
+    /**
      * Test file upload functionality
      */
     public function testUpload(Request $request)
     {
         $debug = [
+            'php_version' => PHP_VERSION,
             'upload_max_filesize' => ini_get('upload_max_filesize'),
             'post_max_size' => ini_get('post_max_size'),
             'max_file_uploads' => ini_get('max_file_uploads'),
+            'max_execution_time' => ini_get('max_execution_time'),
+            'memory_limit' => ini_get('memory_limit'),
             'has_files' => $request->hasFile('media'),
             'files_count' => $request->hasFile('media') ? count($request->file('media')) : 0,
             'request_method' => $request->method(),
             'content_type' => $request->header('Content-Type'),
             'content_length' => $request->header('Content-Length'),
+            'cloudinary_configured' => !empty(config('cloudinary.cloud.cloud_name')),
         ];
-        
+
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $index => $file) {
                 $debug["file_{$index}"] = [
                     'name' => $file->getClientOriginalName(),
                     'size' => $file->getSize(),
+                    'size_mb' => round($file->getSize() / 1024 / 1024, 2),
                     'mime' => $file->getMimeType(),
                     'extension' => $file->getClientOriginalExtension(),
                     'error' => $file->getError(),
+                    'error_message' => $file->getErrorMessage(),
                     'is_valid' => $file->isValid(),
+                    'temp_path' => $file->getRealPath(),
                 ];
+
+                // Test Cloudinary upload
+                if ($file->isValid()) {
+                    try {
+                        $extension = strtolower($file->getClientOriginalExtension());
+                        $isVideo = in_array($extension, ['mp4', 'mov', 'avi', 'webm', 'mkv']);
+
+                        $options = [
+                            'folder' => 'test-uploads',
+                            'public_id' => 'test_' . uniqid(),
+                            'resource_type' => $isVideo ? 'video' : 'image',
+                        ];
+
+                        if ($isVideo) {
+                            $result = Cloudinary::uploadVideo($file->getRealPath(), $options);
+                        } else {
+                            $result = Cloudinary::upload($file->getRealPath(), $options);
+                        }
+
+                        $debug["file_{$index}"]['cloudinary_upload'] = [
+                            'success' => true,
+                            'url' => $result->getSecurePath(),
+                            'public_id' => $result->getPublicId(),
+                        ];
+                    } catch (\Exception $e) {
+                        $debug["file_{$index}"]['cloudinary_upload'] = [
+                            'success' => false,
+                            'error' => $e->getMessage(),
+                        ];
+                    }
+                }
             }
         }
-        
+
         return response()->json($debug);
     }
 
