@@ -7,182 +7,160 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
 
 class ReviewController extends Controller
 {
-    public function store(Request $request, $productSlug)
-    {
-        // Increase PHP limits programmatically
-        ini_set('upload_max_filesize', '100M');
-        ini_set('post_max_size', '110M');
-        ini_set('max_execution_time', '300');
-        ini_set('memory_limit', '256M');
-        
-        $product = Product::where('slug', $productSlug)->firstOrFail();
+    
 
-        // Check for upload errors first
-        if ($request->hasFile('media')) {
-            foreach ($request->file('media') as $index => $file) {
-                $uploadError = $file->getError();
-                if ($uploadError !== UPLOAD_ERR_OK) {
-                    $errorMessages = [
-                        UPLOAD_ERR_INI_SIZE => 'File is too large (exceeds upload_max_filesize)',
-                        UPLOAD_ERR_FORM_SIZE => 'File is too large (exceeds MAX_FILE_SIZE)',
-                        UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
-                        UPLOAD_ERR_NO_FILE => 'No file was uploaded',
-                        UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
-                        UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
-                        UPLOAD_ERR_EXTENSION => 'File upload stopped by extension',
-                    ];
-                    
-                    $errorMessage = $errorMessages[$uploadError] ?? 'Unknown upload error';
-                    
-                    \Log::error('File upload error', [
-                        'file' => $file->getClientOriginalName(),
-                        'error_code' => $uploadError,
-                        'error_message' => $errorMessage,
-                        'file_size' => $file->getSize(),
-                        'php_upload_max' => ini_get('upload_max_filesize'),
-                        'php_post_max' => ini_get('post_max_size')
-                    ]);
-                    
-                    return response()->json([
-                        'success' => false,
-                        'errors' => ["media.{$index}" => [$errorMessage . " (Error code: {$uploadError})"]]
-                    ], 422);
+
+public function store(Request $request, $productSlug)
+{
+    // Find product early
+    $product = Product::where('slug', $productSlug)->firstOrFail();
+
+    // Prevent duplicate reviews
+    if (Review::where('product_id', $product->id)->where('user_id', Auth::id())->exists()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You have already reviewed this product.'
+        ], 422);
+    }
+
+    // Validation rules
+    $rules = [
+        'rating'       => 'required|integer|min:1|max:5',
+        'review_text'  => 'nullable|string|max:1000',
+        'review_type'  => 'required|in:text,text_image,video',
+        'media'        => 'nullable|array|max:5',
+        'media.*'      => [
+            'file',
+            'max:102400', // 100MB in KB
+            function ($attribute, $value, $fail) {
+                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi'];
+                $extension = strtolower($value->getClientOriginalExtension());
+
+                if (!in_array($extension, $allowed)) {
+                    $fail('The file type is not allowed. Allowed: ' . implode(', ', $allowed));
                 }
-                
-                \Log::info('File upload details', [
-                    'file' => $file->getClientOriginalName(),
-                    'size' => $file->getSize(),
-                    'mime' => $file->getMimeType(),
-                    'extension' => $file->getClientOriginalExtension(),
-                    'is_valid' => $file->isValid()
-                ]);
-            }
-        }
 
-        // Simplified validation - remove file validation temporarily
-        $validator = Validator::make($request->all(), [
-            'rating' => 'required|integer|min:1|max:5',
-            'review_text' => 'nullable|string|max:1000',
-            'review_type' => 'required|in:text,text_image,video',
-            'media' => 'nullable|array|max:5',
-        ]);
+                // For video reviews, require at least one video
+                if (request('review_type') === 'video' && !in_array($extension, ['mp4', 'mov', 'avi'])) {
+                    $fail('Video reviews must include at least one video file.');
+                }
+            },
+        ],
+    ];
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
+    // If review_type is video, ensure at least one video is uploaded
+    if ($request->review_type === 'video') {
+        $rules['media'] = 'required|array|min:1|max:5';
+    }
 
-        // Manual file validation with better error reporting
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors'  => $validator->errors()
+        ], 422);
+    }
+
+    $mediaUrls = [];
+
+    try {
         if ($request->hasFile('media')) {
-            foreach ($request->file('media') as $index => $file) {
+            foreach ($request->file('media') as $file) {
                 if (!$file->isValid()) {
-                    \Log::error('Invalid file detected', [
-                        'file' => $file->getClientOriginalName(),
-                        'error' => $file->getError(),
-                        'error_message' => $file->getErrorMessage()
+                    Log::warning('Invalid uploaded file skipped', [
+                        'original_name' => $file->getClientOriginalName(),
+                        'error'         => $file->getErrorMessage()
                     ]);
-                    
-                    return response()->json([
-                        'success' => false,
-                        'errors' => ["media.{$index}" => ['Invalid file: ' . $file->getErrorMessage()]]
-                    ], 422);
+                    continue; // Skip invalid files but continue processing others
                 }
-                
-                // Check file size manually
-                $fileSize = $file->getSize();
-                $maxSize = 100 * 1024 * 1024; // 100MB
-                
-                if ($fileSize > $maxSize) {
-                    return response()->json([
-                        'success' => false,
-                        'errors' => ["media.{$index}" => ['File size (' . round($fileSize/1024/1024, 2) . 'MB) exceeds maximum allowed size (100MB)']]
-                    ], 422);
-                }
-                
-                // Check file type
+
                 $extension = strtolower($file->getClientOriginalExtension());
-                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi'];
-                
-                if (!in_array($extension, $allowedExtensions)) {
-                    return response()->json([
-                        'success' => false,
-                        'errors' => ["media.{$index}" => ['File type not allowed. Allowed types: ' . implode(', ', $allowedExtensions)]]
-                    ], 422);
+                $isVideo = in_array($extension, ['mp4', 'mov', 'avi']);
+
+                $options = [
+                    'folder'     => 'reviews/' . $product->id,
+                    'public_id'  => 'review_' . Auth::id() . '_' . uniqid(),
+                    'overwrite' => false,
+                    'resource_type' => $isVideo ? 'video' : 'image',
+                ];
+
+                // Recommended video optimizations
+                if ($isVideo) {
+                    $options = array_merge($options, [
+                        'quality'       => 'auto',
+                        'fetch_format'  => 'auto',
+                        'resource_type' => 'video', // Explicit
+                    ]);
+
+                    // Use dedicated video upload method
+                    $uploadResult = Cloudinary::uploadVideo($file->getRealPath(), $options);
+                } else {
+                    $uploadResult = Cloudinary::upload($file->getRealPath(), $options);
                 }
+
+                $mediaUrls[] = $uploadResult->getSecurePath();
+            }
+
+            // Final check: if video review but no video uploaded successfully
+            if ($request->review_type === 'video' && empty(array_filter($mediaUrls, fn($url) => str_contains($url, '/video/')))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Video review must contain at least one successfully uploaded video.'
+                ], 422);
             }
         }
 
-        // Check if user already reviewed this product
-        $existingReview = Review::where('product_id', $product->id)
-            ->where('user_id', Auth::id())
-            ->first();
+        // Generate referral code (assuming you have this method)
+        $referralCode = $this->generateReferralCode(Auth::id());
 
-        if ($existingReview) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have already reviewed this product.'
-            ], 422);
-        }
-
-        $mediaUrls = [];
-        if ($request->hasFile('media')) {
-            foreach ($request->file('media') as $index => $file) {
-                if (!$file->isValid()) {
-                    return response()->json([
-                        'success' => false,
-                        'errors' => ["media.{$index}" => ['The file failed to upload. Please check file size and format.']]
-                    ], 422);
-                }
-
-                try {
-                    $path = $file->store('reviews', 'public');
-                    if ($path) {
-                        $mediaUrls[] = $path;
-                    } else {
-                        return response()->json([
-                            'success' => false,
-                            'errors' => ["media.{$index}" => ['Failed to store the uploaded file.']]
-                        ], 422);
-                    }
-                } catch (\Exception $e) {
-                    return response()->json([
-                        'success' => false,
-                        'errors' => ["media.{$index}" => ['File upload failed: ' . $e->getMessage()]]
-                    ], 422);
-                }
-            }
-        }
-
-        // generating ref code
-
-        // ✅ Generate professional referral code
-        $referralCode = $this->generateReferralCode(auth()->id());
-
-        $review = Review::create([
-            'product_id' => $product->id,
-            'user_id' => Auth::id(),
-            'rating' => $request->rating,
-            'review_text' => $request->review_text,
-            'review_type' => $request->review_type,
-            'media_urls' => $mediaUrls,
-            'is_verified_purchase' => $this->hasVerifiedPurchase($product->id),
-            'referral_code' => $referralCode
-        ]);
+        // Create review inside transaction for consistency
+        $review = DB::transaction(function () use (
+            $product, $request, $mediaUrls, $referralCode
+        ) {
+            return Review::create([
+                'product_id'          => $product->id,
+                'user_id'             => Auth::id(),
+                'rating'              => $request->rating,
+                'review_text'         => $request->review_text,
+                'review_type'         => $request->review_type,
+                'media_urls'          => $mediaUrls, // Store as JSON array in DB
+                'is_verified_purchase'=> $this->hasVerifiedPurchase($product->id),
+                'referral_code'       => $referralCode,
+            ]);
+        });
 
         return response()->json([
             'success' => true,
             'message' => 'Review submitted successfully!',
-            'review' => $review->load('user')
+            'review'  => $review->load('user')
+        ], 201);
+
+    } catch (\Exception $e) {
+        Log::error('Review submission failed', [
+            'user_id'     => Auth::id(),
+            'product_id'  => $product->id,
+            'error'       => $e->getMessage(),
+            'trace'       => $e->getTraceAsString(),
+            'files_count' => $request->hasFile('media') ? count($request->file('media')) : 0,
         ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while submitting your review. Please try again later.'
+        ], 500);
     }
+}
 
     public function orderWithFer(Review $review){
         $checkoutUrl = URL::temporarySignedRoute(

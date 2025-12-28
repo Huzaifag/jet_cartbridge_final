@@ -1,7 +1,3 @@
-// Admin Meeting Management
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('meetings', MeetingController::class);
-});
 <?php
 
 use App\Http\Controllers\Accountant\AccountantOrderController;
@@ -332,8 +328,17 @@ Route::prefix('seller')->name('seller.')->group(function () {
 |--------------------------------------------------------------------------
 */
 
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('meetings', MeetingController::class);
+});
+
+
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [\App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.dashboard');
+
+
+
     
     // Unified Product Management Routes
     Route::resource('admin/products', \App\Http\Controllers\Admin\ProductController::class, [

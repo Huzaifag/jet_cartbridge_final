@@ -13,12 +13,14 @@ class MeetingTypeSeeder extends Seeder
     public function run(): void
     {
         $types = ['physical', 'video', 'audio', 'chats'];
-
-        // Update all existing meetings with a random type
+        $today = now()->startOfDay();
         $meetings = Meeting::all();
+        $i = 0;
         foreach ($meetings as $meeting) {
-            $meeting->type = $types[array_rand($types)];
+            $meeting->type = $types[$i % count($types)];
+            $meeting->scheduled_at = $today->copy()->addDays($i % 5)->setHour(10 + ($i % 6))->setMinute(0);
             $meeting->save();
+            $i++;
         }
     }
 }

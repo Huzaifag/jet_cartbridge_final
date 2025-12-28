@@ -435,22 +435,26 @@
         <!-- Appointment Tabs -->
         <div class="appointment-tabs">
             <div class="tab-header">
-                <button class="tab-btn {{ $view === 'meeting' ? 'active' : '' }}" onclick="switchTab('meeting')">
-                    <i class="fas fa-calendar-alt me-2"></i>Meetings
-                </button>
-                <button class="tab-btn {{ $view === 'call' ? 'active' : '' }}" onclick="switchTab('call')">
-                    <i class="fas fa-phone me-2"></i>Inquiries
+                <button class="tab-btn {{ $view === 'physical' ? 'active' : '' }}" onclick="switchTab('physical')">
+                    <i class="fas fa-map-marker-alt me-2"></i>Physical
                 </button>
                 <button class="tab-btn {{ $view === 'video' ? 'active' : '' }}" onclick="switchTab('video')">
+                    <i class="fas fa-video me-2"></i>Video
+                </button>
+                <button class="tab-btn {{ $view === 'audio' ? 'active' : '' }}" onclick="switchTab('audio')">
+                    <i class="fas fa-headphones me-2"></i>Audio
+                </button>
+                <button class="tab-btn {{ $view === 'chats' ? 'active' : '' }}" onclick="switchTab('chats')">
                     <i class="fas fa-comments me-2"></i>Chats
                 </button>
             </div>
 
             <div class="tab-content">
-                @if($view === 'meeting')
-                    <!-- Meetings Tab -->
+                @if(in_array($view, ['physical', 'video', 'audio', 'chats']))
+                    <!-- Meetings Tab by Type -->
                     <div class="appointment-list">
-                        @forelse($meetings as $meeting)
+                        @php $filteredMeetings = $meetings->where('type', $view); @endphp
+                        @forelse($filteredMeetings as $meeting)
                             <div class="appointment-item {{ strtolower($meeting->status) }}" onclick="openMeetingModal({{ $meeting->id }})">
                                 <div class="appointment-header-info">
                                     <div class="appointment-title-info">
@@ -497,7 +501,7 @@
                             <div class="empty-state">
                                 <i class="fas fa-calendar-times"></i>
                                 <h4>No meetings scheduled</h4>
-                                <p>No meetings found for {{ Carbon\Carbon::parse($selectedDate)->format('F j, Y') }}</p>
+                                <p>No {{ ucfirst($view) }} meetings found for {{ Carbon\Carbon::parse($selectedDate)->format('F j, Y') }}</p>
                             </div>
                         @endforelse
                     </div>
