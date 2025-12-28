@@ -633,11 +633,10 @@ $videoReviews = $reviews->where('review_type', 'video');
                                             <div class="position-relative">
                                                 @if ($review->media_urls && count($review->media_urls) > 0)
                                                     <video controls class="card-img-top rounded-top-3" style="max-height: 250px;">
-                                                        <source src="{{ asset('storage/' . $review->media_urls[0]) }}"
-                                                            type="video/mp4">
+                                                        <source src="{{ $review->media_urls[0] }}" type="video/mp4">
                                                         Your browser does not support the video tag.
                                                     </video>
-                                                @else
+                                                                                                                                                        @else
                                                     <img src="https://via.placeholder.com/180x300?text=No+Video"
                                                         class="card-img-top rounded-top-3" alt="No Video">
                                                 @endif

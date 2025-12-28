@@ -19,138 +19,118 @@ class ReviewController extends Controller
 {
 
 
+public function store(Request $request, $productSlug)
+{
+    // Find product
+    $product = Product::where('slug', $productSlug)->firstOrFail();
 
-    public function store(Request $request, $productSlug)
-    {
-        // Find product
-        $product = Product::where('slug', $productSlug)->firstOrFail();
+    // Prevent duplicate reviews
+    if (
+        Review::where('product_id', $product->id)
+            ->where('user_id', Auth::id())
+            ->exists()
+    ) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You have already reviewed this product.'
+        ], 422);
+    }
 
-        // Prevent duplicate reviews
-        if (Review::where('product_id', $product->id)->where('user_id', Auth::id())->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have already reviewed this product.'
-            ], 422);
-        }
+    /* ---------------- VALIDATION ---------------- */
 
-        /* ---------------- VALIDATION ---------------- */
-
-        $rules = [
-            'rating' => 'required|integer|min:1|max:5',
-            'review_text' => 'nullable|string|max:1000',
-            'review_type' => 'required|in:text,text_image,video',
-            'media' => 'nullable|array|max:5',
-            'media.*' => [
-                'file',
-                'max:102400', // 100MB
-                function ($attribute, $file, $fail) {
-                    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi', 'webm', 'mkv'];
-                    $ext = strtolower($file->getClientOriginalExtension());
-
-                    if (!in_array($ext, $allowed)) {
-                        $fail('Unsupported file type.');
-                    }
-
-                    if (in_array($ext, ['mp4', 'mov', 'avi', 'webm', 'mkv']) && $file->getSize() > 100 * 1024 * 1024) {
-                        $fail('Video must be under 100MB.');
-                    }
-                }
-            ],
-        ];
-
-        if ($request->review_type === 'video') {
-            $rules['media'] = 'required|array|min:1';
-        }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        /* ---------------- UPLOAD ---------------- */
-
-        $mediaUrls = [];
-        $uploadedVideoCount = 0;
-
-        if ($request->hasFile('media')) {
-            foreach ($request->file('media') as $file) {
-
-                if (!$file->isValid()) {
-                    continue;
-                }
-
+    $rules = [
+        'rating'      => 'required|integer|min:1|max:5',
+        'review_text' => 'nullable|string|max:1000',
+        'review_type' => 'required|in:text,text_image,video',
+        'media'       => 'nullable|array|max:5',
+        'media.*'     => [
+            'file',
+            'max:102400', // 100MB
+            function ($attribute, $file, $fail) {
+                $allowed = ['jpg','jpeg','png','gif','mp4','mov','avi','webm','mkv'];
                 $ext = strtolower($file->getClientOriginalExtension());
-                $isVideo = in_array($ext, ['mp4', 'mov', 'avi', 'webm', 'mkv']);
 
-                try {
-                    if ($isVideo) {
-                        // ✅ FIX: stream upload (works on Windows)
-                        $upload = Cloudinary::uploadVideo(
-                            fopen($file->getPathname(), 'r'),
-                            [
-                                'folder' => 'reviews/' . $product->id,
-                                'public_id' => 'review_' . Auth::id() . '_' . uniqid(),
-                                'quality' => 'auto:good',
-                                'fetch_format' => 'auto',
-                            ]
-                        );
-
-                        $uploadedVideoCount++;
-                    } else {
-                        $upload = Cloudinary::upload(
-                            fopen($file->getPathname(), 'r'),
-                            [
-                                'folder' => 'reviews/' . $product->id,
-                                'public_id' => 'review_' . Auth::id() . '_' . uniqid(),
-                                'quality' => 'auto:good',
-                                'fetch_format' => 'auto',
-                            ]
-                        );
-                    }
-
-                    $mediaUrls[] = $upload->getSecurePath();
-
-                } catch (\Exception $e) {
-                    Log::error('Cloudinary upload failed', [
-                        'file' => $file->getClientOriginalName(),
-                        'error' => $e->getMessage(),
-                    ]);
+                if (!in_array($ext, $allowed)) {
+                    $fail('Unsupported file type.');
                 }
             }
-        }
+        ],
+    ];
 
-        /* ---------------- FINAL VIDEO CHECK ---------------- */
-
-        if ($request->review_type === 'video' && $uploadedVideoCount === 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Video review must include at least one successfully uploaded video.'
-            ], 422);
-        }
-
-        /* ---------------- SAVE REVIEW ---------------- */
-
-        $review = Review::create([
-            'product_id' => $product->id,
-            'user_id' => Auth::id(),
-            'rating' => $request->rating,
-            'review_text' => $request->review_text,
-            'review_type' => $request->review_type,
-            'media_urls' => $mediaUrls,
-            'is_verified_purchase' => $this->hasVerifiedPurchase($product->id),
-            'referral_code' => $this->generateReferralCode(Auth::id()),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Review submitted successfully!',
-            'review' => $review->load('user')
-        ], 201);
+    if ($request->review_type === 'video') {
+        $rules['media'] = 'required|array|min:1';
     }
+
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors'  => $validator->errors()
+        ], 422);
+    }
+
+    /* ---------------- STORE FILES LOCALLY ---------------- */
+
+    $mediaUrls = [];
+    $uploadedVideoCount = 0;
+
+    if ($request->hasFile('media')) {
+        foreach ($request->file('media') as $file) {
+
+            if (!$file->isValid()) {
+                continue;
+            }
+
+            $ext = strtolower($file->getClientOriginalExtension());
+            $isVideo = in_array($ext, ['mp4','mov','avi','webm','mkv']);
+
+            // Folder structure
+            $folder = $isVideo
+                ? "reviews/{$product->id}/videos"
+                : "reviews/{$product->id}/images";
+
+            // Store file
+            $path = $file->store($folder, 'public');
+
+            if ($isVideo) {
+                $uploadedVideoCount++;
+            }
+
+            // Public URL
+            $mediaUrls[] = asset('storage/' . $path);
+        }
+    }
+
+    /* ---------------- FINAL VIDEO CHECK ---------------- */
+
+    if ($request->review_type === 'video' && $uploadedVideoCount === 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Video review must include at least one uploaded video.'
+        ], 422);
+    }
+
+    /* ---------------- SAVE REVIEW ---------------- */
+
+    $review = Review::create([
+        'product_id'           => $product->id,
+        'user_id'              => Auth::id(),
+        'rating'               => $request->rating,
+        'review_text'          => $request->review_text,
+        'review_type'          => $request->review_type,
+        'media_urls'           => $mediaUrls,
+        'is_verified_purchase' => $this->hasVerifiedPurchase($product->id),
+        'referral_code'        => $this->generateReferralCode(Auth::id()),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Review submitted successfully!',
+        'review'  => $review->load('user')
+    ], 200);
+}
+
 
     public function orderWithFer(Review $review)
     {

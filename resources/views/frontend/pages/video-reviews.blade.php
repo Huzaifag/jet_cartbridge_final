@@ -693,7 +693,7 @@
         <!-- Video -->
         <video 
             class="reel-video" 
-            src="{{ asset('storage/' . $review->media_urls[0]) }}"
+            src="{{ $review->media_urls[0] }}"
             loop
             playsinline
             {{ $index === 0 ? 'autoplay' : '' }}
