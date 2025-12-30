@@ -1,6 +1,7 @@
 @extends('frontend.layout.main')
 
 @push('styles')
+
 <style>
 /* LinkedIn-style Profile Styles */
 .linkedin-profile {

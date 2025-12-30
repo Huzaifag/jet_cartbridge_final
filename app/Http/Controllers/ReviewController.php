@@ -19,117 +19,138 @@ class ReviewController extends Controller
 {
 
 
-public function store(Request $request, $productSlug)
-{
-    // Find product
-    $product = Product::where('slug', $productSlug)->firstOrFail();
+    public function store(Request $request, $productSlug)
+    {
+        // Find product
+        $product = Product::where('slug', $productSlug)->firstOrFail();
 
-    // Prevent duplicate reviews
-    if (
-        Review::where('product_id', $product->id)
-            ->where('user_id', Auth::id())
-            ->exists()
-    ) {
-        return response()->json([
-            'success' => false,
-            'message' => 'You have already reviewed this product.'
-        ], 422);
-    }
-
-    /* ---------------- VALIDATION ---------------- */
-
-    $rules = [
-        'rating'      => 'required|integer|min:1|max:5',
-        'review_text' => 'nullable|string|max:1000',
-        'review_type' => 'required|in:text,text_image,video',
-        'media'       => 'nullable|array|max:5',
-        'media.*'     => [
-            'file',
-            'max:102400', // 100MB
-            function ($attribute, $file, $fail) {
-                $allowed = ['jpg','jpeg','png','gif','mp4','mov','avi','webm','mkv'];
-                $ext = strtolower($file->getClientOriginalExtension());
-
-                if (!in_array($ext, $allowed)) {
-                    $fail('Unsupported file type.');
-                }
-            }
-        ],
-    ];
-
-    if ($request->review_type === 'video') {
-        $rules['media'] = 'required|array|min:1';
-    }
-
-    $validator = Validator::make($request->all(), $rules);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'errors'  => $validator->errors()
-        ], 422);
-    }
-
-    /* ---------------- STORE FILES LOCALLY ---------------- */
-
-    $mediaUrls = [];
-    $uploadedVideoCount = 0;
-
-    if ($request->hasFile('media')) {
-        foreach ($request->file('media') as $file) {
-
-            if (!$file->isValid()) {
-                continue;
-            }
-
-            $ext = strtolower($file->getClientOriginalExtension());
-            $isVideo = in_array($ext, ['mp4','mov','avi','webm','mkv']);
-
-            // Folder structure
-            $folder = $isVideo
-                ? "reviews/{$product->id}/videos"
-                : "reviews/{$product->id}/images";
-
-            // Store file
-            $path = $file->store($folder, 'public');
-
-            if ($isVideo) {
-                $uploadedVideoCount++;
-            }
-
-            // Public URL
-            $mediaUrls[] = asset('storage/' . $path);
+        // Prevent duplicate reviews
+        if (
+            Review::where('product_id', $product->id)
+                ->where('user_id', Auth::id())
+                ->exists()
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already reviewed this product.'
+            ], 422);
         }
-    }
 
-    /* ---------------- FINAL VIDEO CHECK ---------------- */
+        /* ---------------- VALIDATION ---------------- */
 
-    if ($request->review_type === 'video' && $uploadedVideoCount === 0) {
+        $rules = [
+            'rating' => 'required|integer|min:1|max:5',
+            'review_text' => 'nullable|string|max:1000',
+            'review_type' => 'required|in:text,text_image,video',
+            'media' => 'nullable|array|max:5',
+            'media.*' => [
+                'file',
+                'max:102400', // 100MB
+                function ($attribute, $file, $fail) {
+                    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi', 'webm', 'mkv'];
+                    $ext = strtolower($file->getClientOriginalExtension());
+
+                    if (!in_array($ext, $allowed)) {
+                        $fail('Unsupported file type.');
+                    }
+                }
+            ],
+        ];
+
+        if ($request->review_type === 'video') {
+            $rules['media'] = 'required|array|min:1';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        /* ---------------- STORE FILES LOCALLY ---------------- */
+
+        $mediaUrls = [];
+        $uploadedVideoCount = 0;
+
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $file) {
+
+                if (!$file->isValid()) {
+                    continue;
+                }
+
+                $ext = strtolower($file->getClientOriginalExtension());
+                $isVideo = in_array($ext, ['mp4', 'mov', 'avi', 'webm', 'mkv']);
+
+                // Folder structure
+                $folder = $isVideo
+                    ? "reviews/{$product->id}/videos"
+                    : "reviews/{$product->id}/images";
+
+                // Store file
+                // $path = $file->store($folder, 'public');
+
+                $basePath = public_path('storage/reviews/' . $product->id);
+
+                $subFolder = $isVideo ? 'videos' : 'images';
+
+                $destination = $basePath . '/' . $subFolder;
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+
+                $file->move($destination, $fileName);
+
+                $mediaUrls[] = asset("storage/reviews/{$product->id}/{$subFolder}/{$fileName}");
+
+                if ($isVideo) {
+                    $uploadedVideoCount++;
+                }
+
+
+                // if ($isVideo) {
+                //     $uploadedVideoCount++;
+                // }
+
+                // // Public URL
+                // $mediaUrls[] = asset('storage/' . $path);
+            }
+        }
+
+        /* ---------------- FINAL VIDEO CHECK ---------------- */
+
+        if ($request->review_type === 'video' && $uploadedVideoCount === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Video review must include at least one uploaded video.'
+            ], 422);
+        }
+
+        /* ---------------- SAVE REVIEW ---------------- */
+
+        $review = Review::create([
+            'product_id' => $product->id,
+            'user_id' => Auth::id(),
+            'rating' => $request->rating,
+            'review_text' => $request->review_text,
+            'review_type' => $request->review_type,
+            'media_urls' => $mediaUrls,
+            'is_verified_purchase' => $this->hasVerifiedPurchase($product->id),
+            'referral_code' => $this->generateReferralCode(Auth::id()),
+        ]);
+
         return response()->json([
-            'success' => false,
-            'message' => 'Video review must include at least one uploaded video.'
-        ], 422);
+            'success' => true,
+            'message' => 'Review submitted successfully!',
+            'review' => $review->load('user')
+        ], 200);
     }
-
-    /* ---------------- SAVE REVIEW ---------------- */
-
-    $review = Review::create([
-        'product_id'           => $product->id,
-        'user_id'              => Auth::id(),
-        'rating'               => $request->rating,
-        'review_text'          => $request->review_text,
-        'review_type'          => $request->review_type,
-        'media_urls'           => $mediaUrls,
-        'is_verified_purchase' => $this->hasVerifiedPurchase($product->id),
-        'referral_code'        => $this->generateReferralCode(Auth::id()),
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Review submitted successfully!',
-        'review'  => $review->load('user')
-    ], 200);
-}
 
 
     public function orderWithFer(Review $review)
@@ -189,19 +210,84 @@ public function store(Request $request, $productSlug)
      */
     public function videoReels($productSlug = null)
     {
-        $query = Review::with(['user', 'product'])
+        $query = Review::with(['user', 'product', 'product.category'])
             ->where('review_type', 'video')
             ->whereNotNull('media_urls')
             ->orderBy('created_at', 'desc');
 
         if ($productSlug) {
             $product = Product::where('slug', $productSlug)->firstOrFail();
-            $query->where('product_id', $product->id);
+            
+            // Get reviews for this specific product first
+            $productReviews = $query->clone()->where('product_id', $product->id)->get();
+            
+            // Get reviews from same category (excluding current product)
+            $categoryReviews = $query->clone()
+                ->whereHas('product', function($q) use ($product) {
+                    $q->where('category_id', $product->category_id)
+                      ->where('id', '!=', $product->id);
+                })
+                ->limit(20) // Limit to prevent too many videos
+                ->get();
+            
+            // Combine: product reviews first, then category reviews
+            $videoReviews = $productReviews->concat($categoryReviews);
+            
+            return view('frontend.pages.video-reviews', compact('videoReviews', 'product'));
         }
 
-        $videoReviews = $query->get();
+        $videoReviews = $query->limit(50)->get(); // Limit for general viewing
 
         return view('frontend.pages.video-reviews', compact('videoReviews'));
+    }
+
+    /**
+     * Get more video reviews for continuous viewing (AJAX endpoint)
+     */
+    public function getMoreVideoReviews(Request $request)
+    {
+        $categoryId = $request->input('category_id');
+        $excludeIds = $request->input('exclude_ids', []);
+        $limit = $request->input('limit', 10);
+
+        $query = Review::with(['user', 'product', 'product.category'])
+            ->where('review_type', 'video')
+            ->whereNotNull('media_urls')
+            ->whereNotIn('id', $excludeIds)
+            ->orderBy('created_at', 'desc');
+
+        if ($categoryId) {
+            $query->whereHas('product', function($q) use ($categoryId) {
+                $q->where('category_id', $categoryId);
+            });
+        }
+
+        $videoReviews = $query->limit($limit)->get();
+
+        return response()->json([
+            'success' => true,
+            'reviews' => $videoReviews->map(function($review) {
+                return [
+                    'id' => $review->id,
+                    'review_text' => $review->review_text,
+                    'media_urls' => $review->media_urls,
+                    'video_likes' => $review->video_likes ?? 0,
+                    'video_views' => $review->video_views ?? 0,
+                    'user' => [
+                        'id' => $review->user->id,
+                        'name' => $review->user->name,
+                        'avatar' => $review->user->avatar ? asset('storage/' . $review->user->avatar) : null,
+                        'slug' => Str::slug($review->user->name, '')
+                    ],
+                    'product' => [
+                        'id' => $review->product->id,
+                        'name' => $review->product->name,
+                        'slug' => $review->product->slug,
+                        'category_id' => $review->product->category_id
+                    ]
+                ];
+            })
+        ]);
     }
 
     /**

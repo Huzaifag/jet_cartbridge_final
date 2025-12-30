@@ -184,37 +184,13 @@
         @endif
 
         @if(auth()->user()->manufacturer)
-            <!-- Manufacturer Navigation -->
+            <!-- Manufacturer Navigation - All Seller Features -->
 
             <li class="nav-item">
                 <a href="{{ route('manufacturer.categories.index') }}"
                     class="nav-link {{ request()->routeIs('manufacturer.categories.*') ? 'active' : '' }}">
-                    <i class="fas fa-folder"></i>
-                    Manufacturer Categories
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('manufacturer.orders.index') }}"
-                    class="nav-link {{ request()->routeIs('manufacturer.orders.*') ? 'active' : '' }}">
-                    <i class="fas fa-shopping-cart"></i>
-                    Manufacturer Orders
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('manufacturer.bulk-orders.index') }}"
-                    class="nav-link {{ request()->routeIs('manufacturer.bulk-orders.*') ? 'active' : '' }}">
-                    <i class="fas fa-boxes"></i>
-                    Manufacturer Bulk Orders
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('manufacturer.inquiries.index') }}"
-                    class="nav-link {{ request()->routeIs('manufacturer.inquiries.*') ? 'active' : '' }}">
-                    <i class="fas fa-question-circle"></i>
-                    Manufacturer Inquiries
+                    <i class="fas fa-tags"></i>
+                    Categories
                 </a>
             </li>
 
@@ -222,7 +198,7 @@
             <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
                     href="#manufacturerEmployeesMenu" role="button" aria-expanded="false" aria-controls="manufacturerEmployeesMenu">
-                    <span><i class="fas fa-users"></i> Manufacturer Employees</span>
+                    <span><i class="fas fa-users"></i> Employees</span>
                     <i class="fas fa-chevron-down small"></i>
                 </a>
                 <div class="collapse {{ request()->routeIs('manufacturer.employees.*') ? 'show' : '' }}" id="manufacturerEmployeesMenu">
@@ -230,13 +206,13 @@
                         <li class="nav-item">
                             <a href="{{ route('manufacturer.employees.accountant.index') }}"
                                 class="nav-link {{ request()->routeIs('manufacturer.employees.accountant.*') ? 'active' : '' }}">
-                                <i class="fas fa-calculator"></i> Accountants
+                                <i class="fas fa-calculator"></i> Accountant
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{ route('manufacturer.employees.salesman.index') }}"
                                 class="nav-link {{ request()->routeIs('manufacturer.employees.salesman.*') ? 'active' : '' }}">
-                                <i class="fas fa-user-tie"></i> Salesmen
+                                <i class="fas fa-handshake"></i> Salesman
                             </a>
                         </li>
                         <li class="nav-item">
@@ -248,7 +224,7 @@
                         <li class="nav-item">
                             <a href="{{ route('manufacturer.employees.delivery.index') }}"
                                 class="nav-link {{ request()->routeIs('manufacturer.employees.delivery.*') ? 'active' : '' }}">
-                                <i class="fas fa-truck"></i> Delivery
+                                <i class="fas fa-truck"></i> Delivery Man
                             </a>
                         </li>
                     </ul>
@@ -256,10 +232,109 @@
             </li>
 
             <li class="nav-item">
+                <a href="{{ route('manufacturer.inquiries.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.inquiries.*') ? 'active' : '' }}">
+                    <i class="fas fa-comments"></i> B2B Inquiries
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.contact-book.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.contact-book.*') ? 'active' : '' }}">
+                    <i class="fas fa-address-book"></i> Contact Book
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.employee-activities.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.employee-activities.*') ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-list"></i> Employee Activities
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.analytics.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.analytics.*') ? 'active' : '' }}">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.business-history.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.business-history.*') ? 'active' : '' }}">
+                    <i class="fas fa-history"></i> Business History
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.orders.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.orders.*') ? 'active' : '' }}">
+                    <i class="fas fa-shopping-cart"></i>
+                    Orders
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.bulk-orders.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.bulk-orders.*') ? 'active' : '' }}">
+                    <i class="fas fa-boxes"></i>
+                    Bulk Orders
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.chat.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.chat.*') ? 'active' : '' }}">
+                    <i class="fas fa-comments"></i>
+                    Messages
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.leads.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.leads.*') ? 'active' : '' }}">
+                    <i class="fas fa-user-plus"></i>
+                    Lead Management
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.promotions.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.promotions.*') ? 'active' : '' }}">
+                    <i class="fas fa-tags"></i>
+                    Promotions
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.notifications.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.notifications.*') ? 'active' : '' }}">
+                    <i class="fas fa-bell"></i>
+                    Notifications
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.coins-rewards.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.coins-rewards.*') ? 'active' : '' }}">
+                    <i class="fas fa-coins"></i>
+                    Coins & Rewards
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('manufacturer.leads.index') }}"
+                    class="nav-link {{ request()->routeIs('manufacturer.leads.*') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    Leads
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a href="{{ route('manufacturer.settings') }}"
                     class="nav-link {{ request()->routeIs('manufacturer.settings*') ? 'active' : '' }}">
                     <i class="fas fa-cog"></i>
-                    Manufacturer Settings
+                    Settings
                 </a>
             </li>
         @endif

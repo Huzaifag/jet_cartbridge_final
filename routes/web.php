@@ -268,6 +268,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
         // Video Reviews Routes
         Route::get('/video-reviews/{slug?}', [ReviewController::class, 'videoReels'])->name('video.reviews');
+        Route::get('/api/video-reviews/more', [ReviewController::class, 'getMoreVideoReviews'])->name('video.reviews.more');
         Route::post('/api/reviews/{review}/view', [ReviewController::class, 'trackView'])->name('review.track-view');
         Route::post('/api/reviews/{review}/like', [ReviewController::class, 'toggleLike'])->name('review.toggle-like');
         Route::get('/api/reviews/{review}/comments', [ReviewController::class, 'getComments'])->name('review.get-comments');
@@ -591,6 +592,103 @@ Route::prefix('manufacturer')
         Route::post('/meeting/{id}/accept', [MeetingController::class, 'accept'])->name('meeting.accept');
         Route::post('/meeting/{id}/reject', [MeetingController::class, 'reject'])->name('meeting.reject');
         Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+
+        // Analytics Routes
+        Route::prefix('analytics')->name('analytics.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerAnalyticsController::class, 'index'])->name('index');
+            Route::get('/chart-data', [App\Http\Controllers\manufacturer\ManufacturerAnalyticsController::class, 'getChartData'])->name('chart-data');
+            Route::post('/export-report', [App\Http\Controllers\manufacturer\ManufacturerAnalyticsController::class, 'exportReport'])->name('export-report');
+        });
+
+        // Contact Book Routes
+        Route::prefix('contact-book')->name('contact-book.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerContactBookController::class, 'index'])->name('index');
+            Route::post('/', [App\Http\Controllers\manufacturer\ManufacturerContactBookController::class, 'store'])->name('store');
+            Route::get('/{id}', [App\Http\Controllers\manufacturer\ManufacturerContactBookController::class, 'show'])->name('show');
+            Route::put('/{id}', [App\Http\Controllers\manufacturer\ManufacturerContactBookController::class, 'update'])->name('update');
+            Route::delete('/{id}', [App\Http\Controllers\manufacturer\ManufacturerContactBookController::class, 'destroy'])->name('destroy');
+            Route::post('/export', [App\Http\Controllers\manufacturer\ManufacturerContactBookController::class, 'export'])->name('export');
+            Route::post('/import', [App\Http\Controllers\manufacturer\ManufacturerContactBookController::class, 'import'])->name('import');
+        });
+
+        // Business History Routes
+        Route::prefix('business-history')->name('business-history.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerBusinessHistoryController::class, 'index'])->name('index');
+            Route::get('/activity-data', [App\Http\Controllers\manufacturer\ManufacturerBusinessHistoryController::class, 'getActivityData'])->name('activity-data');
+            Route::post('/export', [App\Http\Controllers\manufacturer\ManufacturerBusinessHistoryController::class, 'exportHistory'])->name('export');
+            Route::get('/statistics', [App\Http\Controllers\manufacturer\ManufacturerBusinessHistoryController::class, 'getStatistics'])->name('statistics');
+        });
+
+        // Employee Activities Routes
+        Route::prefix('employee-activities')->name('employee-activities.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerEmployeeActivityController::class, 'index'])->name('index');
+            Route::get('/performance', [App\Http\Controllers\manufacturer\ManufacturerEmployeeActivityController::class, 'getEmployeePerformance'])->name('performance');
+            Route::get('/employee/{id}', [App\Http\Controllers\manufacturer\ManufacturerEmployeeActivityController::class, 'getEmployeeDetails'])->name('employee-details');
+            Route::post('/export', [App\Http\Controllers\manufacturer\ManufacturerEmployeeActivityController::class, 'exportActivities'])->name('export');
+            Route::get('/summary', [App\Http\Controllers\manufacturer\ManufacturerEmployeeActivityController::class, 'getActivitySummary'])->name('summary');
+        });
+
+        // Chat Routes
+        Route::prefix('chat')->name('chat.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'index'])->name('index');
+            Route::get('/conversation/{id}', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'getConversation'])->name('conversation');
+            Route::post('/send-message', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'sendMessage'])->name('send-message');
+            Route::post('/start-conversation', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'startNewConversation'])->name('start-conversation');
+            Route::get('/search', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'searchMessages'])->name('search');
+            Route::post('/mark-read', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'markAsRead'])->name('mark-read');
+            Route::get('/unread-count', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'getUnreadCount'])->name('unread-count');
+            Route::delete('/conversation/{id}', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'deleteConversation'])->name('delete-conversation');
+            Route::post('/block-user', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'blockUser'])->name('block-user');
+            Route::post('/unblock-user', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'unblockUser'])->name('unblock-user');
+            Route::post('/export', [App\Http\Controllers\manufacturer\ManufacturerChatController::class, 'exportChat'])->name('export');
+        });
+
+        // Lead Management Routes
+        Route::prefix('leads')->name('leads.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'store'])->name('store');
+            Route::get('/{id}', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'show'])->name('show');
+            Route::put('/{id}', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'update'])->name('update');
+            Route::delete('/{id}', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/activity', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'addActivity'])->name('add-activity');
+            Route::post('/{id}/convert', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'convertToCustomer'])->name('convert');
+            Route::get('/stats/overview', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'getLeadStats'])->name('stats');
+            Route::post('/export', [App\Http\Controllers\manufacturer\ManufacturerLeadController::class, 'exportLeads'])->name('export');
+        });
+
+        // Promotion Routes
+        Route::prefix('promotions')->name('promotions.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'store'])->name('store');
+            Route::get('/{id}', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'show'])->name('show');
+            Route::put('/{id}', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'update'])->name('update');
+            Route::delete('/{id}', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/activate', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'activate'])->name('activate');
+            Route::post('/{id}/deactivate', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'deactivate'])->name('deactivate');
+            Route::post('/{id}/duplicate', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'duplicate'])->name('duplicate');
+            Route::get('/stats/overview', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'getPromotionStats'])->name('stats');
+            Route::post('/export', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'exportPromotions'])->name('export');
+            Route::get('/generate-coupon', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'generateCouponCode'])->name('generate-coupon');
+            Route::post('/validate-coupon', [App\Http\Controllers\manufacturer\ManufacturerPromotionController::class, 'validateCoupon'])->name('validate-coupon');
+        });
+
+        // Notification Routes
+        Route::prefix('notifications')->name('notifications.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'index'])->name('index');
+            Route::post('/{id}/read', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'markAsRead'])->name('mark-read');
+            Route::post('/mark-all-read', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+            Route::delete('/{id}', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'delete'])->name('delete');
+            Route::delete('/delete-all', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'deleteAll'])->name('delete-all');
+            Route::get('/unread-count', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'getUnreadCount'])->name('unread-count');
+            Route::get('/recent', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'getRecentNotifications'])->name('recent');
+            Route::post('/preferences', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'updatePreferences'])->name('update-preferences');
+            Route::get('/preferences', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'getPreferences'])->name('get-preferences');
+            Route::post('/test', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'sendTestNotification'])->name('send-test');
+            Route::get('/stats', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'getNotificationStats'])->name('stats');
+            Route::post('/export', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'exportNotifications'])->name('export');
+        });
     });
 
 
