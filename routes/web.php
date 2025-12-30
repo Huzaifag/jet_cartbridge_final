@@ -689,6 +689,18 @@ Route::prefix('manufacturer')
             Route::get('/stats', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'getNotificationStats'])->name('stats');
             Route::post('/export', [App\Http\Controllers\manufacturer\ManufacturerNotificationController::class, 'exportNotifications'])->name('export');
         });
+
+        // Coins & Rewards Routes
+        Route::prefix('coins-rewards')->name('coins-rewards.')->group(function () {
+            Route::get('/', [App\Http\Controllers\manufacturer\ManufacturerCoinController::class, 'index'])->name('index');
+            Route::post('/redeem', [App\Http\Controllers\manufacturer\ManufacturerCoinController::class, 'redeemReward'])->name('redeem');
+            Route::get('/transactions', [App\Http\Controllers\manufacturer\ManufacturerCoinController::class, 'getTransactionHistory'])->name('transactions');
+            Route::get('/earning-stats', [App\Http\Controllers\manufacturer\ManufacturerCoinController::class, 'getEarningStats'])->name('earning-stats');
+            Route::get('/reward/{id}/availability', [App\Http\Controllers\manufacturer\ManufacturerCoinController::class, 'checkRewardAvailability'])->name('reward-availability');
+            Route::get('/tier-info', [App\Http\Controllers\manufacturer\ManufacturerCoinController::class, 'getTierInfo'])->name('tier-info');
+            Route::post('/export-transactions', [App\Http\Controllers\manufacturer\ManufacturerCoinController::class, 'exportTransactions'])->name('export-transactions');
+            Route::post('/claim-daily-bonus', [App\Http\Controllers\manufacturer\ManufacturerCoinController::class, 'claimDailyBonus'])->name('claim-daily-bonus');
+        });
     });
 
 
