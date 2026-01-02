@@ -4,6 +4,12 @@
     <span class="support-badge">Help</span>
 </button>
 
+<!-- Bulk Order Button -->
+<button class="bulk-order-btn" id="bulkOrderBtn" onclick="openBulkOrder()">
+    <i class="fas fa-shopping-cart"></i>
+    <span class="bulk-order-badge">Bulk Order</span>
+</button>
+
 <!-- Customer Support Popup -->
 <div class="customer-support-popup" id="customerSupportPopup">
     <!-- Support List View -->
@@ -230,11 +236,52 @@
         box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
     }
 
+    /* Bulk Order Button */
+    .bulk-order-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 90px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        animation: pulse-bulk-order 2s infinite;
+    }
+
+    .bulk-order-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(40, 167, 69, 0.6);
+    }
+
     .support-badge {
         position: absolute;
         top: -5px;
         right: -5px;
         background: #ff4458;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        border: 2px solid white;
+    }
+
+    .bulk-order-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #28a745;
         color: white;
         font-size: 0.65rem;
         font-weight: 700;
@@ -249,6 +296,15 @@
         }
         50% {
             box-shadow: 0 4px 30px rgba(102, 126, 234, 0.7);
+        }
+    }
+
+    @keyframes pulse-bulk-order {
+        0%, 100% {
+            box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 30px rgba(40, 167, 69, 0.7);
         }
     }
 
@@ -954,6 +1010,13 @@
             height: 55px;
         }
 
+        .bulk-order-btn {
+            bottom: 15px;
+            right: 80px;
+            width: 55px;
+            height: 55px;
+        }
+
         .meeting-modal-content {
             max-width: 100%;
             border-radius: 16px 16px 0 0;
@@ -1512,6 +1575,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderManufacturers(filtered);
             }
         });
+    }
+
+    // Bulk Order functionality
+    function openBulkOrder() {
+        window.location.href = '/bulk-order';
     }
 });
 </script>

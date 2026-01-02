@@ -5,9 +5,11 @@
 /* Video Reviews - TikTok/Instagram Reels Style */
 .video-reviews-container {
     background: #000;
-    min-height: 100vh;
+    min-height: 90vh;
     overflow: hidden;
     position: relative;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .video-feed {
@@ -23,22 +25,23 @@
 }
 
 .video-item {
-    height: 100vh;
+    height: 70vh;
     width: 100%;
     position: relative;
     scroll-snap-align: start;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 15vh auto;
 }
 
 .video-player {
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    height: 70vh;
     object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .video-overlay {
@@ -369,6 +372,36 @@
     animation: spin 1s linear infinite;
 }
 
+.video-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    z-index: 1;
+}
+
+.video-error {
+    color: white;
+    text-align: center;
+}
+
+.video-player {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #000;
+}
+
+/* Loading state improvements */
+.video-item.loading .video-overlay {
+    background: rgba(0,0,0,0.7);
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -376,6 +409,16 @@
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
+    .video-item {
+        height: 60vh;
+        margin: 20vh auto;
+    }
+    
+    .video-player {
+        width: 95%;
+        height: 60vh;
+    }
+    
     .video-controls {
         right: 15px;
         bottom: 80px;
@@ -415,6 +458,16 @@
 
 /* Landscape mobile */
 @media (max-width: 768px) and (orientation: landscape) {
+    .video-item {
+        height: 80vh;
+        margin: 10vh auto;
+    }
+    
+    .video-player {
+        width: 85%;
+        height: 80vh;
+    }
+    
     .video-controls {
         bottom: 60px;
         gap: 10px;
@@ -432,30 +485,36 @@
     }
 }
 </style>
-@endpush@sec
-tion('content')
+@endpush
+@section('content')
 <div class="video-reviews-container">
     <div class="video-feed" id="videoFeed">
         @forelse($videoReviews as $index => $review)
             <div class="video-item" data-review-id="{{ $review->id }}" data-index="{{ $index }}">
                 <!-- Video Player -->
                 @if($review->media_urls && count($review->media_urls) > 0)
+                    <!-- Debug: Show video URL -->
+                    {{-- <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 5px; font-size: 12px; z-index: 1000;">
+                        Video URL: {{ $review->media_urls[0] }}
+                    </div> --}}
+                    
                     <video 
+                        controls 
                         class="video-player" 
                         id="video-{{ $review->id }}"
                         loop 
                         muted
                         playsinline
-                        preload="metadata"
-                        poster="{{ asset('images/video-placeholder.jpg') }}"
+                        style="width: 90%; height: 70vh; object-fit: cover; border-radius: 15px;"
                     >
-                        <source src="{{ asset('storage/' . $review->media_urls[0]) }}" type="video/mp4">
+                        <source src="{{ $review->media_urls[0] }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                 @else
-                    <div class="video-placeholder">
-                        <i class="fas fa-video fa-3x text-white"></i>
+                    <div class="video-placeholder d-flex flex-column align-items-center justify-content-center h-100">
+                        <i class="fas fa-video fa-3x text-white mb-3"></i>
                         <p class="text-white mt-2">Video not available</p>
+                        <small class="text-white-50">No media URLs found</small>
                     </div>
                 @endif
 
@@ -583,8 +642,8 @@ tion('content')
         </button>
     </div>
 </div>
-@endsection@
-push('scripts')
+@endsection
+@push('scripts')
 <script>
 class VideoReviewsPlayer {
     constructor() {
@@ -644,24 +703,90 @@ class VideoReviewsPlayer {
             this.currentReviewId = this.videoItems[this.currentIndex].dataset.reviewId;
             
             if (this.currentVideo) {
-                this.showLoading(this.currentReviewId);
+                // Pause all other videos first
+                this.videos.forEach(video => {
+                    if (video !== this.currentVideo) {
+                        video.pause();
+                    }
+                });
+
+                // Reset current video
+                this.currentVideo.currentTime = 0;
                 
-                this.currentVideo.addEventListener('loadeddata', () => {
-                    this.hideLoading(this.currentReviewId);
-                    this.currentVideo.play().then(() => {
+                // Simple play attempt
+                const playPromise = this.currentVideo.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log('Video playing successfully');
                         this.isPlaying = true;
                         this.updateProgress();
                     }).catch(error => {
                         console.log('Autoplay prevented:', error);
-                        this.showPlayButton();
+                        this.isPlaying = false;
+                        // Don't show error, just let user click to play
                     });
-                });
+                }
 
-                this.currentVideo.addEventListener('ended', () => {
+                // Handle video end
+                this.currentVideo.onended = () => {
                     this.currentVideo.currentTime = 0;
-                    this.currentVideo.play();
+                    if (this.isPlaying) {
+                        this.currentVideo.play();
+                    }
+                };
+            }
+        }
+    }
+
+    setupUserInteractionPlay() {
+        const playOnInteraction = () => {
+            if (this.currentVideo && !this.isPlaying) {
+                this.currentVideo.play().then(() => {
+                    this.isPlaying = true;
+                    this.updateProgress();
+                    document.removeEventListener('click', playOnInteraction);
+                    document.removeEventListener('touchstart', playOnInteraction);
+                }).catch(error => {
+                    console.error('Failed to play video on interaction:', error);
                 });
             }
+        };
+
+        document.addEventListener('click', playOnInteraction, { once: true });
+        document.addEventListener('touchstart', playOnInteraction, { once: true });
+    }
+
+    showVideoError(reviewId) {
+        const videoItem = document.querySelector(`[data-review-id="${reviewId}"]`);
+        if (videoItem) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'video-error d-flex flex-column align-items-center justify-content-center h-100 position-absolute';
+            errorDiv.style.cssText = 'top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3;';
+            errorDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <p class="text-white mb-2">Video failed to load</p>
+                <small class="text-white-50">Please check your internet connection</small>
+                <button class="btn btn-primary btn-sm mt-3" onclick="window.videoPlayer.retryVideo('${reviewId}')">
+                    <i class="fas fa-redo me-1"></i> Retry
+                </button>
+            `;
+            videoItem.appendChild(errorDiv);
+        }
+    }
+
+    retryVideo(reviewId) {
+        // Remove error message
+        const errorDiv = document.querySelector(`[data-review-id="${reviewId}"] .video-error`);
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+
+        // Retry playing the video
+        const video = document.getElementById(`video-${reviewId}`);
+        if (video) {
+            this.showLoading(reviewId);
+            video.load();
         }
     }
 
@@ -675,13 +800,22 @@ class VideoReviewsPlayer {
     setupVideoControls() {
         this.videoItems.forEach((item, index) => {
             const video = item.querySelector('.video-player');
-            const playPauseOverlay = item.querySelector('.play-pause-overlay');
             
             if (video) {
                 // Click to play/pause
                 video.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.togglePlayPause();
+                    // Let the native controls handle the click
+                    // e.preventDefault();
+                    // this.togglePlayPause();
+                });
+
+                // Update our tracking when video plays/pauses
+                video.addEventListener('play', () => {
+                    this.isPlaying = true;
+                });
+
+                video.addEventListener('pause', () => {
+                    this.isPlaying = false;
                 });
 
                 // Double tap to like (mobile)
@@ -690,9 +824,7 @@ class VideoReviewsPlayer {
                     tapCount++;
                     if (tapCount === 1) {
                         setTimeout(() => {
-                            if (tapCount === 1) {
-                                this.togglePlayPause();
-                            } else if (tapCount === 2) {
+                            if (tapCount === 2) {
                                 this.likeVideo(item.dataset.reviewId);
                                 this.showLikeAnimation(e.touches ? e.touches[0] : e);
                             }
@@ -991,6 +1123,31 @@ document.head.appendChild(style);
 
 // Initialize video player when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Log video elements and their sources
+    console.log('=== Video Debug Info ===');
+    const videos = document.querySelectorAll('.video-player');
+    console.log(`Found ${videos.length} video elements`);
+    
+    videos.forEach((video, index) => {
+        console.log(`Video ${index + 1}:`);
+        console.log('- Element:', video);
+        console.log('- Source:', video.querySelector('source')?.src || 'No source');
+        console.log('- Ready State:', video.readyState);
+        console.log('- Network State:', video.networkState);
+        
+        // Test if video source is accessible
+        if (video.querySelector('source')?.src) {
+            fetch(video.querySelector('source').src, { method: 'HEAD' })
+                .then(response => {
+                    console.log(`- Source accessible: ${response.ok} (${response.status})`);
+                })
+                .catch(error => {
+                    console.log(`- Source error:`, error);
+                });
+        }
+    });
+    console.log('=== End Debug Info ===');
+    
     window.videoPlayer = new VideoReviewsPlayer();
 });
 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\manufacturer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Warehouse;
+use App\Models\WareHouse;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +13,7 @@ class ManufacturerWarehouseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Warehouse::where('manufacturer_id', Auth::user()->manufacturer->id);
+        $query = WareHouse::where('manufacturer_id', Auth::user()->manufacturer->id);
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -61,7 +61,7 @@ class ManufacturerWarehouseController extends Controller
             $data['avatar'] = $request->file('avatar')->store('warehouse', 'public');
         }
 
-        Warehouse::create($data);
+        WareHouse::create($data);
 
         $role = Role::firstOrCreate(['name' => 'warehouse', 'guard_name' => 'web']);
         $user->assignRole($role);

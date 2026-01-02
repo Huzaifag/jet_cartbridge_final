@@ -7,6 +7,7 @@ use App\Models\Seller;
 use App\Models\Salesman;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Product extends Model
 {
@@ -53,7 +54,19 @@ class Product extends Model
      */
     public function owner()
     {
-        return $this->morphTo();
+        // Check if polymorphic columns exist
+        if (Schema::hasColumn('products', 'owner_type') && Schema::hasColumn('products', 'owner_id')) {
+            return $this->morphTo();
+        }
+        
+        // Fallback to legacy relationships
+        if ($this->seller_id) {
+            return $this->seller();
+        } elseif ($this->manufacturer_id) {
+            return $this->manufacturer();
+        }
+        
+        return null;
     }
 
     /**
@@ -123,7 +136,18 @@ class Product extends Model
      */
     public function scopeByOwnerType($query, $ownerType)
     {
-        return $query->where('owner_type', $ownerType);
+        if (Schema::hasColumn('products', 'owner_type')) {
+            return $query->where('owner_type', $ownerType);
+        }
+        
+        // Fallback for legacy structure
+        if ($ownerType === 'App\\Models\\Seller') {
+            return $query->whereNotNull('seller_id');
+        } elseif ($ownerType === 'App\\Models\\Manufacturer') {
+            return $query->whereNotNull('manufacturer_id');
+        }
+        
+        return $query->whereRaw('1 = 0');
     }
 
     /**
@@ -131,7 +155,18 @@ class Product extends Model
      */
     public function scopeByOwner($query, $ownerType, $ownerId)
     {
-        return $query->where('owner_type', $ownerType)->where('owner_id', $ownerId);
+        if (Schema::hasColumn('products', 'owner_type') && Schema::hasColumn('products', 'owner_id')) {
+            return $query->where('owner_type', $ownerType)->where('owner_id', $ownerId);
+        }
+        
+        // Fallback for legacy structure
+        if ($ownerType === 'App\\Models\\Seller') {
+            return $query->where('seller_id', $ownerId);
+        } elseif ($ownerType === 'App\\Models\\Manufacturer') {
+            return $query->where('manufacturer_id', $ownerId);
+        }
+        
+        return $query->whereRaw('1 = 0');
     }
 
     /**
@@ -140,6 +175,11 @@ class Product extends Model
      */
     public function scopeAccessibleBy($query, array $owner)
     {
+        // Check if polymorphic columns exist, if not fall back to legacy columns
+        if (!Schema::hasColumn('products', 'owner_type') || !Schema::hasColumn('products', 'owner_id')) {
+            return $this->scopeAccessibleByLegacy($query, $owner);
+        }
+
         $ownerSets = [];
 
         if ($owner['role'] === 'seller') {
@@ -194,6 +234,26 @@ class Product extends Model
                 });
             }
         });
+    }
+
+    /**
+     * Legacy version of scopeAccessibleBy for backward compatibility
+     */
+    public function scopeAccessibleByLegacy($query, array $owner)
+    {
+        if ($owner['role'] === 'seller') {
+            return $query->where('seller_id', $owner['model']->id);
+        } elseif ($owner['role'] === 'manufacturer') {
+            return $query->where('manufacturer_id', $owner['model']->id);
+        } elseif ($owner['role'] === 'salesman') {
+            // For salesman, show products from their seller
+            $sellerId = $owner['model']->seller_id ?? null;
+            if ($sellerId) {
+                return $query->where('seller_id', $sellerId);
+            }
+        }
+        
+        return $query->whereRaw('1 = 0'); // Return no results if no valid owner
     }
 
     public function getMainImageAttribute()

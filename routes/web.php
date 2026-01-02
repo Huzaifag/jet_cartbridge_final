@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Accountant\AccountantOrderController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BulkOrderController;
 use App\Http\Controllers\Customer\ChatController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\InvoicesController;
@@ -269,6 +270,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         // Video Reviews Routes
         Route::get('/video-reviews/{slug?}', [ReviewController::class, 'videoReels'])->name('video.reviews');
         Route::get('/api/video-reviews/more', [ReviewController::class, 'getMoreVideoReviews'])->name('video.reviews.more');
+        Route::get('/debug/video-reviews', [ReviewController::class, 'debugVideoReviews'])->name('debug.video.reviews');
         Route::post('/api/reviews/{review}/view', [ReviewController::class, 'trackView'])->name('review.track-view');
         Route::post('/api/reviews/{review}/like', [ReviewController::class, 'toggleLike'])->name('review.toggle-like');
         Route::get('/api/reviews/{review}/comments', [ReviewController::class, 'getComments'])->name('review.get-comments');
@@ -278,6 +280,24 @@ Route::middleware(['web', 'auth'])->group(function () {
         // Customer Support API Routes
         Route::get('/api/sellers/list', [\App\Http\Controllers\Api\SupportController::class, 'getSellers'])->name('api.sellers.list');
         Route::get('/api/manufacturers/list', [\App\Http\Controllers\Api\SupportController::class, 'getManufacturers'])->name('api.manufacturers.list');
+
+        // Bulk Order Routes
+        Route::prefix('bulk-order')->name('bulk-order.')->group(function () {
+            Route::get('/', [BulkOrderController::class, 'index'])->name('index');
+            Route::get('/checkout', function() {
+                return view('frontend.bulk-order.checkout');
+            })->name('checkout');
+            Route::get('/my-orders', [BulkOrderController::class, 'myOrders'])->name('my-orders');
+            Route::get('/{id}', [BulkOrderController::class, 'show'])->name('show');
+        });
+
+        // Bulk Order API Routes
+        Route::prefix('api/bulk-order')->name('api.bulk-order.')->group(function () {
+            Route::get('/seller/{sellerId}/categories', [BulkOrderController::class, 'getSellerCategories'])->name('seller-categories');
+            Route::get('/seller/{sellerId}/category/{categoryId}/products', [BulkOrderController::class, 'getCategoryProducts'])->name('category-products');
+            Route::post('/store', [BulkOrderController::class, 'store'])->name('store');
+            Route::get('/search-sellers', [BulkOrderController::class, 'searchSellers'])->name('search-sellers');
+        });
         Route::post('/api/conversations/create', [\App\Http\Controllers\Api\SupportController::class, 'createConversation'])->name('api.conversations.create');
         Route::post('/api/meetings/request', [\App\Http\Controllers\Api\SupportController::class, 'requestMeeting'])->name('api.meetings.request');
     });

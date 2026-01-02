@@ -213,6 +213,8 @@ class ReviewController extends Controller
         $query = Review::with(['user', 'product', 'product.category'])
             ->where('review_type', 'video')
             ->whereNotNull('media_urls')
+            ->where('media_urls', '!=', '[]')
+            ->where('media_urls', '!=', 'null')
             ->orderBy('created_at', 'desc');
 
         if ($productSlug) {
@@ -236,7 +238,30 @@ class ReviewController extends Controller
             return view('frontend.pages.video-reviews', compact('videoReviews', 'product'));
         }
 
-        $videoReviews = $query->limit(50)->get(); // Limit for general viewing
+        $videoReviews = $query->limit(50)->get();
+
+        // Debug: Log video reviews data
+        \Log::info('Video Reviews Debug:', [
+            'total_reviews' => $videoReviews->count(),
+            'sample_review' => $videoReviews->first() ? [
+                'id' => $videoReviews->first()->id,
+                'media_urls' => $videoReviews->first()->media_urls,
+                'review_type' => $videoReviews->first()->review_type,
+            ] : null
+        ]);
+
+        // Filter and validate video reviews
+        $videoReviews = $videoReviews->filter(function($review) {
+            // Ensure media_urls is properly formatted
+            if (is_string($review->media_urls)) {
+                $review->media_urls = json_decode($review->media_urls, true);
+            }
+            
+            // Check if we have valid video URLs
+            return is_array($review->media_urls) && 
+                   count($review->media_urls) > 0 && 
+                   !empty($review->media_urls[0]);
+        });
 
         return view('frontend.pages.video-reviews', compact('videoReviews'));
     }
@@ -587,5 +612,53 @@ class ReviewController extends Controller
             'success' => true,
             'message' => 'Share tracked'
         ]);
+    }
+
+    /**
+     * Debug video reviews data and playback issues
+     */
+    public function debugVideoReviews()
+    {
+        // Get all reviews with video data
+        $allReviews = Review::whereNotNull('media_urls')->get();
+        
+        $debugInfo = [
+            'total_reviews_with_media' => $allReviews->count(),
+            'video_type_reviews' => Review::where('review_type', 'video')->count(),
+            'sample_reviews' => [],
+            'storage_info' => [
+                'storage_path' => storage_path('app/public'),
+                'public_storage_path' => public_path('storage'),
+                'storage_link_exists' => is_link(public_path('storage')),
+                'videos_directory_exists' => file_exists(storage_path('app/public/videos')),
+            ]
+        ];
+
+        // Sample review data
+        foreach ($allReviews->take(5) as $review) {
+            $mediaUrls = is_string($review->media_urls) 
+                ? json_decode($review->media_urls, true) 
+                : $review->media_urls;
+
+            $sampleData = [
+                'id' => $review->id,
+                'review_type' => $review->review_type,
+                'media_urls_raw' => $review->media_urls,
+                'media_urls_decoded' => $mediaUrls,
+                'has_valid_media' => is_array($mediaUrls) && count($mediaUrls) > 0,
+            ];
+
+            // Check if video file exists
+            if (is_array($mediaUrls) && count($mediaUrls) > 0) {
+                $videoPath = storage_path('app/public/' . $mediaUrls[0]);
+                $sampleData['video_file_exists'] = file_exists($videoPath);
+                $sampleData['video_file_path'] = $videoPath;
+                $sampleData['video_url'] = asset('storage/' . $mediaUrls[0]);
+            }
+
+            $debugInfo['sample_reviews'][] = $sampleData;
+        }
+
+        return response()->json($debugInfo, 200, [], JSON_PRETTY_PRINT);
     }
 }
