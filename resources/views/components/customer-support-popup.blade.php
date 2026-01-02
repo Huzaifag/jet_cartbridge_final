@@ -5,7 +5,7 @@
 </button>
 
 <!-- Bulk Order Button -->
-<button class="bulk-order-btn" id="bulkOrderBtn" onclick="openBulkOrder()">
+<button class="bulk-order-btn" id="bulkOrderBtn" onclick="window.location.href='/bulk-order'">
     <i class="fas fa-shopping-cart"></i>
     <span class="bulk-order-badge">Bulk Order</span>
 </button>
