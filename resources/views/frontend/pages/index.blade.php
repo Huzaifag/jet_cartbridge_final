@@ -1,4 +1,33 @@
 @extends('frontend.layout.main')
+
+@push('styles')
+<style>
+/* Category Card Hover Effects */
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.category-card:hover .category-image {
+    transform: scale(1.05);
+}
+
+.category-card:hover .category-placeholder {
+    background: rgba(245, 158, 11, 0.2) !important;
+}
+
+.category-card:hover .btn-premium {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.category-card .btn-premium {
+    transition: all 0.3s ease;
+}
+</style>
+@endpush
+
 @section('content')
     <!-- Premium Hero Slider -->
     <section class="premium-hero-slider">
@@ -170,31 +199,61 @@
                 <p class="premium-subtitle">Explore our wide range of product categories</p>
             </div>
             <div class="premium-grid premium-grid-4">
-                <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/electronic-devices_144627-41317.jpg" alt="Electronics"
-                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
-                    <h3 class="premium-card-title">Electronics</h3>
-                    <p class="premium-card-text">20,000+ products</p>
-                </div>
-                <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/industrial-machines_1127-3426.jpg" alt="Machinery"
-                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
-                    <h3 class="premium-card-title">Machinery</h3>
-                    <p class="premium-card-text">15,000+ products</p>
-                </div>
-                <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/fabric-samples-textile-swatches_93675-130843.jpg"
-                        alt="Textiles" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
-                    <h3 class="premium-card-title">Textiles</h3>
-                    <p class="premium-card-text">25,000+ products</p>
-                </div>
-                <div class="premium-card premium-fade-in">
-                    <img src="https://img.freepik.com/free-photo/construction-equipment_1127-3294.jpg" alt="Construction"
-                        class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
-                    <h3 class="premium-card-title">Construction</h3>
-                    <p class="premium-card-text">18,000+ products</p>
-                </div>
+                @forelse($categories->take(8) as $category)
+                    <div class="premium-card premium-fade-in category-card" style="cursor: pointer; transition: all 0.3s ease;">
+                        <a href="{{ route('home', ['category' => $category->id]) }}" class="text-decoration-none text-dark">
+                            @if($category->image)
+                                <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"
+                                    class="w-100 mb-3 category-image" style="height: 150px; object-fit: cover; border-radius: 0.5rem; transition: transform 0.3s ease;">
+                            @else
+                                <div class="w-100 mb-3 d-flex align-items-center justify-content-center text-accent category-placeholder"
+                                    style="height: 150px; background: rgba(245, 158, 11, 0.1); border-radius: 0.5rem; transition: background 0.3s ease;">
+                                    <i class="fas fa-box fa-3x"></i>
+                                </div>
+                            @endif
+                            <h3 class="premium-card-title">{{ $category->name }}</h3>
+                            <p class="premium-card-text text-muted">{{ number_format($category->products_count) }}+ products</p>
+                            <div class="btn-premium btn-premium-secondary mt-2 w-100 text-center">
+                                <i class="fas fa-arrow-right me-2"></i>View Products
+                            </div>
+                        </a>
+                    </div>
+                @empty
+                    <!-- Fallback categories if none exist in database -->
+                    <div class="premium-card premium-fade-in">
+                        <img src="https://img.freepik.com/free-photo/electronic-devices_144627-41317.jpg" alt="Electronics"
+                            class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                        <h3 class="premium-card-title">Electronics</h3>
+                        <p class="premium-card-text">Coming Soon</p>
+                    </div>
+                    <div class="premium-card premium-fade-in">
+                        <img src="https://img.freepik.com/free-photo/industrial-machines_1127-3426.jpg" alt="Machinery"
+                            class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                        <h3 class="premium-card-title">Machinery</h3>
+                        <p class="premium-card-text">Coming Soon</p>
+                    </div>
+                    <div class="premium-card premium-fade-in">
+                        <img src="https://img.freepik.com/free-photo/fabric-samples-textile-swatches_93675-130843.jpg"
+                            alt="Textiles" class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                        <h3 class="premium-card-title">Textiles</h3>
+                        <p class="premium-card-text">Coming Soon</p>
+                    </div>
+                    <div class="premium-card premium-fade-in">
+                        <img src="https://img.freepik.com/free-photo/construction-equipment_1127-3294.jpg" alt="Construction"
+                            class="w-100 mb-3" style="height: 150px; object-fit: cover; border-radius: 0.5rem;">
+                        <h3 class="premium-card-title">Construction</h3>
+                        <p class="premium-card-text">Coming Soon</p>
+                    </div>
+                @endforelse
             </div>
+            
+            @if($categories->count() > 8)
+                <div class="text-center mt-4">
+                    <a href="{{ route('categories') }}" class="btn-premium btn-premium-primary">
+                        View All Categories
+                    </a>
+                </div>
+            @endif
         </div>
     </section>
 

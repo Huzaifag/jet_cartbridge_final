@@ -176,7 +176,7 @@
 .continue-btn {
     position: fixed;
     bottom: 2rem;
-    right: 2rem;
+    right: 10rem;
     background: #007bff;
     color: white;
     border: none;
@@ -359,7 +359,7 @@
 </div>
 @endsection
 
-@push('scripts')
+
 <script>
 let selectedSeller = null;
 let selectedCategory = null;
@@ -417,7 +417,7 @@ async function proceedToCategories() {
                 const categoryCard = `
                     <div class="col-md-4 mb-3">
                         <div class="card category-card h-100" onclick="selectCategory(${category.id}, '${category.name}')">
-                            <img src="${category.image ? '/storage/' + category.image : '/images/placeholder-category.jpg'}" 
+                            <img src="${category.image}" 
                                  class="card-img-top" style="height: 150px; object-fit: cover;">
                             <div class="card-body text-center">
                                 <h6 class="card-title">${category.name}</h6>
@@ -456,7 +456,7 @@ async function selectCategory(categoryId, categoryName) {
                 const productCard = `
                     <div class="col-md-4 mb-3">
                         <div class="card product-card h-100">
-                            <img src="${product.images.length > 0 ? '/storage/' + product.images[0] : '/images/placeholder-product.jpg'}" 
+                            <img src="${product.images.length > 0 ? product.images[0] : '/images/placeholder-product.jpg'}" 
                                  class="card-img-top" style="height: 200px; object-fit: cover;">
                             <div class="card-body">
                                 <h6 class="card-title">${product.name}</h6>
@@ -562,4 +562,3 @@ function proceedToCheckout() {
     window.location.href = '/bulk-order/checkout';
 }
 </script>
-@endpush

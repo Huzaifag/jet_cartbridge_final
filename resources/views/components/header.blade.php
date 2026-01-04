@@ -226,7 +226,7 @@
             </div>
             
             <!-- Search Bar Inside Navbar -->
-            <div class="hero-search-inline ms-3" style="max-width: 280px; min-width: 180px; width: 100%;" data-animation="fadeInUp" data-delay="300">
+            <div class="hero-search-inline ms-3 navbar-search-container" id="navbarSearchContainer" style="max-width: 280px; min-width: 180px; width: 100%; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease;" data-animation="fadeInUp" data-delay="300">
                 <form method="GET" action="{{ route('home') }}">
                     <div class="hero-search-wrapper" style="width: 100%;">
                         <i class="fas fa-search hero-search-icon"></i>

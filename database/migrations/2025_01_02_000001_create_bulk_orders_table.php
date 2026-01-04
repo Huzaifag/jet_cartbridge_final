@@ -11,23 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('bulk_orders')) {
         Schema::create('bulk_orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('seller_id')->constrained()->onDelete('cascade');
-            $table->string('order_number')->unique();
+            $table->string('order_number', 191)->unique();
             $table->decimal('total_amount', 10, 2);
             $table->enum('status', ['pending', 'accepted', 'rejected', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
-            $table->text('delivery_address');
+            $table->longText('delivery_address');
             $table->date('delivery_date')->nullable();
-            $table->text('notes')->nullable();
-            $table->text('seller_response')->nullable();
+            $table->longText('notes')->nullable();
+            $table->longText('seller_response')->nullable();
             $table->timestamp('seller_response_date')->nullable();
             $table->timestamps();
 
             $table->index(['user_id', 'status']);
             $table->index(['seller_id', 'status']);
-            $table->index('order_number');
+            $table->index([DB::raw('order_number(191)')], 'bulk_orders_order_number_index');
         });
 
         Schema::create('bulk_order_items', function (Blueprint $table) {
@@ -37,12 +38,13 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('unit_price', 8, 2);
             $table->decimal('total_price', 10, 2);
-            $table->text('notes')->nullable();
+            $table->longText('notes')->nullable();
             $table->timestamps();
 
             $table->index('bulk_order_id');
             $table->index('product_id');
         });
+    }
     }
 
     /**

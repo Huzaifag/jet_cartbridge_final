@@ -539,12 +539,12 @@ document.head.appendChild(style);
         // Check if user has already been prompted
         const hasBeenPrompted = localStorage.getItem('locationPrompted');
         
-        if (!hasBeenPrompted && navigator.geolocation) {
-            // Show subtle notification about location features
-            setTimeout(() => {
-                showLocationPrompt();
-            }, 3000); // Show after 3 seconds
-        }
+        // if (!hasBeenPrompted && navigator.geolocation) {
+        //     // Show subtle notification about location features
+        //     setTimeout(() => {
+        //         showLocationPrompt();
+        //     }, 3000); // Show after 3 seconds
+        // }
     });
     
     // function showLocationPrompt() {
