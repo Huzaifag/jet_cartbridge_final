@@ -24,6 +24,6 @@ jobs:
           server: ftpupload.net
           username: if0_39876433
           password: Ati2025ya
-          server-dir: /htdocs/  # For addon domains
+          server-dir: /jetcartbridge.web1337.net/htdocs/  # For addon domains
           timeout: 86400000
           log-level: standard
